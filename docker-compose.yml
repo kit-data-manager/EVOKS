@@ -1,0 +1,131 @@
+version: "3.7"
+
+x-app: &evoks
+  build:
+    context: "."
+  volumes:
+    - .:/code
+  restart: "unless-stopped"
+
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+    volumes:
+       - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+  
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+       - pgadmin:/root/.pgadmin
+
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - postgres
+    restart: unless-stopped
+  web:
+    <<: *evoks
+    command: "python ./evoks/manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    networks: 
+      - postgres
+      - fuseki-dev
+    volumes:
+      - .:/code
+      - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
+      - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
+      - ./fuseki-dev/backup:/code/fuseki-dev/backup
+  tailwind:
+    <<: *evoks
+    command: "bash tailwind.sh"
+    ports:
+      - "8383:8383"
+  fuseki-dev:
+    container_name: fuseki-dev
+    image: secoresearch/fuseki
+    hostname: fuseki-dev
+    environment: 
+      ADMIN_PASSWORD: 'fuseki_password'
+      ENABLE_DATA_WRITE: 'True'
+      ENABLE_UPDATE: 'True'
+      ENABLE_UPLOAD: 'True'
+    ports:
+      - "3030:3030"
+    volumes: 
+      - ./fuseki-dev/data:/fuseki-base/databases
+      - ./fuseki-dev/config:/fuseki-base/configuration
+      - ./fuseki-dev/backup:/fuseki-base/backups
+    networks:
+      - fuseki-dev
+  fuseki-live:
+    container_name: fuseki-live
+    image: secoresearch/fuseki
+    hostname: fuseki-live
+    environment: 
+      ADMIN_PASSWORD: 'fuseki_password'
+      ENABLE_DATA_WRITE: 'True'
+      ENABLE_UPDATE: 'True'
+      ENABLE_UPLOAD: 'True'
+    ports:
+      - "3040:3030"
+    volumes: 
+      - ./fuseki-live/data:/fuseki-base/databases
+      - ./fuseki-live/config:/fuseki-base/configuration
+      - ./fuseki-live/backup:/fuseki-base/backups
+    networks:
+      - fuseki-live
+  skosmos-dev:
+    build:
+      context: github.com/NatLibFi/Skosmos.git
+      dockerfile: dockerfiles/Dockerfile.ubuntu
+    ports: 
+      - 9090:80
+    hostname: skosmos-dev
+    depends_on: 
+      - fuseki-dev
+    networks:
+      - fuseki-dev
+    volumes:
+      - ./skosmos-live/config.ttl:/var/www/html/config.ttl
+  skosmos-live:
+    build:
+      context: github.com/NatLibFi/Skosmos.git
+      dockerfile: dockerfiles/Dockerfile.ubuntu
+    ports: 
+      - 9080:80
+    hostname: skosmos-live
+    depends_on: 
+      - fuseki-live
+    networks:
+      - fuseki-live
+    volumes:
+      - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
+networks:
+  postgres:
+    driver: bridge
+  fuseki-dev:
+    driver: bridge
+  fuseki-live:
+    driver: bridge
+volumes:
+    postgres:
+    pgadmin:
+    fuseki:

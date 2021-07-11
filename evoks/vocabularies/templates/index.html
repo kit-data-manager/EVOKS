@@ -1,0 +1,21 @@
+{% if vocabularies %}
+
+<table style="width:20%">
+    <h3>hi {{ user }}</h3>
+    <tr>
+        <th style="text-align: left;">description</th>
+        <th style="text-align: left;">term_count</th>
+    </tr>
+    {% for vocabulary in vocabularies %}
+
+    <tr>
+        <td>{{ vocabulary.description }}</td>
+        <td>{{ vocabulary.term_count }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+{% else %}
+<h3>hi {{ user }}</h3>
+<p>No vocabularies are available.</p>
+{% endif %}
