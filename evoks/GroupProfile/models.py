@@ -23,3 +23,12 @@ class GroupProfile(models.Model):
         self.group.user_set.add(User)
         self.size = self.size + 1
         self.group.save()
+
+    #Permission check fehlt TODO
+    def remove_user(self,User):
+        self.group.user_set.remove(User)
+        self.size = self.size - 1
+        if self.size<1:
+            self.group.delete()
+        else: self.group.save()
+        
