@@ -11,15 +11,15 @@ class ProfileTest(TestCase):
         User.objects.create(username='jhon', password='ok')
 
     def test_verified_false(self):
-        user = User.objects.get(id=1)
+        user = User.objects.get(username='jhon')
         self.assertFalse(user.profile.verified)
 
     def test_name(self):
-        user = User.objects.get(id=1)
+        user = User.objects.get(username='jhon')
         user.profile.name = 'tom'
         self.assertEquals(user.profile.name, 'tom')
 
     def test_verified_true(self):
-        user = User.objects.get(id=1)
+        user = User.objects.get(username='jhon')
         user.profile.verify()
         self.assertTrue(user.profile.verified)
