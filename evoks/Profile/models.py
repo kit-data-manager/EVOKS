@@ -5,8 +5,9 @@ from django.dispatch import receiver
 
 
 class Profile(models.Model):
+    # delete TODO in one to one drinnen?
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    describtion = models.TextField(max_length=500, blank=True)
+    description = models.TextField(max_length=500, blank=True)
     name = models.TextField(max_length=50, blank=False)
     verified = models.BooleanField(default=False)
 
@@ -19,8 +20,6 @@ class Profile(models.Model):
     def save_user_profile(sender, instance, **kwargs):
         instance.profile.save()
 
-    # delete TODO in one to one drinnen?
-
     # hier fehlt admin abfrage TODO
 
     def verify(self):
@@ -30,4 +29,7 @@ class Profile(models.Model):
     # export TODO
 
     def export_userdata(self):
-        User.email_user(self, subject, 'Ihre Daten')
+        # datei=open('daten.txt','a')
+        # datei.write('hi') kreirt file muss aber auch wieder gelöscht oder überschrieben werde
+        self.user.email_user(subject='Data', message='Ihre Daten bei Evoks'+self.name+'sind:'+self.description)
+        #[self.user.email]
