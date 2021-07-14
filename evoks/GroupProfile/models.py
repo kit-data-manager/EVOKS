@@ -18,3 +18,8 @@ class GroupProfile(models.Model):
     @receiver(post_save, sender=Group)
     def save_groupprofile(sender, instance, **kwargs):
         instance.groupprofile.save()
+
+    def add_user(self,User):
+        self.group.user_set.add(User)
+        self.size = self.size + 1
+        self.group.save()
