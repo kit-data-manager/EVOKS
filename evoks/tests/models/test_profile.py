@@ -8,7 +8,7 @@ class ProfileTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Set up non-modified objects used by all test methods
-        User.objects.create(username='jhon', password='ok')
+        User.objects.create(username='jhon', password='ok',email='game111111@gmx.de')
 
     def test_verified_false(self):
         user = User.objects.get(id=1)
@@ -23,3 +23,10 @@ class ProfileTest(TestCase):
         user = User.objects.get(id=1)
         user.profile.verify()
         self.assertTrue(user.profile.verified)
+
+    def test_mail(self):
+        user = User.objects.get(username='jhon')
+        user.profile.export_userdata()
+        print('mailed: '+user.email)
+        self.assertTrue(True)
+
