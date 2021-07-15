@@ -24,6 +24,11 @@ class ProfileTest(TestCase):
         user.profile.verify()
         self.assertTrue(user.profile.verified)
 
+    def test_verified_true(self):
+        user = User.objects.get(username='jhon')
+        user.profile.description='hi'
+        self.assertAlmostEquals(user.profile.description, 'hi')
+
     def test_mail(self):
         user = User.objects.get(username='jhon')
         user.profile.export_userdata()
