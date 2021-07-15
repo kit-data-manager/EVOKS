@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.conf import settings
 
 
 class Profile(models.Model):
@@ -28,6 +29,7 @@ class Profile(models.Model):
     """
     verify sets verified in profile true
     """
+
     def verify(self):
         self.verified = True
         self.user.save()
@@ -35,6 +37,7 @@ class Profile(models.Model):
     """
     export_userdata sends a mail with userdata to the mail from user.email
     """
+
     def export_userdata(self):
-        self.user.email_user(subject='Data', message='Ihre Daten bei Evoks'+self.name+'sind:'+self.description)
-        
+        self.user.email_user(subject='Data', message='Ihre Daten bei Evoks' +
+                             self.name+'sind:'+self.description, from_email=settings.EVOKS_MAIL)

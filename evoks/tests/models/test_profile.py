@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from django.contrib.auth.models import User
 from Profile.models import Profile
-
+from django.conf import settings
 
 class ProfileTest(TestCase):
     @classmethod
@@ -32,6 +32,6 @@ class ProfileTest(TestCase):
     def test_mail(self):
         user = User.objects.get(username='jhon')
         user.profile.export_userdata()
-        print('mailed: '+user.email)
+        print('mailed from: '+settings.EVOKS_MAIL +' to '+user.email)
         self.assertTrue(True)
 
