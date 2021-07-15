@@ -18,7 +18,6 @@ class GroupProfileTest(TestCase):
         user = User.objects.get(username='tom')
         group.groupprofile.add_user(user)
         self.assertEquals(group.user_set.get(username='tom'), user)
-        # self.assertTrue(group.user_set.all().filter(user).exist())
 
     def test_add_counter(self):
         group = Group.objects.get(name='hey')
@@ -32,3 +31,11 @@ class GroupProfileTest(TestCase):
         group.groupprofile.add_user(user)
         group.groupprofile.remove_user(user)
         self.assertEqual(group.groupprofile.size, 1)
+
+    def test_remove_counter_zero(self):
+        group = Group.objects.get(name='hey')
+        user = User.objects.get(username='tom')
+        group.groupprofile.add_user(user)
+        group.groupprofile.size=0
+        group.groupprofile.remove_user(user)
+        self.assertFalse(Group.objects.filter(id=group.id).exists())

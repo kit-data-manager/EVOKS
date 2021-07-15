@@ -7,7 +7,7 @@ from django.dispatch import receiver
 class GroupProfile(models.Model):
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
     description = models.TextField(max_length=500, blank=True)
-    #group_owner = User
+    group_owner = models.IntegerField(default=1)
     size = models.IntegerField(default=1)
 
     """
@@ -28,21 +28,22 @@ class GroupProfile(models.Model):
     """
     add_user adds a user to the group and counts groupsize up.
     """
+
     def add_user(self, User):
         self.group.user_set.add(User)
         self.size = self.size + 1
         self.group.save()
 
-    
     """ 
     remove_user removes the given user and counts groupsize down.
     deletes the group if no user remains.
     """
+
     def remove_user(self, User):
         self.group.user_set.remove(User)
-        self.size = self.size - 1
+        self.size = self.size - 1  
+        self.group.save()     
         if self.size < 1:
-            self.group.delete()
-        else:
-            self.group.save()
+            Group.objects.get(id=self.group.id).delete()
+            
         

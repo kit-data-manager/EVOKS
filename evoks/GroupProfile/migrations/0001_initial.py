@@ -18,6 +18,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('description', models.TextField(blank=True, max_length=500)),
+                ('group_owner', models.IntegerField(default=1)),
                 ('size', models.IntegerField(default=1)),
                 ('group', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='auth.group')),
             ],
