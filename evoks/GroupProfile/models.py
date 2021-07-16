@@ -8,7 +8,7 @@ from django.dispatch import receiver
 class GroupProfile(models.Model):
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
     description = models.TextField(max_length=500, blank=True)
-    group_owner = User
+    group_owner = models.IntegerField(default=1)
     size = models.IntegerField(default=1)
 
     
