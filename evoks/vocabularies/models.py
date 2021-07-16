@@ -2,6 +2,7 @@ from django.db import models
 from Profile.models import Profile
 from GroupProfile.models import GroupProfile
 import enum
+#from Fuseki.fuseki
 
 class State(enum.Enum):
     dev = 1
@@ -11,9 +12,12 @@ class State(enum.Enum):
 # Create your models here.
 #missing triple and searchable Interface
 class Vocabulary(models.Model):
-    description = models.CharField(max_length=30)
-    term_count = models.IntegerField()
+    description = models.CharField(max_length=30, default='')
+    term_count = models.IntegerField(default=0)
     name = models.CharField(max_length=30, default='')
+
+    def get_name(self):
+        return self.name
 
     #on delete flage wrshl entweder SET_NULL oder SET_DEFAULT
     profiles = models.ManyToManyField(Profile, on_delete=models.SET_NULL)
@@ -62,8 +66,10 @@ class Vocabulary(models.Model):
     def set_dev():
         state = 1
     
-    #def add_term(self, name : str):
-        #Term(self, name : str)
+    def add_term(self, name : str):
+        placeholder = '123'
+        #self.terms.add(Term(self, name : str))
+        #record user who added Term as contributor if not already done
     
     def add_profile(self, profile : Profile, permission : str):
         self.profiles.add(profile)
@@ -72,19 +78,21 @@ class Vocabulary(models.Model):
     def add_group(self, group : GroupProfile, permission : str):
         self.groups.add(group)
 
-    #def remove_term(name):
+    def remove_term(self, name):
         term = self.terms.objects.filter(name=name)
         self.terms.remove(term)
         term.delete()
-        test_if_live_vocabulary(self)
+        self.test_if_live_vocabulary(self)
     
     def remove_profile(self, profile : Profile):
         self.profiles.remove(profile)
         #remove permissions
+        #set from live to dev?
     
     def remove_group(self, group : GroupProfile):
         self.groups.remove(group)
         #remove permissions
+        #set from live to dev?
 
     def get_name(self):
         return self.name
