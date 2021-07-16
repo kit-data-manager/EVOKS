@@ -1,5 +1,15 @@
+from pathlib import Path
+from typing import List, Set, Dict, Tuple, Optional
 import os
 import socket
+import environ
+
+env = environ.Env(
+    FUSEKI_USER=(str, 'admin'),
+    FUSEKI_PASSWORD=(str, 'fuseki_password')
+)
+environ.Env.read_env()
+
 """
 Django settings for evoks project.
 
@@ -11,12 +21,14 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-from typing import List, Set, Dict, Tuple, Optional
-from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+DOCKER_BASE_DIR = BASE_DIR.parent
+
+FUSEKI_USER = env('FUSEKI_USER')
+FUSEKI_PASSWORD = env('FUSEKI_PASSWORD')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
