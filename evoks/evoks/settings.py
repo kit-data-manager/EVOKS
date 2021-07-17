@@ -83,6 +83,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+AUTHENTICATION_BACKENDS = (
+    'evoks.backend.CustomBackend',
+)
+
 ROOT_URLCONF = 'evoks.urls'
 
 TEMPLATES = [
