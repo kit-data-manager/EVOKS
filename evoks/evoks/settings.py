@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List, Set, Dict, Tuple, Optional
 import os
 import socket
-#import environ
+import environ
 
 env = environ.Env(
     FUSEKI_USER=(str, 'admin'),
