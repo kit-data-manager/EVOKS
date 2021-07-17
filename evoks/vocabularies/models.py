@@ -1,10 +1,17 @@
+from _typeshed import Self
 from django.db import models
 from Profile.models import Profile
 from GroupProfile.models import GroupProfile
 import enum
-#from Fuseki.fuseki
+import Fuseki.fuseki
+from django.contrib.auth.models import Permission
 
 class State(enum.Enum):
+    """State enum that represents the state of the Vocabulary
+
+    Args:
+        enum ([Enum): Python Enum
+    """
     dev = 1
     review = 2
     live = 3
@@ -16,21 +23,25 @@ class Vocabulary(models.Model):
     term_count = models.IntegerField(default=0)
     name = models.CharField(max_length=30, default='')
 
-    def get_name(self):
-        return self.name
-
     #on delete flage wrshl entweder SET_NULL oder SET_DEFAULT
     profiles = models.ManyToManyField(Profile, on_delete=models.SET_NULL)
     groups = models.ManyToManyField(GroupProfile, on_delete=models.SET_NULL)
     #many-to-one-fields belong in the 'one' models
     state = State
 
-    #class Meta:
-        #permissions = (('ownwer', 'Owner'),
-                       #('participant', 'Participant'),
-                       #('spectator', 'Spectator'))
+
+    class Meta:
+        permissions = (('ownwer', 'Owner'),
+                       ('participant', 'Participant'),
+                       ('spectator', 'Spectator'))
 
     def __init__(self, name : str, creator : Profile) -> None:
+        """Creates a new Vocabulary Object
+
+        Args:
+            name (str): Name of the Vocabulary
+            creator (Profile): User that created the Vocabulary
+        """
         self.name = name
 
         self.profiles.add(creator)
@@ -40,59 +51,110 @@ class Vocabulary(models.Model):
 
         self.state = 1
 
-        #fuseki create_vocabulary?
+        fuseki_dev = Fuseki.objects.filter(port=3030)
+        fuseki_dev.create_vocabulary(self)
     
-    def test_if_live_vocabulary(self):
+    def get_name(self) -> str:
+        return self.name
+
+    def set_dev_if_live(self) -> None:
+        """Tests if Vocabulary is live and sets it to dev
+        """
         if self.state is 3:
             self.state = 2
     
-    def import_vocabulary(input):
+    def import_vocabulary(input) -> None:
+        """Imports a Vocabulary
+
+        Args:
+            input ([type]): Vocabulary to import
+        """
         #stub
         placeholder = 'sdf'
-        return None
     
-    def export_vocabulary(dataformat):
+    def export_vocabulary(dataformat) -> None:
+        """Sends the Vocabulary in the provided dataformat to the users email
+
+        Args:
+            dataformat (Enum): Desired dataformat
+        """
         #stub
         placeholder='123'
     
-    def set_live():
-        state = 3
-        #migration
+    def set_live(self) -> None:
+        """Sets the state to live and starts the migration process
+        """
+        if self.state is 3:
+            raise ValueError('Vocabulary is already live')
+        else: 
+            state = 3
+            #thread?
+            #fuseki.startvocabularycopy...
+            #versionsnummer?
+            #migration
     
-    def set_review():
+    def set_review() -> None:
+        """Sets the state to review
+        """
         state = 2
         #sumn else?
     
-    def set_dev():
+    def set_dev() -> None:
+        """Sets the state to dev
+        """
         state = 1
     
-    def add_term(self, name : str):
+    #permission required participant or owner
+    def remove_term(self, name : str) -> None:
+        """Removes a Term from the Vocabulary and deletes it
+
+        Args:
+            name (str): Name of the Term
+        """
+        term = self.terms.objects.filter(name=name)
+        self.terms.remove(term)
+        self.set_dev_if_live(self)
+        term.delete()
+
+
+    #permission required participant or owner
+    def add_term(self, name : str) -> None:
+        """Adds a Term to the Vocabulary
+
+        Args:
+            name (str): Name of the Term
+        """
         placeholder = '123'
+        #check permission?
         #self.terms.add(Term(self, name : str))
         #record user who added Term as contributor if not already done
     
-    def add_profile(self, profile : Profile, permission : str):
-        self.profiles.add(profile)
-        #todo permissions
-    
-    def add_group(self, group : GroupProfile, permission : str):
-        self.groups.add(group)
+    #permission required owner
+    def add_profile(self, profile : Profile, permission : str) -> None:
+        """Adds a User to the Vocabulary
 
-    def remove_term(self, name):
-        term = self.terms.objects.filter(name=name)
-        self.terms.remove(term)
-        term.delete()
-        self.test_if_live_vocabulary(self)
+        Args:
+            profile (Profile): User to be added
+            permission (Permission): Permission the User will have on the Vocabulary
+        """
+        self.profiles.add(profile)
+        self.profiles.get(profile).user.user_permissions.add(permission)
     
-    def remove_profile(self, profile : Profile):
+    #permission required owner
+    def add_group(self, group : GroupProfile, permission : str) -> None:
+        self.groups.add(group)
+        self.groups.get(group).permissions.add(permission)
+    
+    #permission required owner
+    #can you remove urself?
+    def remove_profile(self, profile : Profile) -> None:
         self.profiles.remove(profile)
         #remove permissions
         #set from live to dev?
     
-    def remove_group(self, group : GroupProfile):
+    #permission required owner
+    def remove_group(self, group : GroupProfile) -> None:
         self.groups.remove(group)
         #remove permissions
         #set from live to dev?
 
-    def get_name(self):
-        return self.name
