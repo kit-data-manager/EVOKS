@@ -1,12 +1,27 @@
+<<<<<<< HEAD
 from pathlib import Path
 from typing import List, Set, Dict, Tuple, Optional
 import os
 import socket
+=======
+
+from pathlib import Path
+from typing import List, Set, Dict, Tuple, Optional
+
+import os
+import socket
+
+>>>>>>> remotes/origin/UserProfile
 import environ
 
 env = environ.Env(
     FUSEKI_USER=(str, 'admin'),
+<<<<<<< HEAD
     FUSEKI_PASSWORD=(str, 'fuseki_password')
+=======
+    FUSEKI_PASSWORD=(str, 'fuseki_password'),
+    EVOKS_MAIL=(str, 'game111111@gmx.de')
+>>>>>>> remotes/origin/UserProfile
 )
 environ.Env.read_env()
 
@@ -24,6 +39,11 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+DOCKER_BASE_DIR = BASE_DIR.parent
+
+FUSEKI_USER = env('FUSEKI_USER')
+FUSEKI_PASSWORD = env('FUSEKI_PASSWORD')
+EVOKS_MAIL = env('EVOKS_MAIL')
 
 DOCKER_BASE_DIR = BASE_DIR.parent
 
