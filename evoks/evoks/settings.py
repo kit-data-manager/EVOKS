@@ -24,6 +24,11 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+DOCKER_BASE_DIR = BASE_DIR.parent
+SKOSMOS_DEV_DIR = "skosmos-dev/config.ttl"
+SKOSMOS_LIVE_DIR = "skosmos-live/config.ttl"
+SKOSMOS_TEST_CONFIG = "evoks/tests/skosmos/config.ttl"
+
 
 DOCKER_BASE_DIR = BASE_DIR.parent
 

@@ -5,4 +5,5 @@ django-tailwind
 sparqlwrapper
 mypy
 django-stubs
+rdflib
 django-environ
