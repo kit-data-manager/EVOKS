@@ -10,7 +10,7 @@ class State(enum.Enum):
     """State enum that represents the state of the Vocabulary
 
     Args:
-        enum ([Enum): Python Enum
+        enum: Python Enum
     """
     dev = 1
     review = 2
@@ -21,7 +21,7 @@ class State(enum.Enum):
 
 
 class Vocabulary(models.Model):
-    name = models.CharField(max_length=30, default='', unique=True)
+    name = models.CharField(max_length=30, unique=True)
     profiles = models.ManyToManyField(Profile, blank=True)
     description = models.CharField(max_length=30, default='', blank=True)
     term_count = models.IntegerField(default=0)
@@ -66,6 +66,7 @@ class Vocabulary(models.Model):
         permission = Permission.objects.get(name=('owner', 'Owner'))
         vocabulary.profiles.add(creator)
         vocabulary.profiles.get(user=creator.user).user.user_permissions.add(permission)
+        vocabulary.state = 1
 
     def get_name(self) -> str:
         return self.name
