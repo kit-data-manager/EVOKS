@@ -1,9 +1,7 @@
-<<<<<<< HEAD
 from pathlib import Path
 from typing import List, Set, Dict, Tuple, Optional
 import os
 import socket
-=======
 
 from pathlib import Path
 from typing import List, Set, Dict, Tuple, Optional
@@ -11,17 +9,12 @@ from typing import List, Set, Dict, Tuple, Optional
 import os
 import socket
 
->>>>>>> remotes/origin/UserProfile
 import environ
 
 env = environ.Env(
     FUSEKI_USER=(str, 'admin'),
-<<<<<<< HEAD
-    FUSEKI_PASSWORD=(str, 'fuseki_password')
-=======
     FUSEKI_PASSWORD=(str, 'fuseki_password'),
     EVOKS_MAIL=(str, 'game111111@gmx.de')
->>>>>>> remotes/origin/UserProfile
 )
 environ.Env.read_env()
 

@@ -1,15 +1,18 @@
 from django.test import TestCase
-
+from vocabularies.models import Vocabulary
+from django.contrib.auth.models import User
 
 class YourTestClass(TestCase):
     @classmethod
     def setUpTestData(cls):
-        print("setUpTestData: Run once to set up non-modified data for all class methods.")
-        pass
 
-    def setUp(self):
-        print("setUp: Run once for every test method to setup clean data.")
-        pass
+        user = User.objects.create(username='jhon', password='ok',email='jhon@example.com')
+        Vocabulary.create_vocabulary(name='genel', creator=user.profile)
+
+    def testPermission(self):
+        user = User.objects.get(username='jhon')
+        vocabulary = Vocabulary.create_vocabulary(name='genel', creator=user.profile)
+        print(user.has_perm('owner', vocabulary))
 
     def test_false_is_false(self):
         print("Method: test_false_is_false.")

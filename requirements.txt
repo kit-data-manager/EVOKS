@@ -5,8 +5,4 @@ django-tailwind
 sparqlwrapper
 mypy
 django-stubs
-<<<<<<< HEAD
-=======
-
->>>>>>> remotes/origin/UserProfile
 django-environ
