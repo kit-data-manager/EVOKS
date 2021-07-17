@@ -1,4 +1,5 @@
 from django.urls import include, path
+from . import views
 
 """evoks URL Configuration
 
@@ -25,7 +26,10 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
     path('vocabularies/', include('vocabularies.urls')),
-    path('', TemplateView.as_view(template_name="base.html")),
+    path('', TemplateView.as_view(template_name="base.html"), name='Dashboard'),
+    path('login/', views.LoginView, name='Signin'),
+    path('signup/', views.SignupView, name='Signup'),
+    path('verify/<str:uid>/<str:token>', views.VerificationView)
 
 ]
 
