@@ -1,0 +1,135 @@
+from unittest.case import skip
+from django.test import TestCase
+from Fuseki.fuseki import Fuseki
+from vocabularies.models import Vocabulary
+from time import sleep
+import os
+from django.conf import settings
+
+
+class FusekiTestCase(TestCase):
+
+    def setUp(self) -> None:
+        self.fuseki_dev = Fuseki(
+            'fuseki-dev', 3030, 'development', 'fuseki-dev/backup')
+        self.vocabulary = Vocabulary(name='ds')
+        self.vocabulary.save()
+        self.fuseki_dev.create_vocabulary(self.vocabulary)
+
+    def tearDown(self) -> None:
+        # remove all backup files
+        for f in os.listdir(self.fuseki_dev.backup_path):
+            os.remove(os.path.join(self.fuseki_dev.backup_path, f))
+        # delete all datasets
+        try:
+            self.fuseki_dev.delete_vocabulary(self.vocabulary)
+        except:  # will fail when running the test_delete_vocabulary testcase
+            pass
+
+    def test_constructor(self):
+
+        # all attributes set correctly
+        self.assertEqual(self.fuseki_dev.host, 'fuseki-dev')
+        self.assertEqual(self.fuseki_dev.port, 3030)
+        self.assertEqual(self.fuseki_dev.environment, 'development')
+
+        # api_url and url 'calculated'
+        self.assertIsNotNone(self.fuseki_dev.api_url)
+        self.assertIsNotNone(self.fuseki_dev.url)
+
+    def test_constructor_bad_host(self):
+        # will fail because of wrong hostname
+        with self.assertRaises(ValueError):
+            Fuseki('fuseki-yeet', 3030, 'development', 'fuseki-dev/backup')
+
+    def test_get_copy_tasks(self):
+        task_id = self.fuseki_dev.start_vocabulary_copy(self.vocabulary)
+        self.assertIsNotNone(task_id)
+
+    def test_get_copy(self):
+
+        task_id = self.fuseki_dev.start_vocabulary_copy(self.vocabulary)
+        tasks = self.fuseki_dev.get_copy_tasks()
+
+        task = None
+        while task is not None:
+            task = next((task for task in tasks if task.id is task_id), None)
+            sleep(0.25)
+
+        copy = self.fuseki_dev.get_copy(task, self.vocabulary)
+        self.assertTrue(os.path.exists(copy.path))
+
+    def test_delete_vocabulary(self):
+        self.fuseki_dev.delete_vocabulary(self.vocabulary)
+
+        try:
+            copied_vocabulary = Vocabulary(name=self.vocabulary.get_name())
+            copied_vocabulary.save()
+            self.fuseki_dev.create_vocabulary(copied_vocabulary)
+            self.fuseki_dev.delete_vocabulary(copied_vocabulary)
+
+        except:
+            self.fail('Vocabulary did not get deleted')
+
+    def test_create_vocabulary(self):
+        v = Vocabulary(name='cool_vocabulary')
+        v.save()
+
+        try:
+            self.fuseki_dev.create_vocabulary(v)
+        except Exception as e:
+            self.fail('Creating vocabulary failed ' + str(e))
+        self.fuseki_dev.delete_vocabulary(v)
+
+    def test_restore_copy(self):
+
+        try:
+            source = Vocabulary(name='ds_source')
+            source.save()
+
+            target = Vocabulary(name='ds_target')
+            target.save()
+
+            self.fuseki_dev.create_vocabulary(source)
+
+            task_id = self.fuseki_dev.start_vocabulary_copy(source)
+
+            tasks = self.fuseki_dev.get_copy_tasks()
+            task = next((task for task in tasks if task.id is task_id), None)
+            while task is not None:
+                task = next(
+                    (task for task in tasks if task.id == task_id), None)
+                tasks = self.fuseki_dev.get_copy_tasks()
+                print(task)
+                print(tasks)
+                sleep(0.25)
+
+            copy = self.fuseki_dev.get_copy(task, source)
+
+            self.fuseki_dev.restore_copy(target, copy)
+            self.fuseki_dev.delete_vocabulary(target)
+            self.fuseki_dev.delete_vocabulary(source)
+            copy.delete()
+        except Exception as e:
+            self.fail('Restoring vocabulary failed '+str(e))
+
+    def test_query(self):
+        try:
+            results = self.fuseki_dev.query(
+                self.vocabulary,
+                """
+                prefix owl: <http://www.w3.org/2002/07/owl#>
+                prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+                SELECT DISTINCT ?class ?label ?description
+                WHERE {
+                ?class a owl:Class.
+                OPTIONAL { ?class rdfs:label ?label}
+                OPTIONAL { ?class rdfs:comment ?description}
+                }
+                LIMIT 25
+            """)
+            self.assertIsNotNone(results)
+
+        except Exception as e:
+            self.fail('Query failed: ' + str(e))

@@ -5,3 +5,4 @@ django-tailwind
 sparqlwrapper
 mypy
 django-stubs
+django-environ
