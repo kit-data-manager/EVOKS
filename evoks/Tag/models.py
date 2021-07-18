@@ -4,7 +4,7 @@ from django.db import models
 class Tag(models.Model):
 
     max_name_length = 100
-    name = models.CharField(max_length=max_name_length)
+    name = models.CharField(max_length=max_name_length) # type: str
     post_date = datetime.datetime.now
 
     """

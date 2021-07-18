@@ -1,6 +1,6 @@
 import datetime
 from django.db import models
-from evoks.Profile.models import Profile 
+from Profile.models import Profile 
 
 
 class Comment(models.Model):
