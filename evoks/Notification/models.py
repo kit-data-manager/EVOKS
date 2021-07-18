@@ -3,19 +3,19 @@ from enum import Enum
 from Profile.models import Profile
 
 class Type(Enum):
-    """
-    Enum for Notificationtype. Has 3 variables
+    """Enum for Type
     """
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
     WARNING = 'WARNING'
 
 class Notification(models.Model):
-    """
-    Notification Class. Has 3 attributes.
-    """
 
-    def __init__(self, receiver : Profile, message : str, type : Type) -> None:
+    receiver = Profile
+    message = str
+    type = Type
+
+    def __init__(self, receiver, message, type):
         """Constructor for notification
 
         Args:
