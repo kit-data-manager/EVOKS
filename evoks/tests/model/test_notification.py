@@ -13,7 +13,7 @@ class test_notification(TestCase):
 
     def test_init_(self):
         """
-        Test method for constructor. Checks if given parameters has been set correctly.
+        Test method for constructor. Checks if given parameters have been set correctly.
         """
 
         sender = User.objects.create(

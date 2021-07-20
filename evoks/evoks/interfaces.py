@@ -1,17 +1,20 @@
 from abc import ABC, abstractmethod
 
+# TODO: docs
+
+
 class Triple(ABC):
     """
-    Interface Triple, that classes Term and Vocabulary can use some functions with inheritance.
+    Triple interface for all classes that are partially stored in Fuseki.
     """
     @abstractmethod
-    def edit_field(self, url : str, type : str, content : str) -> None:
+    def edit_field(self, url: str, type: str, content: str) -> None:
         pass
 
     @abstractmethod
-    def create_field(self, url : str, type : str, content : str) -> str:
+    def create_field(self, url: str, type: str, content: str) -> str:
         pass
 
     @abstractmethod
-    def delete_field(self, url : str) -> None:
+    def delete_field(self, url: str) -> None:
         pass
