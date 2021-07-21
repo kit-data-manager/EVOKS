@@ -8,7 +8,7 @@ class ProfileTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Set up non-modified objects used by all test methods
-        User.objects.create(username='jhon', password='ok',email='game111111@gmx.de')
+        User.objects.create(username='jhon', password='ok',email='jhon@example.com')
 
     def test_verified_false(self):
         user = User.objects.get(username='jhon')
@@ -24,7 +24,7 @@ class ProfileTest(TestCase):
         user.profile.verify()
         self.assertTrue(user.profile.verified)
 
-    def test_verified_true(self):
+    def test_verified_true2(self):
         user = User.objects.get(username='jhon')
         user.profile.description='hi'
         self.assertAlmostEquals(user.profile.description, 'hi')

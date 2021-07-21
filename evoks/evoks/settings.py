@@ -14,7 +14,7 @@ import environ
 env = environ.Env(
     FUSEKI_USER=(str, 'admin'),
     FUSEKI_PASSWORD=(str, 'fuseki_password'),
-    EVOKS_MAIL=(str, 'game111111@gmx.de')
+    EVOKS_MAIL=(str, 'john@example.com')
 )
 environ.Env.read_env()
 
@@ -76,7 +76,8 @@ INSTALLED_APPS = [
     'Fuseki',
     'Tag',
     'Notification',
-    'theme'
+    'theme',
+    #'object-permissions'
 ]
 
 TAILWIND_APP_NAME = 'theme'
