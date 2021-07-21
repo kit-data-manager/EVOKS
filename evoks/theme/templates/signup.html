@@ -1,0 +1,10 @@
+<!-- templates/registration/login.html -->
+<h2>Create your account</h2>
+<form method="post">
+  {% csrf_token %}
+  or <a href="{% url 'Signin' %}">
+    sign in
+  </a> 
+  {{ form.as_p }}
+  <button type="submit">Sign up</button>
+</form>

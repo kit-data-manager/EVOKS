@@ -1,6 +1,5 @@
+
 from pathlib import Path
-from typing import List, Set, Dict, Tuple, Optional
-import os
 import socket
 
 from pathlib import Path
@@ -14,7 +13,7 @@ import environ
 env = environ.Env(
     FUSEKI_USER=(str, 'admin'),
     FUSEKI_PASSWORD=(str, 'fuseki_password'),
-    EVOKS_MAIL=(str, 'john@example.com')
+    EVOKS_MAIL=(str, 'game111111@gmx.de')
 )
 environ.Env.read_env()
 
@@ -42,6 +41,13 @@ DOCKER_BASE_DIR = BASE_DIR.parent
 
 FUSEKI_USER = env('FUSEKI_USER')
 FUSEKI_PASSWORD = env('FUSEKI_PASSWORD')
+
+EVOKS_MAIL = env('EVOKS_MAIL')
+
+SKOSMOS_DEV_DIR = "skosmos-dev/config.ttl"
+SKOSMOS_LIVE_DIR = "skosmos-live/config.ttl"
+SKOSMOS_TEST_CONFIG = "evoks/tests/skosmos/config.ttl"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -91,6 +97,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'evoks.backend.CustomBackend',
+)
 
 ROOT_URLCONF = 'evoks.urls'
 

@@ -41,6 +41,17 @@ class Fuseki:
             raise ValueError(
                 'Invalid Fuseki configuration. Failed to ping server')
 
+    def build_sparql_endpoint(self, vocabulary: Vocabulary) -> str:
+        """
+            builds the SPARQL endpoint for a given vocabulary
+        Args:
+            vocabulary (Vocabulary): The vocabulary
+
+        Returns:
+            str: the endpoint
+        """
+        return '{base}{name}/sparql'.format(base=self.url, name=vocabulary.get_name())
+
     def ping(self) -> bool:
         """
         Pings the Fuseki server, returns true/false if successful/unsuccessful

@@ -6,38 +6,31 @@ from django.conf import settings
 
 
 class Profile(models.Model):
+    """Profile model with one-to-one relation to user model
+    """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     description = models.TextField(max_length=500, blank=True)
     name = models.TextField(max_length=50, blank=False)
     verified = models.BooleanField(default=False)
 
-    """
-    creates  profile if user is created. use User.objects.create()
-    """
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
+        """
+        creates  profile if user is created. use User.objects.create()
+        """
         if created:
             Profile.objects.create(user=instance)
 
-    """
-    save_user_profile automatically saves profile if User is saved. use user.save
-    """
     @receiver(post_save, sender=User)
     def save_user_profile(sender, instance, **kwargs):
+        """
+        save_user_profile automatically saves profile if User is saved. use user.save
+        """
         instance.profile.save()
 
-    """
-    verify sets verified in profile true
-    """
-
-    def verify(self):
+    def verify(self) -> None:
+        """
+        verify sets verified in profile true
+        """
         self.verified = True
         self.user.save()
-
-    """
-    export_userdata sends a mail with userdata to the mail from user.email
-    """
-
-    def export_userdata(self):
-        self.user.email_user(subject='Data', message='Ihre Daten bei Evoks' +
-                             self.name+'sind:'+self.description, from_email=settings.EVOKS_MAIL)
