@@ -30,22 +30,22 @@ class GroupProfile(models.Model):
 
     
 
-    def add_user(self, User):
+    def add_user(self, user:User):
         """
         add_user adds a user to the group and counts groupsize up.
         """
-        self.group.user_set.add(User)
+        self.group.user_set.add(user)
         self.size = self.size + 1
         self.group.save()
 
     
 
-    def remove_user(self, User):
+    def remove_user(self, user:User):
         """ 
         remove_user removes the given user and counts groupsize down.
         deletes the group if no user remains.
         """
-        self.group.user_set.remove(User)
+        self.group.user_set.remove(user)
         self.size = self.size - 1  
         self.group.save()     
         if self.size < 1:
