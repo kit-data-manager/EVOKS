@@ -3,6 +3,7 @@ from Profile.models import Profile
 from GroupProfile.models import GroupProfile
 import enum
 from django.contrib.auth.models import Permission
+from guardian.shortcuts import assign_perm, remove_perm, get_perms
 #import Fuseki.fuseki
 
 
@@ -15,6 +16,16 @@ class State(enum.Enum):
     DEV = 1
     REVIEW = 2
     LIVE = 3
+
+class Dataformat(enum.Enum):
+    """Dataformat enum represents the different kinds of Format that are selectable when downloading a Vocabulary
+
+    Args:
+        enum: Python Enum
+    """
+    RDFXML = 1
+    JSONLD = 2
+    TURTLE = 3
 
 #missing triple and searchable Interface TODO
 #TODO delete vocabulary?
@@ -38,15 +49,13 @@ class Vocabulary(models.Model):
     @classmethod
     def create(cls, name : str, creator : Profile):
         #TODO return type
-        #TODO set creator permission to owner
         #TODO Save creator in triple field
         #TODO fuseki create vocabulary
         vocabulary = cls(name=name)
         vocabulary.save()
         creator.user.save()
-        #permission = Permission.objects.get(name='Owner')
         vocabulary.profiles.add(creator)
-        #creator.user.user_permissions.add(permission)
+        assign_perm('owner', creator.user, vocabulary)
         vocabulary.state = State.DEV
         vocabulary.save()
         #fuseki_dev = Fuseki.objects.filter(port=3030)
@@ -75,7 +84,7 @@ class Vocabulary(models.Model):
         """
         placeholder = 'sdf'
 
-    def export_vocabulary(dataformat) -> None:
+    def export_vocabulary(dataformat : Dataformat) -> None:
         """Sends the Vocabulary in the provided dataformat to the users email
 
         Args:
@@ -148,19 +157,18 @@ class Vocabulary(models.Model):
             permission (Permission): Permission the User will have on the Vocabulary
         """
         self.profiles.add(profile)
-        #self.profiles.get(profile).user.user_permissions.add(permission)
+        assign_perm(permission, profile.user, self)
 
     #permission required owner
-    def add_group(self, group: GroupProfile, permission: str) -> None:
+    def add_group(self, group_profile: GroupProfile, permission: str) -> None:
         """Adds a group to the Vocabulary
 
         Args:
             group (GroupProfile): Group that is being added
             permission (str): Permission of the Group on the Vocabulary
         """
-        #TODO Permission
-        self.groups.add(group)
-        #self.groups.get(group).group.permissions.add(permission)
+        self.groups.add(group_profile)
+        assign_perm(permission, group_profile.group, self)
 
     #permission required owner
     def remove_profile(self, profile: Profile) -> None:
@@ -170,14 +178,16 @@ class Vocabulary(models.Model):
             profile (Profile): User that gets removed
         """
         self.profiles.remove(profile)
-        #remove permissions?
+        for key in get_perms(profile.user, self):
+            remove_perm(key, profile.user, self)
 
     #permission required owner
-    def remove_group(self, group: GroupProfile) -> None:
+    def remove_group(self, group_profile: GroupProfile) -> None:
         """Removes a group from the Vocabulary
 
         Args:
             group (GroupProfile): Group that gets removed
         """
-        self.groups.remove(group)
-        #remove permissions?
+        self.groups.remove(group_profile)
+        for key in get_perms(group_profile.group, self):
+            remove_perm(key, group_profile.group, self)

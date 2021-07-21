@@ -3,21 +3,21 @@ from vocabularies.models import Vocabulary
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
 
-class YourTestClass(TestCase):
+class VocabularyTest(TestCase):
     @classmethod
-    def set_up_test_data(cls):
-        user = User.objects.create(username='jhon', password='ok',email='jhon@example.com')
-        user.save()
+    def setUpTestData(cls):
+        user = User.objects.create(username='jhon', password='ok',
+                            email='someone@example.com')
         Vocabulary.create(name='genel', creator=user.profile)
 
-    def test_permission(self):
+    def test_verified_false(self):
+        user = User.objects.get(username='jhon')
+        self.assertFalse(user.profile.verified)
+
+    def test_permission_after_creation(self):
         user = User.objects.get(username='jhon')
         vocabulary = Vocabulary.objects.get(name='genel')
-        permission = Permission.objects.get(name='Owner')
-        print(vocabulary.name)
-        print(permission)
-        print(user.has_perm('vocabularies.owner', vocabulary))
-        print(user.has_perm('vocabularies.owner'))
+        print(user.has_perm('owner', vocabulary))
 
     def test_false_is_false(self):
         self.assertFalse(False)

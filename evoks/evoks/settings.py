@@ -83,7 +83,7 @@ INSTALLED_APPS = [
     'Tag',
     'Notification',
     'theme',
-    #'object-permissions'
+    'guardian',
 ]
 
 TAILWIND_APP_NAME = 'theme'
@@ -100,6 +100,7 @@ MIDDLEWARE = [
 
 AUTHENTICATION_BACKENDS = (
     'evoks.backend.CustomBackend',
+    'guardian.backends.ObjectPermissionBackend',
 )
 
 ROOT_URLCONF = 'evoks.urls'
