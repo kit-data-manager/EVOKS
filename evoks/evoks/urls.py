@@ -26,14 +26,9 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
 
-    path('vocabularies', TemplateView.as_view(template_name='base.html')),
+    # path('vocabularies', TemplateView.as_view(template_name='base.html')),
 
-    path('vocabularies/<slug:name>', TemplateView.as_view(template_name='vocabulary.html')),
-    path('vocabularies/<slug:name>/terms', TemplateView.as_view(template_name='vocabulary_terms.html')),
-    path('vocabularies/<slug:name>/members', TemplateView.as_view(template_name='vocabulary_members.html')),
-    path('vocabularies/<slug:name>/setting', TemplateView.as_view(template_name='vocabulary_setting.html')),
-    path('vocabularies/<slug:name>/term_detail', TemplateView.as_view(template_name='term_detail.html')),
-
+    path('vocabularies', include('vocabularies.urls')),
     
     path('signup', TemplateView.as_view(template_name='signup.html')),
     path('login', TemplateView.as_view(template_name='login.html')),

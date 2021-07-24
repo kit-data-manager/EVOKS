@@ -1,3 +1,4 @@
+from django import template
 from django.shortcuts import render
 from django.http import HttpResponse
 from .models import *
@@ -5,29 +6,31 @@ from django.template import loader
 from SPARQLWrapper import SPARQLWrapper, JSON
 
 
-def index(request):
+def index(request, name):
 
-#    sparql = SPARQLWrapper("http://fuseki-dev:3030/finnish-test")
-#    sparql.setQuery("""
-#        SELECT ?subject ?predicate ?object
-#        WHERE {
-#        ?subject ?predicate ?object
-#        }
-#        LIMIT 25
-#    """)
-#    sparql.setReturnFormat(JSON)
-#    results = sparql.query().convert()
-#    for result in results["results"]["bindings"]:
-#        print(result)
-#    print('---------------------------')
+    # TODO fix csrf
+    if request.method == 'DELETE':
+        # Delete vocabulary
+        Vocabulary.objects.get(name=name).delete()
+        return HttpResponse(status=204)
 
-  
-    if request.user.is_authenticated:
-        vocabularies = Vocabulary.objects.all()
-        template = loader.get_template('index.html')
-        context = {
-            'user': request.user,
-            'vocabularies': vocabularies,
-        }
-        return HttpResponse(template.render(context, request))
-    return HttpResponse('pls login')
+    print('yeet')
+    # if request.user.is_authenticated:
+    vocabulary = Vocabulary.objects.get(name=name)
+    print(vocabulary)
+    template = loader.get_template('vocabulary.html')
+    context = {
+        'user': request.user,
+        'vocabulary': vocabulary,
+    }
+    return HttpResponse(template.render(context, request))
+    # return HttpResponse('pls login')
+
+
+def settings(request, name):
+    # vocabulary = Vocabulary.objects.get(name=name)
+    context = {
+        'vocabulary': {'state': 'LIVE'}
+    }
+    template = loader.get_template('vocabulary_setting.html')
+    return HttpResponse(template.render(context, request))
