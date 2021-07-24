@@ -33,27 +33,32 @@
             <main class="flex-1 relative focus:outline-none">
                 <div class="py-6">
                     <div class="px-4 sm:px-6 md:px-0">
-                        <h1 class="text-xl font-semibold text-gray-900">YSO - General Finnish ontology
+                        <h1 class="text-xl font-semibold text-gray-900">{{vocabulary.name}}
                         </h1>
                     </div>
                     <div class="px-4 sm:px-6 md:px-0">
                         <!-- Replace with your content -->
                         <div class="py-4">
                             <!-- This example requires Tailwind CSS v2.0+ -->
-                            <button type="button"
-                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                Overview
-                            </button>
-                            <button type="button"
-                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                Terms
-                            </button> <button type="button"
-                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                Members
-                            </button> <button type="button"
-                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                Settings
-                            </button>
+                            <form action="#" method="post">
+                                {% csrf_token %}
+                                <button type="submit" name="overview"
+                                    class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    Overview
+                                </button>
+                                <button type="submit" name="terms"
+                                    class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    Terms
+                                </button> 
+                                <button type="submit" name="members"
+                                    class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    Members
+                                </button> 
+                                <button type="submit" name="settings"
+                                    class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    Settings
+                                </button>
+                            </form>
                             <main>
 
                                 <div class="py-6">
@@ -68,72 +73,74 @@
                                                 </legend>
                                                 <div class="bg-white rounded-md -space-y-px">
                                                     <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
-                                                    <label
-                                                        class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">
-                                                        <input type="radio" name="vocabulary-setting" value="Live" 
-                                                        {% ifequal vocabulary.state "LIVE" %} checked {% endifequal %}
-                                                            class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
-                                                            aria-labelledby="privacy-setting-0-label"
-                                                            aria-describedby="privacy-setting-0-description">
-                                                        <div class="ml-3 flex flex-col">
-                                                            <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
-                                                            <span id="vocabulary-setting-0-label"
-                                                                class="text-gray-900 block text-sm font-medium">
-                                                                Live
-                                                            </span>
-                                                            <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
-                                                            <span id="vocabulary-setting-0-description"
-                                                                class="text-gray-500 block text-sm">
-                                                                This vocabulary will be migrated to the live Skosmos
-                                                                instance and won't be editable anymore.
-                                                            </span>
-                                                        </div>
-                                                    </label>
+                                                    <form action="#" method="post"> {% csrf_token %}
+                                                        <label
+                                                            class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">
+                                                            <input type="radio" name="vocabulary-setting" value="Live" id='1' onclick="this.form.submit();"
+                                                            {% ifequal vocabulary.state "LIVE" %} checked {% endifequal %}
+                                                                class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
+                                                                aria-labelledby="privacy-setting-0-label"
+                                                                aria-describedby="privacy-setting-0-description">
+                                                            <div class="ml-3 flex flex-col">
+                                                                <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
+                                                                <span id="vocabulary-setting-0-label"
+                                                                    class="text-gray-900 block text-sm font-medium">
+                                                                    Live
+                                                                </span>
+                                                                <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
+                                                                <span id="vocabulary-setting-0-description"
+                                                                    class="text-gray-500 block text-sm">
+                                                                    This vocabulary will be migrated to the live Skosmos
+                                                                    instance and won't be editable anymore.
+                                                                </span>
+                                                            </div>
+                                                        </label>
 
-                                                    <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
-                                                    <label
-                                                        class="border-gray-200 relative border p-4 flex cursor-pointer">
-                                                        <input type="radio" name="vocabulary-setting"
-                                                            value="Development" {% ifequal vocabulary.state "REVIEW" %} checked {% endifequal %}
-                                                            class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
-                                                            aria-labelledby="privacy-setting-1-label"
-                                                            aria-describedby="privacy-setting-1-description">
-                                                        <div class="ml-3 flex flex-col">
-                                                            <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
-                                                            <span id="vocabulary-setting-1-label"
-                                                                class="text-gray-900 block text-sm font-medium">
-                                                                Review
-                                                            </span>
-                                                            <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
-                                                            <span id="vocabulary-setting-1-description"
-                                                                class="text-gray-500 block text-sm">
-                                                                All users will have read-only access to this vocabulary.
-                                                            </span>
-                                                        </div>
-                                                    </label>
+                                                        <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
+                                                        <label
+                                                            class="border-gray-200 relative border p-4 flex cursor-pointer">
+                                                            <input type="radio" name="vocabulary-setting" id='2' onclick="this.form.submit();"
+                                                                value="Development" {% ifequal vocabulary.state "REVIEW" %} checked {% endifequal %}
+                                                                class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
+                                                                aria-labelledby="privacy-setting-1-label"
+                                                                aria-describedby="privacy-setting-1-description">
+                                                            <div class="ml-3 flex flex-col">
+                                                                <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
+                                                                <span id="vocabulary-setting-1-label"
+                                                                    class="text-gray-900 block text-sm font-medium">
+                                                                    Review
+                                                                </span>
+                                                                <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
+                                                                <span id="vocabulary-setting-1-description"
+                                                                    class="text-gray-500 block text-sm">
+                                                                    All users will have read-only access to this vocabulary.
+                                                                </span>
+                                                            </div>
+                                                        </label>
 
-                                                    <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
-                                                    <label
-                                                        class="border-gray-200 rounded-bl-md rounded-br-md relative border p-4 flex cursor-pointer">
-                                                        <input type="radio" name="vocabulary-setting" {% ifequal vocabulary.state "DEVELOPMENT" %} checked {% endifequal %}
-                                                            value="Private to you"
-                                                            class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
-                                                            aria-labelledby="privacy-setting-2-label"
-                                                            aria-describedby="privacy-setting-2-description">
-                                                        <div class="ml-3 flex flex-col">
-                                                            <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
-                                                            <span id="vocabulary-setting-2-label"
-                                                                class="text-gray-900 block text-sm font-medium">
-                                                                Development
-                                                            </span>
-                                                            <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
-                                                            <span id="vocabulary-setting-2-description"
-                                                                class="text-gray-500 block text-sm">
-                                                                Only members of this vocabulary have reading and writing
-                                                                rights.
-                                                            </span>
-                                                        </div>
-                                                    </label>
+                                                        <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
+                                                        <label
+                                                            class="border-gray-200 rounded-bl-md rounded-br-md relative border p-4 flex cursor-pointer">
+                                                            <input type="radio" name="vocabulary-setting" id='3' {% ifequal vocabulary.state "DEVELOPMENT" %} checked {% endifequal %}
+                                                                value="Private to you" onclick="this.form.submit();"
+                                                                class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
+                                                                aria-labelledby="privacy-setting-2-label"
+                                                                aria-describedby="privacy-setting-2-description">
+                                                            <div class="ml-3 flex flex-col">
+                                                                <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
+                                                                <span id="vocabulary-setting-2-label"
+                                                                    class="text-gray-900 block text-sm font-medium">
+                                                                    Development
+                                                                </span>
+                                                                <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
+                                                                <span id="vocabulary-setting-2-description"
+                                                                    class="text-gray-500 block text-sm">
+                                                                    Only members of this vocabulary have reading and writing
+                                                                    rights.
+                                                                </span>
+                                                            </div>
+                                                        </label>
+                                                    </form>
                                                 </div>
                                             </fieldset>
 
@@ -164,10 +171,13 @@
                                                     </p>
                                                 </div>
                                                 <div class="mt-5">
-                                                    <button type="button" id="delete-vocabulary-button"
+                                                    <form action="#" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit" id="delete-vocabulary-button" name='delete'
                                                         class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
                                                         Delete
                                                     </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>

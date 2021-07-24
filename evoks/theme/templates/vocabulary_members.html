@@ -87,6 +87,10 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody class="bg-white divide-y divide-gray-200">
+                                                                    {% for data in members %}.
+                                                                    
+                                                                
+                                                                    
                                                                     <tr>
 
                                                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -99,10 +103,10 @@
                                                                                 <div class="ml-4">
                                                                                     <div
                                                                                         class="text-sm font-medium text-gray-900">
-                                                                                        Jane Cooper
+                                                                                        {{data.name}}<br/>
                                                                                     </div>
                                                                                     <div class="text-sm text-gray-500">
-                                                                                        jane.cooper@example.com
+                                                                                        {{data.user.email}}<br/>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -115,7 +119,7 @@
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
 
-                                                                            <button type="button"
+                                                                            <button type="submit" name='kick'
                                                                                 class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm hidden md:table-cell">
                                                                                 Kick
                                                                             </button>
@@ -123,6 +127,8 @@
                                                                         </td>
 
                                                                     </tr>
+                                                                    <hr/>
+                                                                    {% endfor %}
                                                                     <!-- More people... -->
                                                                 </tbody>
                                                             </table>

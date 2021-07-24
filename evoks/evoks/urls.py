@@ -31,9 +31,9 @@ urlpatterns = [
     path('vocabularies', include('vocabularies.urls')),
     
     path('signup', TemplateView.as_view(template_name='signup.html')),
-    path('login', TemplateView.as_view(template_name='login.html')),
+    path('login', TemplateView.as_view(template_name='login.html'), name='login'),
     path('reset', TemplateView.as_view(template_name='reset_password.html')),
-    path('profile', TemplateView.as_view(template_name='profile.html')),
+    path('profile', TemplateView.as_view(template_name='profile.html'), name='profile'),
 
     path('teams', TemplateView.as_view(template_name='teams.html')),
     path('teams/<slug:name>', TemplateView.as_view(template_name='team_detail.html')),
