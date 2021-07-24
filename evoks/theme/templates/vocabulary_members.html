@@ -32,7 +32,7 @@
             <main class="flex-1 relative focus:outline-none">
                 <div class="py-6">
                     <div class="px-4 sm:px-6 md:px-0">
-                        <h1 class="text-xl font-semibold text-gray-900">YSO - General Finnish ontology
+                        <h1 class="text-xl font-semibold text-gray-900">{{vocabulary.name}}
                         </h1>
                     </div>
                     <div class="px-4 sm:px-6 md:px-0">
@@ -93,7 +93,7 @@
                                                                 <tbody class="bg-white divide-y divide-gray-200">
                                                                     
                                                                     <tr>
-                                                                    {{ data|slice:"{{(page - 1) * 10}}:{{page * 10 - 1}}" }}
+                                                                    {{ data|slice:"(page - 1) * 10:page * 10 - 1" }}
                                                                     {% for data in members %}
                                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                                             <div class="flex items-center">
@@ -146,9 +146,9 @@
                                                 <div class="hidden sm:block">
                                                     <p class="text-sm text-gray-700">
                                                         Showing
-                                                        <span class="font-medium">1</span>
+                                                        <span class="font-medium">{{page|add:"-1"}}</span>
                                                         to
-                                                        <span class="font-medium">10</span>
+                                                        <span class="font-medium">{% widthratio page 1 10 %}</span>
                                                         of
                                                         <span class="font-medium">{{members|length}}</span>
                                                         results
