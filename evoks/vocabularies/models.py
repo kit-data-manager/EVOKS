@@ -1,9 +1,14 @@
 from django.db import models
+from django.utils.datastructures import MultiValueDict
 from Profile.models import Profile
 from GroupProfile.models import GroupProfile
 import enum
 from django.contrib.auth.models import Permission
 from guardian.shortcuts import assign_perm, remove_perm, get_perms
+import Term.models
+from django.core.mail import EmailMessage
+from Fuseki.fuseki import Fuseki
+from django.http import HttpRequest
 #import Fuseki.fuseki
 
 
@@ -76,21 +81,36 @@ class Vocabulary(models.Model):
         if self.state is State.LIVE:
             self.set_dev()
 
-    def import_vocabulary(input) -> None:
+    def import_vocabulary(input : MultiValueDict) -> None:
         """Imports a Vocabulary
 
         Args:
             input ([type]): Vocabulary to import
         """
+        #mögliche dateiformate: rdf/xml, Json-Ld, Turtle
         placeholder = 'sdf'
 
-    def export_vocabulary(dataformat : Dataformat) -> None:
+    def export_vocabulary(self, dataformat : Dataformat) -> None:
         """Sends the Vocabulary in the provided dataformat to the users email
 
         Args:
             dataformat (Enum): Desired dataformat
         """
-        placeholder = '123'
+        #TODO turn vocabulary into file in given format
+        #TODO
+        #TODO either has to take user as argument or sending email part handled in view
+        vocab = 'placeholder'
+        subject = '{0} Vocabulary in the {1} dataformat'.format(self.name, dataformat)
+        body = 'Attached to this email is the requested Vocabulary...'
+        email = EmailMessage(
+            subject,
+            body,
+            'bob@example.com',
+            'jhon@example.com'
+        )
+        formatstring = dataformat.lower()
+        email.attach('{0}.{1}'.format(self.name, formatstring), vocab)
+        email.send()
 
     def set_live(self) -> None:
         """Sets the state to live and starts the migration process
@@ -132,10 +152,10 @@ class Vocabulary(models.Model):
         Args:
             name (str): Name of the Term
         """
-        #term = self.terms.objects.filter(name=name)
-        #self.terms.remove(term)
+        term = self.term_set.get(name=name)
+        self.term_set.remove(term)
         self.set_dev_if_live()
-        #term.delete()
+        term.delete()
 
     #permission required participant or owner
     def add_term(self, name: str) -> None:
@@ -144,8 +164,7 @@ class Vocabulary(models.Model):
         Args:
             name (str): Name of the Term
         """
-        placeholder = '123'
-        #self.terms.add(Term(self, name : str))
+        self.term_set.add(Term.models.Term.create(name=name))
         #record user who added Term as contributor if not already done
 
     #permission required owner
@@ -178,6 +197,8 @@ class Vocabulary(models.Model):
             profile (Profile): User that gets removed
         """
         self.profiles.remove(profile)
+        #currently removes all permissions user has :(
+        #does this remove permissions given by groups?
         for key in get_perms(profile.user, self):
             remove_perm(key, profile.user, self)
 
@@ -191,3 +212,43 @@ class Vocabulary(models.Model):
         self.groups.remove(group_profile)
         for key in get_perms(group_profile.group, self):
             remove_perm(key, group_profile.group, self)
+
+    def edit_field(url : str, type : str, content : str) -> None:
+        """Edits a Triple field by using SPARQL Queries and the Fuseki-Dev Instance
+
+        Args:
+            url (str): Url of the Triple
+            type (str): Typ of the Triple
+            content (str): Content of the Triple
+        """
+        #fuseki_dev.buil_sparql_endpoint(self)
+        placeholder = 123
+
+    def create_field(url : str, type : str, content : str) -> str:
+        """Creates a Triple Field on the Fuseki-Dev Instance
+
+        Args:
+            url (str): Url of the Triple
+            type (str): Type of the Triple
+            content (str): Content of the Triple
+
+        Returns:
+            str: [description]
+        """
+        placeholder = 123
+
+    def delete_field(url : str) -> None:
+        """Deletes a Triple Field on the Fuseki-Dev Instance
+
+        Args:
+            url (str): Url of the Triple
+        """
+        placeholder = 123
+
+    def search(input : str):
+        """Searches all Vocabularies for input. Vocabularies that contain input get put into a list and the list gets returned
+
+        Args:
+            input (str): Search string
+        """
+        placeholder = 123
