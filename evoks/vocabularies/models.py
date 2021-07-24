@@ -7,9 +7,7 @@ from django.contrib.auth.models import Permission
 from guardian.shortcuts import assign_perm, remove_perm, get_perms
 import Term.models
 from django.core.mail import EmailMessage
-from Fuseki.fuseki import Fuseki
 from django.http import HttpRequest
-#import Fuseki.fuseki
 
 
 class State(enum.Enum):

@@ -39,20 +39,24 @@
                         <!-- Replace with your content -->
                         <div class="py-4">
                             <!-- This example requires Tailwind CSS v2.0+ -->
-                            <button type="button"
-                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                Overview
-                            </button>
-                            <button type="button"
-                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                Terms
-                            </button> <button type="button"
-                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                Members
-                            </button> <button type="button"
-                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                Settings
-                            </button>
+                            <form action="#" method="post"> {% csrf_token %}
+                                <button type="submit" name="overview"
+                                    class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    Overview
+                                </button>
+                                <button type="submit" name="terms"
+                                    class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    Terms
+                                </button> 
+                                <button type="submit" name="members"
+                                    class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    Members
+                                </button> 
+                                <button type="submit" name="settings"
+                                    class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    Settings
+                                </button>
+                            </form>
                             <main>
 
                                 <div class="py-6">
@@ -87,12 +91,10 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody class="bg-white divide-y divide-gray-200">
-                                                                    {% for data in members %}.
-                                                                    
-                                                                
                                                                     
                                                                     <tr>
-
+                                                                    {{ data|slice:"{{(page - 1) * 10}}:{{page * 10 - 1}}" }}
+                                                                    {% for data in members %}
                                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                                             <div class="flex items-center">
                                                                                 <div class="flex-shrink-0 h-10 w-10">
@@ -118,11 +120,12 @@
                                                                         </td>
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-
-                                                                            <button type="submit" name='kick'
-                                                                                class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm hidden md:table-cell">
-                                                                                Kick
-                                                                            </button>
+                                                                            <form action="#" method="post"> {% csrf_token %}
+                                                                                <button type="submit" name="kick {{data.name}}"
+                                                                                    class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm hidden md:table-cell">
+                                                                                    Kick
+                                                                                </button>
+                                                                            </form>
 
                                                                         </td>
 
@@ -147,7 +150,7 @@
                                                         to
                                                         <span class="font-medium">10</span>
                                                         of
-                                                        <span class="font-medium">20</span>
+                                                        <span class="font-medium">{{members|length}}</span>
                                                         results
                                                     </p>
                                                 </div>
@@ -176,22 +179,24 @@
                                         <!-- This example requires Tailwind CSS v2.0+ -->
                                         <div class="bg-white shadow sm:rounded-lg">
                                             <div class="px-4 py-5 sm:p-6">
-                                                <div>
-                                                    <label for="email"
-                                                        class="block text-sm font-medium text-gray-700">Invite a
-                                                        member or a group</label>
-                                                    <div class="mt-1">
-                                                        <input type="text" name="email" id="email"
-                                                            class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                                            placeholder="ontologyfan@student.kit.edu or KIT Ontologen 2">
+                                                <form action="#" method="post"> {% csrf_token %}
+                                                    <div>
+                                                        <label for="email"
+                                                            class="block text-sm font-medium text-gray-700">Invite a
+                                                            member or a group</label>
+                                                        <div class="mt-1">
+                                                            <input type="text" name="email" id="email"
+                                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                                                placeholder="ontologyfan@student.kit.edu or KIT Ontologen 2">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="mt-5">
-                                                    <button type="button"
-                                                        class="inline-flex items-center justify-center px-10 py-2 border border-transparent font-medium rounded-md text-white bg-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
-                                                        Invite
-                                                    </button>
-                                                </div>
+                                                    <div class="mt-5">
+                                                        <button type="submit" name="invite"
+                                                            class="inline-flex items-center justify-center px-10 py-2 border border-transparent font-medium rounded-md text-white bg-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
+                                                            Invite
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
@@ -209,10 +214,12 @@
                                                     </p>
                                                 </div>
                                                 <div class="mt-5">
-                                                    <button type="button"
-                                                        class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
-                                                        Kick all members
-                                                    </button>
+                                                    <form action="#" method="post"> {% csrf_token %}
+                                                        <button type="submit" name="kickall"
+                                                            class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
+                                                            Kick all members
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>

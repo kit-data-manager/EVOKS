@@ -58,17 +58,43 @@ def settings(request, name):
 
 
 def members(request : HttpRequest, name):
+    #user = User.objects.create(username='jebediah', password='ok', email='jebediah@example.com')
     vocabulary = Vocabulary.objects.get(name=name)
+    #user = User.objects.get(username='jhon')
+    #vocabulary = Vocabulary.create(name='TestVoc', creator=user.profile)
     #vocabulary = Vocabulary.create(name)
     #context ={}
  
     # add the dictionary during initialization
     context = {
         'vocabulary' : vocabulary,
-        'members' : vocabulary.profiles
+        'members' : vocabulary.profiles.all(),
+        'page' : 1
     }
     if(request.method == 'POST'):
-        if(request.POST['kick'] == 'abc'):
-            vocabulary.remove_profile(vocabulary.profiles.get(username='abc'))
+        if('overview' in request.POST):
+            return redirect('vocabulary_overview', name=vocabulary.name)
+        elif('terms' in request.POST):
+            return redirect('vocabulary_terms', name=vocabulary.name)
+        elif('members' in request.POST):
+            return redirect('vocabulary_members', name=vocabulary.name)
+        elif('settings' in request.POST):
+            return redirect('vocabulary_settings', name=vocabulary.name)
+        elif('invite' in request.POST):
+            #needs permission owner?
+            email = request.POST['email']
+            #needs to check if user exists
+            invite_user = User.objects.get(email=email)
+            vocabulary.add_profile(invite_user.profile, 'participant')
+        elif('kickall' in request.POST):
+            #needs permission owner?
+            for p in vocabulary.profiles.all():
+                #kick creator too?
+                vocabulary.remove_profile(p)
+        #for loop ok?
+        for p in vocabulary.profiles.all():
+            #needs permission owner?
+            if('kick {0}'.format(p.name) in request.POST):
+                vocabulary.remove_profile(p)
 
     return render(request, 'vocabulary_members.html', context)
