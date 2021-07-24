@@ -59,9 +59,6 @@ def settings(request, name):
 
 def members(request : HttpRequest, name):
     vocabulary = Vocabulary.objects.get(name=name)
-    
-    user = User.objects.create(username='jhon', password='ok',
-                            email='someone@example.com')
     #vocabulary = Vocabulary.create(name)
     #context ={}
  
