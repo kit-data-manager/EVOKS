@@ -33,27 +33,29 @@
             <main class="flex-1 relative focus:outline-none">
                 <div class="py-6">
                     <div class="px-4 sm:px-6 md:px-0">
-                        <h1 class="text-xl font-semibold text-gray-900">YSO - General Finnish ontology
+                        <h1 class="text-xl font-semibold text-gray-900">{{vocabulary.name}}
                         </h1>
                     </div>
                     <div class="px-4 sm:px-6 md:px-0">
                         <!-- Replace with your content -->
                         <div class="py-4">
                             <!-- This example requires Tailwind CSS v2.0+ -->
-                            <button type="button"
+                            <a href='{% url 'vocabulary_overview' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Overview
-                            </button>
-                            <button type="button"
+                            </a>
+                            <a href='{% url 'vocabulary_terms' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Terms
-                            </button> <button type="button"
+                            </a> 
+                            <a href='{% url 'vocabulary_members' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Members
-                            </button> <button type="button"
+                            </a> 
+                            <a href='{% url 'vocabulary_settings' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings
-                            </button>
+                            </a>
                             <main>
                                 <div class="mt-5">
                                     <button type="button" id="create-term-button"
@@ -62,13 +64,14 @@
                                     </button>
                                     <label for="location" class="block text-sm font-medium text-gray-700">Initial
                                         Letter</label>
-                                    <select id="location" name="location"
-                                        class="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md">
-                                        <option selected>A</option>
-                                        <option>B</option>
-                                        <option>C</option>
-                                        <option>D</option>
-                                    </select>
+                                    <form action="#" method="post"> {% csrf_token %}
+                                        <select id="location" name="location" onChange="form.submit();"
+                                            class="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md">
+                                            {{% for a in initial_letter.initial_letter.field.choices%}
+                                            <option value="{{a.0}}">{{a.1}}</option>
+                                            {% endfor %}}
+                                        </select>
+                                    </form>
                                 </div>
 
                                 <!-- This example requires Tailwind CSS v2.0+ -->
@@ -90,21 +93,23 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody class="bg-white divide-y divide-gray-200">
-                                                        <tr>
+                                                        {% for data in terms %}
+                                                        <tr> 
                                                             <td class="px-6 py-4 whitespace-nowrap">
                                                                 <div class="flex items-center">
                                                                     <div class="text-sm text-gray-900">
-                                                                        Cooles Vokabular
+                                                                        {{data.name}}
                                                                     </div>
                                                                 </div>
                                                             </td>
 
                                                             <td
                                                                 class="px-6 py-4 whitespace-nowrap text-sm text-regal-blue">
-                                                                <a href="#">Edit
+                                                                <a href="'{% url 'term_detail' name=vocabulary.name %}'">Edit
                                                                 </a>
                                                             </td>
                                                         </tr>
+                                                        {% endfor %}
                                                         <!-- More people... -->
                                                     </tbody>
                                                 </table>
@@ -118,23 +123,27 @@
                                     <div class="hidden sm:block">
                                         <p class="text-sm text-gray-700">
                                             Showing
-                                            <span class="font-medium">1</span>
+                                            <span class="font-medium">{{terms.start_index}}</span>
                                             to
-                                            <span class="font-medium">10</span>
+                                            <span class="font-medium">{{terms.end_index}}</span>
                                             of
-                                            <span class="font-medium">20</span>
+                                            <span class="font-medium">{{terms.paginator.count}}</span>
                                             results
                                         </p>
                                     </div>
                                     <div class="flex-1 flex justify-between sm:justify-end">
-                                        <a href="#"
-                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                            Previous
-                                        </a>
-                                        <a href="#"
-                                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                            Next
-                                        </a>
+                                        {% if terms.has_previous %}
+                                            <a href="?page={{ terms.previous_page_number }}"
+                                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                                Previous
+                                            </a>
+                                        {% endif %}
+                                        {% if terms.has_next %}
+                                            <a href="?page={{ terms.next_page_number }}"
+                                                class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                                Next
+                                            </a>
+                                        {% endif %}
                                     </div>
                                 </nav>
 

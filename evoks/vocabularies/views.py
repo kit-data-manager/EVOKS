@@ -9,6 +9,8 @@ from django.contrib.auth.models import User, Group
 from django.shortcuts import redirect, reverse
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied
+from .forms import Vocabulary_Terms_Form
+from Term.models import Term
 
 def index(request, name):
 
@@ -124,3 +126,31 @@ def members(request : HttpRequest, name):
                 #raise PermissionDenied
 
     return render(request, 'vocabulary_members.html', context)
+
+def terms(request : HttpRequest, name : str):
+    vocabulary = Vocabulary.objects.get(name=name)
+    terms = vocabulary.term_set.all()
+    #TODO
+    initial_letter = 'a'
+    if 'location' in request.POST:
+        form = Vocabulary_Terms_Form(request.POST)
+        initial_letter = request.POST['location']
+    else:
+        form = Vocabulary_Terms_Form()
+
+
+    initial_terms = terms.filter(name__startswith=initial_letter)
+    p = Paginator(terms, 10)
+    page_number = request.GET.get('page')
+    page_obj = p.get_page(page_number)
+
+    p.allow_empty_first_page
+
+    #TODO filter queryset by initial letter, sort queryset alphabeticaly
+
+    context = {
+        'vocabulary' : vocabulary,
+        'terms' : page_obj,
+        'initial_letter' : form
+    }
+    return render(request, 'vocabulary_terms.html', context)

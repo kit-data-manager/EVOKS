@@ -24,7 +24,7 @@ class Vocabulary_views_test(TestCase):
         )
         #c.post.__setattr__('vocabulary-setting1')
         self.assertTemplateUsed(response, "vocabulary_setting.html")
-        self.assertContains(
-            response,
-            '<input type="radio" name="vocabulary-setting2" value="Development" {% ifequal vocabulary.state "REVIEW" %} checked {% endifequal %} class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue" aria-labelledby="privacy-setting-1-label" aria-describedby="privacy-setting-1-description">',
-        )
+        #self.assertContains(
+            #response,
+            #'<input type="radio" name="vocabulary-setting2" value="Development" {% ifequal vocabulary.state "REVIEW" %} checked {% endifequal %} class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue" aria-labelledby="privacy-setting-1-label" aria-describedby="privacy-setting-1-description">',
+        #)
