@@ -65,7 +65,7 @@
                                     <label for="location" class="block text-sm font-medium text-gray-700">Initial
                                         Letter</label>
                                     <form action="#" method="post"> {% csrf_token %}
-                                        <select id="location" name="location" onChange="form.submit();"
+                                        <select id="location" name="location" onchange="this.form.submit()"
                                             class="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md">
                                             {{% for a in initial_letter.initial_letter.field.choices%}
                                             <option value="{{a.0}}">{{a.1}}</option>
