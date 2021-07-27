@@ -157,6 +157,7 @@ class Vocabulary(models.Model):
         self.term_set.remove(term)
         self.set_dev_if_live()
         term.delete()
+        self.term_count -= 1
 
     # permission required participant or owner
     def add_term(self, name: str) -> None:
@@ -166,7 +167,8 @@ class Vocabulary(models.Model):
             name (str): Name of the Term
         """
         self.term_set.add(Term.models.Term.create(name=name))
-        # record user who added Term as contributor if not already done
+        self.term_count += 1
+        #record user who added Term as contributor if not already done
 
     # permission required owner
     def add_profile(self, profile: Profile, permission: str) -> None:
@@ -222,7 +224,12 @@ class Vocabulary(models.Model):
             type (str): Typ of the Triple
             content (str): Content of the Triple
         """
-        # fuseki_dev.buil_sparql_endpoint(self)
+        #fusek_dev.query(self,
+        #   'DELETE { {0} {1} {2} }
+        #   INSERT { {0} {1} {2} }
+        #   WHERE
+        #       { {0} {1} {2}
+        #       }'.format(url, type, content) 
         placeholder = 123
 
     def create_field(url: str, type: str, content: str) -> str:
@@ -236,6 +243,10 @@ class Vocabulary(models.Model):
         Returns:
             str: [description]
         """
+        #how to handle prefixes?
+        #fuseki_dev.query(self, 
+        #   'CONSTRUCT {{0} {1} {2} ;}'.format(url, type, content))
+        #or 'INSERT DATA {{0} {1} {2} ;}'.format(url, type, content))
         placeholder = 123
 
     def delete_field(url: str) -> None:
@@ -244,6 +255,11 @@ class Vocabulary(models.Model):
         Args:
             url (str): Url of the Triple
         """
+        #fuseki_dev.query(self,
+        #   'DELETE DATA
+        #   {
+        #       {0} {1} {2}  ;
+        #   }'.format(url, type, content)
         placeholder = 123
 
     def search(input: str):
