@@ -26,8 +26,7 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
 
-    # path('vocabularies', TemplateView.as_view(template_name='base.html')),
-
+    path('', TemplateView.as_view(template_name='base.html')),
     path('vocabularies', include('vocabularies.urls')),
     
     path('signup', TemplateView.as_view(template_name='signup.html')),
