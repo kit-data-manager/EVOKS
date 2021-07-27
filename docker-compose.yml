@@ -58,6 +58,9 @@ services:
     command: "bash tailwind.sh"
     ports:
       - "8383:8383"
+    networks: 
+      - fuseki-dev
+      - fuseki-live
   fuseki-dev:
     container_name: fuseki-dev
     image: secoresearch/fuseki

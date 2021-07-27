@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from requests import auth
 from vocabularies.models import Vocabulary
-from SPARQLWrapper import SPARQLWrapper, XML, JSON
+from SPARQLWrapper import SPARQLWrapper, XML, JSON, N3
 import requests
 from .task import Task
 from .copy import Copy
@@ -223,4 +223,5 @@ class Fuseki:
         sparql.setQuery(query)
         sparql.setReturnFormat(JSON)
         results = sparql.query().convert()
+        print(results)
         return results

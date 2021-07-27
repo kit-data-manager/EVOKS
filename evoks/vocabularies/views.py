@@ -9,10 +9,12 @@ from django.contrib.auth.models import User, Group
 from django.shortcuts import redirect, reverse
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+from rdflib import Graph, Literal
 
 from django.core.exceptions import PermissionDenied
 from .forms import Vocabulary_Terms_Form
 from Term.models import Term
+from evoks.fuseki import fuseki_dev
 
 def index(request, name):
 
@@ -22,11 +24,14 @@ def index(request, name):
         print('DELETETETET')
         # Vocabulary.objects.get(name=name).delete()
         return HttpResponse(status=204)
-
     print('yeet')
     # if request.user.is_authenticated:
     vocabulary = Vocabulary.objects.get(name=name)
-    print(vocabulary)
+
+    thing = fuseki_dev.query(vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""")
+    print(thing.serialize(format='n3'))
+    for s, p, o in thing:
+        print(p, o)
     template = loader.get_template('vocabulary.html')
     context = {
         'user': request.user,
