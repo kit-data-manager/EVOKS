@@ -17,7 +17,7 @@
     <!-- Create Vocabulary Modal -->
     {% include "modals/create_vocabulary.html" %}
     <!-- Create Vocabulary Modal -->
-    {% include "modals/delete_vocabulary.html"}
+    {% include "modals/delete_vocabulary.html" %}
 
 
     <div class="h-screen bg-white overflow-visible flex">
@@ -74,7 +74,7 @@
                                                         <label
                                                             class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">
                                                             <input type="radio" name="vocabulary-setting" value="Live" id='1' onclick="this.form.submit();"
-                                                            {% ifequal vocabulary.state "LIVE" %} checked {% endifequal %}
+                                                            {% ifequal vocabulary.state "Live" %} checked {% endifequal %}
                                                                 class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
                                                                 aria-labelledby="privacy-setting-0-label"
                                                                 aria-describedby="privacy-setting-0-description">
@@ -97,7 +97,7 @@
                                                         <label
                                                             class="border-gray-200 relative border p-4 flex cursor-pointer">
                                                             <input type="radio" name="vocabulary-setting" id='2' onclick="this.form.submit();"
-                                                                value="Development" {% ifequal vocabulary.state "REVIEW" %} checked {% endifequal %}
+                                                                value="Review" {% ifequal vocabulary.state "Review" %} checked {% endifequal %}
                                                                 class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
                                                                 aria-labelledby="privacy-setting-1-label"
                                                                 aria-describedby="privacy-setting-1-description">
@@ -114,12 +114,11 @@
                                                                 </span>
                                                             </div>
                                                         </label>
-
                                                         <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
                                                         <label
                                                             class="border-gray-200 rounded-bl-md rounded-br-md relative border p-4 flex cursor-pointer">
-                                                            <input type="radio" name="vocabulary-setting" id='3' {% ifequal vocabulary.state "DEVELOPMENT" %} checked {% endifequal %}
-                                                                value="Private to you" onclick="this.form.submit();"
+                                                            <input type="radio" name="vocabulary-setting" id='3' {% ifequal vocabulary.state "Development" %} checked {% endifequal %}
+                                                                value="Development" onclick="this.form.submit();"
                                                                 class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
                                                                 aria-labelledby="privacy-setting-2-label"
                                                                 aria-describedby="privacy-setting-2-description">
@@ -168,13 +167,13 @@
                                                     </p>
                                                 </div>
                                                 <div class="mt-5">
-                                                    <form action="#" method="post">
+                                                    <!-- <form action="#" method="post"> -->
                                                     {% csrf_token %}
                                                     <button type="submit" id="delete-vocabulary-button" name='delete'
                                                         class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
                                                         Delete
                                                     </button>
-                                                    </form>
+                                                    <!-- </form> -->
                                                 </div>
                                             </div>
                                         </div>
