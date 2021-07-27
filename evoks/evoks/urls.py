@@ -35,10 +35,12 @@ urlpatterns = [
     path('reset', TemplateView.as_view(template_name='reset_password.html')),
     path('profile', TemplateView.as_view(template_name='profile.html'), name='profile'),
 
-    path('teams', TemplateView.as_view(template_name='teams.html')),
+    path('teams', TemplateView.as_view(template_name='teams.html'), name='teams'),
     path('teams/<slug:name>', TemplateView.as_view(template_name='team_detail.html')),
 
-    path('help', TemplateView.as_view(template_name='help_page.html')),
+    path('help', TemplateView.as_view(template_name='help_page.html'), name='help'),
+
+    path('main', TemplateView.as_view(template_name='base.html'), name='dashboard')
     
 
 ]

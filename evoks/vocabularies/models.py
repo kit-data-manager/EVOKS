@@ -154,6 +154,7 @@ class Vocabulary(models.Model):
         self.term_set.remove(term)
         self.set_dev_if_live()
         term.delete()
+        self.term_count -= 1
 
     #permission required participant or owner
     def add_term(self, name: str) -> None:
@@ -163,6 +164,7 @@ class Vocabulary(models.Model):
             name (str): Name of the Term
         """
         self.term_set.add(Term.models.Term.create(name=name))
+        self.term_count += 1
         #record user who added Term as contributor if not already done
 
     #permission required owner
