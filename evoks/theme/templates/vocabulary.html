@@ -41,20 +41,22 @@
                         <!-- Replace with your content -->
                         <div class="py-4">
                             <!-- This example requires Tailwind CSS v2.0+ -->
-                            <button type="button"
+                            <a href='{% url 'vocabulary_overview' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Overview
-                            </button>
-                            <button type="button"
+                            </a>
+                            <a href='{% url 'vocabulary_terms' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Terms
-                            </button> <button type="button"
+                            </a> 
+                            <a href='{% url 'vocabulary_members' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                Member
-                            </button> <button type="button"
+                                Members
+                            </a> 
+                            <a href='{% url 'vocabulary_settings' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings
-                            </button>
+                            </a>
 
                             <div class="mt-5 border-t border-gray-200">
                                 <dl class="divide-y divide-gray-200">
@@ -245,13 +247,16 @@
                             <!-- Tags Thing-->
                             <div class="float-right mt-5">
                                 <span class="mr-0.5">
-                                    <a href="#"
-                                        class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
-                                        <span class="absolute flex-shrink-0 flex items-center justify-center">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true"></span>
-                                        </span>
-                                        <span class="ml-3.5 font-medium text-gray-900">Bug</span>
-                                    </a>
+                                    {% for tag in vocabulary.tag_set.all %}
+                                        <a href="#"
+                                            class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
+                                            <span class="absolute flex-shrink-0 flex items-center justify-center">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-{{tag.color}}-500" aria-hidden="true"></span>
+                                            </span>
+                                            <span class="ml-3.5 font-medium text-gray-900">{{tag.color}}</span>
+                                        </a>
+                                    {% endfor %}
+                                    <!--
                                     <a href="#"
                                         class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
                                         <span class="absolute flex-shrink-0 flex items-center justify-center">
@@ -259,7 +264,7 @@
                                                 aria-hidden="true"></span>
                                         </span>
                                         <span class="ml-3.5 font-medium text-gray-900">Accessibility</span>
-                                    </a>
+                                    </a> -->
                                     <a href="#" id="create-tag-button"
                                         class="relative inline-flex items-center rounded-full border border-gray-300  px-0.5 py-0.5 text-sm bg-regal-blue">
 

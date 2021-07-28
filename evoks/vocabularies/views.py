@@ -17,6 +17,7 @@ from django.db import IntegrityError
 from django.core.exceptions import PermissionDenied
 from .forms import Vocabulary_Terms_Form
 from Term.models import Term
+from Tag.models import Tag
 from evoks.fuseki import fuseki_dev
 from evoks.forms import CreateVocabularyForm
 
@@ -54,10 +55,16 @@ def prefixes(request, name):
 
 def index(request, name):
     if request.user.is_authenticated:
+        vocabulary = Vocabulary.objects.get(name=name)
         if request.method == 'POST':
+            if request.POST['tag-name'] != '':
+                tag_name = request.POST['tag-name']
+                print(tag_name)
+                tag = Tag.create(name=tag_name, vocabulary=vocabulary)
+                print('Color of the Created Tag: {0}'.format(tag.color))
+                return redirect('vocabulary_overview', name=name)
             form = CreateVocabularyForm(request.POST, request.FILES)
             if form.is_valid():
-                print(request.FILES['file-upload'])
                 if request.FILES['file-upload'] != None:
                     import_voc = request.FILES['file-upload']
                     Vocabulary.import_vocabulary(import_voc)
@@ -79,7 +86,7 @@ def index(request, name):
             return HttpResponse(status=204)
         print('yeet')
         # if request.user.is_authenticated:
-        vocabulary = Vocabulary.objects.get(name=name)
+        
 
         thing = '123'
         thing = fuseki_dev.query(vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""")

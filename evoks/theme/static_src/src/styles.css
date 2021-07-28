@@ -1,3 +1,8 @@
+.bg-pink-500 {
+    --tw-bg-opacity: 1;
+    background-color: rgba(239, 68, 68, var(--tw-bg-opacity));
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+

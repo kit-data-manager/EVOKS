@@ -13,7 +13,7 @@ class CustomBackend(ModelBackend):
     """
 
     def authenticate(self, request: HttpRequest, username=None, password=None, **kwargs) -> Optional[User]:
-        """Checks if a user with the given email and password exists and if he is verified.
+        """Checks if a user with the given email and password exists and if he is verified or an admin.
 
         Args:
             request (HttpRequest): The Request
