@@ -20,9 +20,9 @@ from .forms import Vocabulary_Terms_Form
 from Term.models import Term
 from Tag.models import Tag
 from evoks.fuseki import fuseki_dev
-from evoks.forms import CreateVocabularyForm
 from Comment.models import Comment
 from itertools import chain
+from guardian.shortcuts import get_perms
 
 
 def convert_prefixes(prefixes: List[str]):
@@ -60,12 +60,14 @@ def index(request, name):
     if request.user.is_authenticated:
         user = request.user
         vocabulary = Vocabulary.objects.get(name=name)
-        user_is_owner = user.has_perm('owner', vocabulary)
-        user_is_participant = user.has_perm('participant', vocabulary)
-        user_is_spectator = user.has_perm('spectator', vocabulary)
+        user_is_owner = 'owner' in get_perms(user, vocabulary)
+        user_is_participant = 'participant' in get_perms(user, vocabulary)
+        user_is_spectator = 'spectator' in get_perms(user, vocabulary)
         user_is_staff = user.is_staff
-        print('Owner: {0}, Participant: {1}, Spectator: {2}'.format(user_is_owner, user_is_participant, user_is_spectator))
-        if user_is_owner or user_is_participant or user_is_spectator or user_is_staff:
+
+        #check if user is allowed to view vocabulary
+        if user_is_owner or user_is_participant or user_is_spectator or user_is_staff or vocabulary.state == 'Review':
+            #put comments and tags on vocabulary into a list sorted from newest to oldest
             comments = vocabulary.comment_set.filter()
             tags = vocabulary.tag_set.filter()
             activity_list = sorted(
@@ -73,36 +75,47 @@ def index(request, name):
                 key=lambda obj: str(obj.post_date), reverse=True)
             for index, key in enumerate(activity_list):
                 activity_list[index].type = key.__class__.__name__
+            
+
+            context = {
+                'user': request.user,
+                'vocabulary': vocabulary,
+                'activities' : activity_list
+            }
+
+
             if request.method == 'POST':
-                #comment
+                
+                #create comment
                 if 'comment' in request.POST:
                     comment_text = request.POST['comment-text']
-                    Comment.create(text=comment_text, author=request.user.profile, vocabulary=vocabulary, term=None)
+                    Comment.create(text=comment_text, author=user.profile, vocabulary=vocabulary, term=None)
+                    #refresh page so created comment is visible
                     return redirect('vocabulary_overview', name=name)
-                #tag
+                
+                #create tag
                 elif 'tag' in request.POST:
                     tag_name = request.POST['tag-name']
-                    tag = Tag.create(name=tag_name, author=request.user.profile, vocabulary=vocabulary, term=None)
+                    tag = Tag.create(name=tag_name, author=user.profile, vocabulary=vocabulary, term=None)
+                    #refresh page so created tag is visible
                     return redirect('vocabulary_overview', name=name)
 
                 #create vocabulary modal
                 elif 'create-vocabulary' in request.POST:
-                    form = CreateVocabularyForm(request.POST, request.FILES)
-                    if form.is_valid():
-                        if request.FILES['file-upload'] != None:
+                        if 'file-upload' in request.FILES:
                             import_voc = request.FILES['file-upload']
                             Vocabulary.import_vocabulary(import_voc)
                         elif request.POST['name'] != '' and request.POST['urispace'] != '':
                             try:
-                                voc_name = form.cleaned_data['name']
-                                urispace = form.cleaned_data['urispace']
-                                Vocabulary.create(name=voc_name, urispace=urispace, creator=request.user.profile)
+                                voc_name = request.POST['name']
+                                urispace = request.POST['urispace']
+                                Vocabulary.create(name=voc_name, urispace=urispace, creator=user.profile)
                             except IntegrityError:
                                 return HttpResponse('vocabulary already exists')
-            else:
-                form= CreateVocabularyForm()
         else:
             return HttpResponse('your not part of this vocabulary')
+
+    
         # TODO fix csrf
         if request.method == 'DELETE':
             # Delete vocabularyy
@@ -113,11 +126,8 @@ def index(request, name):
         print(thing.serialize(format='n3'))
         for s, p, o in thing:
             print(p, o)
-        context = {
-            'user': request.user,
-            'vocabulary': vocabulary,
-            'activities' : activity_list
-        }
+        
+
         return render(request, 'vocabulary.html', context)
         # return HttpResponse('pls login')
     else:
