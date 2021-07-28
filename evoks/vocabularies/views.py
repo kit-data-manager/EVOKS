@@ -10,35 +10,57 @@ from django.shortcuts import redirect, reverse
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from rdflib import Graph, Literal
+from django.db import IntegrityError
 
 from django.core.exceptions import PermissionDenied
 from .forms import Vocabulary_Terms_Form
 from Term.models import Term
 from evoks.fuseki import fuseki_dev
+from evoks.forms import CreateVocabularyForm
 
 def index(request, name):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            form = CreateVocabularyForm(request.POST, request.FILES)
+            if form.is_valid():
+                print(request.FILES['file-upload'])
+                if request.FILES['file-upload'] != None:
+                    import_voc = request.FILES['file-upload']
+                    Vocabulary.import_vocabulary(import_voc)
+                elif request.POST['name'] != '' and request.POST['urispace'] != '':
+                    try:
+                        voc_name = form.cleaned_data['name']
+                        urispace = form.cleaned_data['urispace']
+                        Vocabulary.create(name=voc_name, urispace=urispace, creator=request.user.profile)
+                        print('created smthn vocabulary yaa')
+                    except IntegrityError:
+                        return HttpResponse('vocabulary already exists')
+        else:
+            form= CreateVocabularyForm()
+        # TODO fix csrf
+        if request.method == 'DELETE':
+            # Delete vocabularyy
+            print('DELETETETET')
+            # Vocabulary.objects.get(name=name).delete()
+            return HttpResponse(status=204)
+        print('yeet')
+        # if request.user.is_authenticated:
+        vocabulary = Vocabulary.objects.get(name=name)
 
-    # TODO fix csrf
-    if request.method == 'DELETE':
-        # Delete vocabulary
-        print('DELETETETET')
-        # Vocabulary.objects.get(name=name).delete()
-        return HttpResponse(status=204)
-    print('yeet')
-    # if request.user.is_authenticated:
-    vocabulary = Vocabulary.objects.get(name=name)
-
-    thing = fuseki_dev.query(vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""")
-    print(thing.serialize(format='n3'))
-    for s, p, o in thing:
-        print(p, o)
-    template = loader.get_template('vocabulary.html')
-    context = {
-        'user': request.user,
-        'vocabulary': vocabulary,
-    }
-    return HttpResponse(template.render(context, request))
-    # return HttpResponse('pls login')
+        thing = '123'
+        thing = fuseki_dev.query(vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""")
+        print(thing.serialize(format='n3'))
+        for s, p, o in thing:
+            print(p, o)
+        template = loader.get_template('vocabulary.html')
+        context = {
+            'user': request.user,
+            'vocabulary': vocabulary,
+        }
+        return HttpResponse(template.render(context, request))
+        # return HttpResponse('pls login')
+    else:
+        return redirect('login')
 
 
 def settings(request, name):

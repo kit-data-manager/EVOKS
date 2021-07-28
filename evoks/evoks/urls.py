@@ -29,9 +29,9 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='base.html')),
     path('vocabularies', include('vocabularies.urls')),
     
-    path('signup', TemplateView.as_view(template_name='signup.html')),
+    path('signup', views.signup_view, name='signup'),
     path('login', views.login_view, name='login'),
-    path('reset', TemplateView.as_view(template_name='reset_password.html')),
+    path('reset', TemplateView.as_view(template_name='reset_password.html'), name='password_reset'),
     path('profile', TemplateView.as_view(template_name='profile.html'), name='profile'),
 
     path('teams', TemplateView.as_view(template_name='teams.html'), name='teams'),
