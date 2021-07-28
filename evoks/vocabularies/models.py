@@ -37,9 +37,9 @@ class Dataformat(enum.Enum):
 
 
 class Vocabulary(models.Model):
-    name = models.CharField(max_length=30, unique=True)
+    name = models.SlugField(max_length=50, unique=True)
     profiles = models.ManyToManyField(Profile, blank=True)
-    description = models.CharField(max_length=30, default='', blank=True)
+    urispace = models.CharField(max_length=100, default='', blank=True)
     term_count = models.IntegerField(default=0)
     groups = models.ManyToManyField(GroupProfile, blank=True)
     prefixes = ArrayField(models.CharField(max_length=100), default=list)
@@ -58,18 +58,18 @@ class Vocabulary(models.Model):
         ]
 
     @classmethod
-    def create(cls, name: str, creator: Profile):
+    def create(cls, name: str, urispace : str, creator: Profile):
+        from evoks.fuseki import fuseki_dev
         # TODO return type
         # TODO Save creator in triple field
         # TODO fuseki create vocabulary
-        vocabulary = cls(name=name)
+        vocabulary = cls(name=name, urispace=urispace)
         vocabulary.save()
         creator.user.save()
         vocabulary.profiles.add(creator)
         assign_perm('owner', creator.user, vocabulary)
         vocabulary.save()
-        #fuseki_dev = Fuseki.objects.filter(port=3030)
-        # fuseki_dev.create_vocabulary(vocabulary)
+        fuseki_dev.create_vocabulary(vocabulary)
         return vocabulary
 
     def get_name(self) -> str:
