@@ -1,6 +1,7 @@
 import datetime
 from django.db import models
 from Profile.models import Profile
+from django.db.models.deletion import CASCADE, SET_NULL
 
 
 class Comment(models.Model):
@@ -11,7 +12,9 @@ class Comment(models.Model):
 
     max_text_length = 1000
     text = models.CharField(max_length=max_text_length)
-    author: Profile
+    author = models.ForeignKey(to='Profile.Profile', on_delete=SET_NULL, blank=True, null=True)
+    vocabulary = models.ForeignKey(to='vocabularies.Vocabulary', on_delete=CASCADE, blank=True, null=True)
+    #hier fehlt term shit
     post_date = datetime.datetime.now
 
     def __init__(self, text: str) -> None:
