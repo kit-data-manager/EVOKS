@@ -1,10 +1,9 @@
-from unittest.case import skip
 from django.test import TestCase
 from Fuseki.fuseki import Fuseki
 from vocabularies.models import Vocabulary
 from time import sleep
 import os
-from django.conf import settings
+from unittest.case import skip
 
 
 class FusekiTestCase(TestCase):
@@ -41,6 +40,10 @@ class FusekiTestCase(TestCase):
         # will fail because of wrong hostname
         with self.assertRaises(ValueError):
             Fuseki('fuseki-yeet', 3030, 'development', 'fuseki-dev/backup')
+
+    def test_sparql_endpoint(self):
+        url = self.fuseki_dev.build_sparql_endpoint(self.vocabulary)
+        self.assertIsNotNone(url)
 
     def test_get_copy_tasks(self):
         task_id = self.fuseki_dev.start_vocabulary_copy(self.vocabulary)
@@ -95,13 +98,12 @@ class FusekiTestCase(TestCase):
             task_id = self.fuseki_dev.start_vocabulary_copy(source)
 
             tasks = self.fuseki_dev.get_copy_tasks()
-            task = next((task for task in tasks if task.id is task_id), None)
-            while task is not None:
+            task = next((task for task in tasks if task.id ==
+                        task_id and task.success == True), None)
+            while task is None:
                 task = next(
                     (task for task in tasks if task.id == task_id), None)
                 tasks = self.fuseki_dev.get_copy_tasks()
-                print(task)
-                print(tasks)
                 sleep(0.25)
 
             copy = self.fuseki_dev.get_copy(task, source)
