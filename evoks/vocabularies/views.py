@@ -10,25 +10,54 @@ from django.shortcuts import redirect, reverse
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from rdflib import Graph, Literal
-
+import time
+from typing import List
 from django.core.exceptions import PermissionDenied
 from .forms import Vocabulary_Terms_Form
 from Term.models import Term
 from evoks.fuseki import fuseki_dev
 
+
+def convert_prefixes(prefixes: List[str]):
+    converted: List[str]
+    for prefix in prefixes:
+        parts = prefix.split()
+        converted.append('PREFIX {prefix} {url}'.format(
+            prefix=parts[1], url=parts[2]))
+
+    return converted
+
+
+def prefixes(request, name):
+    vocabulary = Vocabulary.objects.get(name=name)
+
+    if request.method == 'POST':
+        prefixes = request.POST['prefixes'].split(
+            '\r\n')  # could lead to problems with \r\n
+        non_empty_prefixes = [line for line in prefixes if line.strip() != ""]
+        vocabulary.prefixes = non_empty_prefixes
+        convert_prefixes(non_empty_prefixes)
+        vocabulary.save()
+
+    template = loader.get_template('vocabulary_prefixes.html')
+    context = {
+        'user': request.user,
+        'vocabulary': vocabulary,
+        'prefixes': '\n'.join(vocabulary.prefixes),
+    }
+
+    return HttpResponse(template.render(context, request))
+
+
 def index(request, name):
 
-    # TODO fix csrf
-    if request.method == 'DELETE':
-        # Delete vocabulary
-        print('DELETETETET')
-        # Vocabulary.objects.get(name=name).delete()
-        return HttpResponse(status=204)
     print('yeet')
     # if request.user.is_authenticated:
     vocabulary = Vocabulary.objects.get(name=name)
 
-    thing = fuseki_dev.query(vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""")
+    thing = fuseki_dev.query(
+        vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""")
+
     print(thing.serialize(format='n3'))
     for s, p, o in thing:
         print(p, o)
@@ -52,7 +81,6 @@ def settings(request, name):
         'vocabulary': vocabulary
     }
 
-
     if request.method == 'POST':
         if 'delete' in request.POST:
             # vocabulary.delete()
@@ -65,7 +93,6 @@ def settings(request, name):
         elif(request.POST['vocabulary-setting'] == 'Development'):
             vocabulary.set_dev()
     return render(request, 'vocabulary_setting.html', context)
-
 
 
 def members(request: HttpRequest, name):
@@ -143,17 +170,17 @@ def members(request: HttpRequest, name):
 
     return render(request, 'vocabulary_members.html', context)
 
-def terms(request : HttpRequest, name : str):
+
+def terms(request: HttpRequest, name: str):
     vocabulary = Vocabulary.objects.get(name=name)
     terms = vocabulary.term_set.all()
-    #TODO
+    # TODO
     initial_letter = 'a'
     if 'location' in request.POST:
         form = Vocabulary_Terms_Form(request.POST)
         initial_letter = request.POST['location']
     else:
         form = Vocabulary_Terms_Form()
-
 
     initial_terms = terms.filter(name__startswith=initial_letter)
     p = Paginator(terms, 10)
@@ -162,11 +189,11 @@ def terms(request : HttpRequest, name : str):
 
     p.allow_empty_first_page
 
-    #TODO filter queryset by initial letter, sort queryset alphabeticaly
+    # TODO filter queryset by initial letter, sort queryset alphabeticaly
 
     context = {
-        'vocabulary' : vocabulary,
-        'terms' : page_obj,
-        'initial_letter' : form
+        'vocabulary': vocabulary,
+        'terms': page_obj,
+        'initial_letter': form
     }
     return render(request, 'vocabulary_terms.html', context)

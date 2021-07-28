@@ -10,6 +10,7 @@ urlpatterns = [
     path('/<slug:name>/terms', TemplateView.as_view(
         template_name='vocabulary_terms.html'), name='vocabulary_terms'),
     path('/<slug:name>/members', views.members, name='vocabulary_members'),
+    path('/<slug:name>/prefixes', views.prefixes, name='vocabulary_prefixes'),
     path('/<slug:name>/settings', views.settings, name='vocabulary_settings'),
     path('/<slug:name>/term_detail',
          TemplateView.as_view(template_name='term_detail.html'), name='term_detail'),

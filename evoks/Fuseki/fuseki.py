@@ -223,5 +223,5 @@ class Fuseki:
         sparql.setQuery(query)
         sparql.setReturnFormat(JSON)
         results = sparql.query().convert()
-        print(results)
+        # print(results)
         return results
