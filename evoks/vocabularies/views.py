@@ -1,4 +1,6 @@
 from django import template
+from django.db.models import query
+from django.db.models.query_utils import Q
 from django.http.request import HttpRequest
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -20,6 +22,8 @@ from Term.models import Term
 from Tag.models import Tag
 from evoks.fuseki import fuseki_dev
 from evoks.forms import CreateVocabularyForm
+import xml.dom.minidom
+import json
 
 
 def convert_prefixes(prefixes: List[str]):
@@ -72,12 +76,13 @@ def index(request, name):
                     try:
                         voc_name = form.cleaned_data['name']
                         urispace = form.cleaned_data['urispace']
-                        Vocabulary.create(name=voc_name, urispace=urispace, creator=request.user.profile)
+                        Vocabulary.create(
+                            name=voc_name, urispace=urispace, creator=request.user.profile)
                         print('created smthn vocabulary yaa')
                     except IntegrityError:
                         return HttpResponse('vocabulary already exists')
         else:
-            form= CreateVocabularyForm()
+            form = CreateVocabularyForm()
         # TODO fix csrf
         if request.method == 'DELETE':
             # Delete vocabularyy
@@ -86,13 +91,34 @@ def index(request, name):
             return HttpResponse(status=204)
         print('yeet')
         # if request.user.is_authenticated:
-        
 
-        thing = '123'
-        thing = fuseki_dev.query(vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""")
-        print(thing.serialize(format='n3'))
-        for s, p, o in thing:
-            print(p, o)
+        thing = fuseki_dev.query(vocabulary, """
+            SELECT * WHERE {
+                <http://www.yso.fi/onto/yso/> ?pred ?obj .
+            }
+        """, 'json')
+
+        p = fuseki_dev.query(
+            vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso>""", 'xml')
+        print(p.serialize(format='xml'))
+
+        fields = {}
+        for x in thing['results']['bindings']:
+            pred = x['pred']['value']
+            obj = x['obj']
+            if pred not in fields:
+                fields[pred] = {
+                    'type': 'only show shorted thing', 'objects': [obj]}
+            else:
+                fields[pred]['objects'].append(obj)
+
+        # print(json.dumps(fields, indent=4, sort_keys=True))
+        #dom = xml.dom.minidom.parseString(thing)
+        #pretty_xml_as_string = dom.toprettyxml()
+        # print(pretty_xml_as_string)
+        # print(thing.serialize(format='n3'))
+        # for s, p, o in thing:
+        #    print(p, o)
         template = loader.get_template('vocabulary.html')
         context = {
             'user': request.user,
@@ -207,27 +233,50 @@ def members(request: HttpRequest, name):
 
 def terms(request: HttpRequest, name: str):
     vocabulary = Vocabulary.objects.get(name=name)
-    terms = vocabulary.term_set.all()
-    # TODO
-    initial_letter = 'a'
-    if 'location' in request.POST:
-        form = Vocabulary_Terms_Form(request.POST)
-        initial_letter = request.POST['location']
-    else:
-        form = Vocabulary_Terms_Form()
 
-    initial_terms = terms.filter(name__startswith=initial_letter)
-    p = Paginator(terms, 10)
-    page_number = request.GET.get('page')
-    page_obj = p.get_page(page_number)
+    letter = request.GET.get('letter') or 'a'
+    page_number = int(request.GET.get('page') or 1)
+    
+    limit = 20
+    offset = (page_number-1) * limit
 
-    p.allow_empty_first_page
+    form = Vocabulary_Terms_Form(
+        initial={'initial_letter': (letter, letter.upper())})
+
+    query = """
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+    SELECT DISTINCT ?sub ?pred ?obj
+    WHERE {{
+        ?sub skos:prefLabel ?obj .
+    FILTER (strstarts(str(?obj), '{letter}'))
+    FILTER (lang(?obj) = 'en')
+    }}
+    ORDER BY ?obj
+    LIMIT {limit} OFFSET {offset}
+    """.format(limit=20, offset=offset, letter=letter)
+
+    thing = fuseki_dev.query(vocabulary, query, 'json')
+
+    terms = []
+    for x in thing['results']['bindings']:
+        obj = x['obj']
+        terms.append({'name': obj['value']})
+
+    # print(json.dumps(thing, indent=4, sort_keys=True))
+
+    #initial_terms = terms.filter(name__startswith=initial_letter)
+    #p = Paginator(terms, 10)
+    #page_number = request.GET.get('page')
+    #page_obj = p.get_page(page_number)
+
+    # p.allow_empty_first_page
 
     # TODO filter queryset by initial letter, sort queryset alphabeticaly
-
+    # form.add_initial_prefix(letter)
     context = {
         'vocabulary': vocabulary,
-        'terms': page_obj,
-        'initial_letter': form
+        'terms': {'data': terms, 'next_page_number': page_number+1, 'previous_page_number': 1 if page_number-1 == 0 else page_number-1, 'start_index': offset, 'end_index': offset+len(terms) },
+        'initial_letter': form,
     }
     return render(request, 'vocabulary_terms.html', context)

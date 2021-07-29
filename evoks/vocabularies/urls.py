@@ -7,8 +7,7 @@ from . import views
 urlpatterns = [
     path('', TemplateView.as_view(template_name='base.html'), name='base'),
     path('/<slug:name>', views.index, name='vocabulary_overview'),
-    path('/<slug:name>/terms', TemplateView.as_view(
-        template_name='vocabulary_terms.html'), name='vocabulary_terms'),
+    path('/<slug:name>/terms', views.terms, name='vocabulary_terms'),
     path('/<slug:name>/members', views.members, name='vocabulary_members'),
     path('/<slug:name>/prefixes', views.prefixes, name='vocabulary_prefixes'),
     path('/<slug:name>/settings', views.settings, name='vocabulary_settings'),
