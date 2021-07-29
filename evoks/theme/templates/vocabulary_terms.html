@@ -27,7 +27,7 @@
         <!-- Static sidebar for desktop -->
         {% include "sidebars/desktop.html" %}
 
-        <div class="flex-1 max-w-4xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
+        <div class="flex-1 max-w-7xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
             {% include "header/searchbar.html" %}
 
             <main class="flex-1 relative focus:outline-none">
@@ -52,6 +52,10 @@
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Members
                             </a>
+                            <a href='{% url 'vocabulary_prefixes' name=vocabulary.name %}'
+                            class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            Prefixes
+                             </a>
                             <a href='{% url 'vocabulary_settings' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings

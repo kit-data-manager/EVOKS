@@ -1,9 +1,9 @@
 
 function createInput(value, id) {
     return `
-    <div class="flex-shrink-0 flex-grow">
+    <div class="">
     <input type="text" name="name" id="${id}" value="${value}"
-        class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-3/4 sm:text-sm border-gray-300 rounded-md"
+        class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block sm:text-sm border-gray-300 rounded-md"
         >
     </div>`.trim()
 }

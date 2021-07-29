@@ -207,7 +207,7 @@ class Fuseki:
                 return Copy(task, self.__build_backup_path(backup))
         raise ValueError('Backup could not be found')
 
-    def query(self, vocabulary: Vocabulary, query: str, return_format: str) -> dict:
+    def query(self, vocabulary: Vocabulary, query: str, return_format: str):
         """
         Sends SPARQL query to database and returns JSON dictionary
 
