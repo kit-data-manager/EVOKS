@@ -207,7 +207,7 @@ class Fuseki:
                 return Copy(task, self.__build_backup_path(backup))
         raise ValueError('Backup could not be found')
 
-    def query(self, vocabulary: Vocabulary, query: str) -> dict:
+    def query(self, vocabulary: Vocabulary, query: str, return_format: str):
         """
         Sends SPARQL query to database and returns JSON dictionary
 
@@ -221,7 +221,7 @@ class Fuseki:
             base=self.url, name=vocabulary.get_name()))
 
         sparql.setQuery(query)
-        sparql.setReturnFormat(JSON)
+        sparql.setReturnFormat(return_format)
         results = sparql.query().convert()
         # print(results)
         return results

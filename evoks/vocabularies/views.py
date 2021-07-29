@@ -1,5 +1,7 @@
 import datetime
 from django import template
+from django.db.models import query
+from django.db.models.query_utils import Q
 from django.http.request import HttpRequest
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -20,6 +22,8 @@ from .forms import Vocabulary_Terms_Form
 from Term.models import Term
 from Tag.models import Tag
 from evoks.fuseki import fuseki_dev
+import xml.dom.minidom
+import json
 from Comment.models import Comment
 from itertools import chain
 from guardian.shortcuts import get_perms
@@ -56,7 +60,13 @@ def prefixes(request, name):
     return HttpResponse(template.render(context, request))
 
 
+def convert_predicate(namespaces, predicate):
+
+    return ''
+
+
 def index(request, name):
+
     if request.user.is_authenticated:
         user = request.user
         vocabulary = Vocabulary.objects.get(name=name)
@@ -65,9 +75,9 @@ def index(request, name):
         user_is_spectator = 'spectator' in get_perms(user, vocabulary)
         user_is_staff = user.is_staff
 
-        #check if user is allowed to view vocabulary
+        # check if user is allowed to view vocabulary
         if user_is_owner or user_is_participant or user_is_spectator or user_is_staff or vocabulary.state == 'Review':
-            #put comments and tags on vocabulary into a list sorted from newest to oldest
+            # put comments and tags on vocabulary into a list sorted from newest to oldest
             comments = vocabulary.comment_set.filter()
             tags = vocabulary.tag_set.filter()
             activity_list = sorted(
@@ -75,44 +85,45 @@ def index(request, name):
                 key=lambda obj: str(obj.post_date), reverse=True)
             for index, key in enumerate(activity_list):
                 activity_list[index].type = key.__class__.__name__
-            
 
             context = {
                 'user': request.user,
                 'vocabulary': vocabulary,
-                'activities' : activity_list
+                'activities': activity_list
             }
 
-
             if request.method == 'POST':
-                
-                #create comment
+
+                # create comment
                 if 'comment' in request.POST:
                     comment_text = request.POST['comment-text']
-                    Comment.create(text=comment_text, author=user.profile, vocabulary=vocabulary, term=None)
-                    #refresh page so created comment is visible
-                    return redirect('vocabulary_overview', name=name)
-                
-                #create tag
-                elif 'tag' in request.POST:
-                    tag_name = request.POST['tag-name']
-                    tag = Tag.create(name=tag_name, author=user.profile, vocabulary=vocabulary, term=None)
-                    #refresh page so created tag is visible
+                    Comment.create(
+                        text=comment_text, author=user.profile, vocabulary=vocabulary, term=None)
+                    # refresh page so created comment is visible
                     return redirect('vocabulary_overview', name=name)
 
-                #create vocabulary modal
+                # create tag
+                elif 'tag' in request.POST:
+                    tag_name = request.POST['tag-name']
+                    tag = Tag.create(
+                        name=tag_name, author=user.profile, vocabulary=vocabulary, term=None)
+                    # refresh page so created tag is visible
+                    return redirect('vocabulary_overview', name=name)
+
+                # create vocabulary modal
                 elif 'create-vocabulary' in request.POST:
-                        if 'file-upload' in request.FILES:
-                            import_voc = request.FILES['file-upload']
-                            Vocabulary.import_vocabulary(import_voc)
-                        elif request.POST['name'] != '' and request.POST['urispace'] != '':
-                            try:
-                                voc_name = request.POST['name']
-                                urispace = request.POST['urispace']
-                                Vocabulary.create(name=voc_name, urispace=urispace, creator=user.profile)
-                            except IntegrityError:
-                                return HttpResponse('vocabulary already exists')
-                
+                    if 'file-upload' in request.FILES:
+                        import_voc = request.FILES['file-upload']
+                        Vocabulary.import_vocabulary(import_voc)
+                    elif request.POST['name'] != '' and request.POST['urispace'] != '':
+                        try:
+                            voc_name = request.POST['name']
+                            urispace = request.POST['urispace']
+                            Vocabulary.create(
+                                name=voc_name, urispace=urispace, creator=user.profile)
+                        except IntegrityError:
+                            return HttpResponse('vocabulary already exists')
+
                 elif 'create-team' in request.POST:
                     team_name = request.POST['team-name']
                     Group.objects.create(name=team_name)
@@ -120,20 +131,68 @@ def index(request, name):
         else:
             return HttpResponse('your not part of this vocabulary')
 
-    
-        # TODO fix csrf
-        if request.method == 'DELETE':
-            # Delete vocabularyy
-            print('DELETETETET')
-            # Vocabulary.objects.get(name=name).delete()
-            return HttpResponse(status=204)  
-        thing = fuseki_dev.query(vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""")
-        print(thing.serialize(format='n3'))
-        for s, p, o in thing:
-            print(p, o)
-        
+        thing = fuseki_dev.query(vocabulary, """
+            SELECT * WHERE {
+                <http://www.yso.fi/onto/yso/> ?pred ?obj .
+            }
+        """, 'json')
 
-        return render(request, 'vocabulary.html', context)
+        p = fuseki_dev.query(
+            vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""", 'xml')
+
+        namespaces = []
+        for short, uri in p.namespaces():
+            namespaces.append((short, uri.toPython()))
+            #print(uri.toPython())
+
+        #print('--------------------')
+        fields = {}
+        for x in thing['results']['bindings']:
+            pred = x['pred']['value']
+            obj = x['obj']
+            if pred not in fields:
+                # print(pred)
+                type = pred.rsplit('#', 1)[-1]
+                if type == pred:
+                    type = pred.rsplit('/', 1)[-1]
+
+                max = 0
+                max_prefix = ''
+                count = 0
+                for s, p in namespaces:
+                    for i, e in enumerate(p):
+                        if len(pred) > i and e == pred[i]:
+                            count += 1
+                        else:
+                            continue
+                    if count > max:
+                        max = count
+                        max_prefix = (s, p)
+                    count = 0
+
+                # print(max_prefix)
+                shortcut = '{prefix}:{type}'.format(
+                    prefix=max_prefix[0], type=type)
+                fields[pred] = {
+                    'type': shortcut, 'objects': [obj]}
+            else:
+                fields[pred]['objects'].append(obj)
+
+        print(json.dumps(fields, indent=4, sort_keys=True))
+        #dom = xml.dom.minidom.parseString(thing)
+        #pretty_xml_as_string = dom.toprettyxml()
+        # print(pretty_xml_as_string)
+        # print(thing.serialize(format='n3'))
+        # for s, p, o in thing:
+        #    print(p, o)
+        template = loader.get_template('vocabulary.html')
+        context = {
+            'user': request.user,
+            'vocabulary': vocabulary,
+            'fields': fields,
+            'activities': activity_list
+        }
+        return HttpResponse(template.render(context, request))
         # return HttpResponse('pls login')
     else:
         return redirect('login')
@@ -146,7 +205,7 @@ def settings(request, name):
             print(vocabulary.state)
         except ObjectDoesNotExist:
             return redirect('base')
-        
+
         user = request.user
         user_is_owner = 'owner' in get_perms(user, vocabulary)
         user_is_staff = user.is_staff
@@ -157,7 +216,7 @@ def settings(request, name):
 
         if request.method == 'POST':
             if user_is_owner or user_is_staff:
-                if 'delete' in request.POST:  
+                if 'delete' in request.POST:
                     # vocabulary.delete()
                     print('yetetet')
                     return redirect('base')
@@ -227,7 +286,8 @@ def members(request: HttpRequest, name):
                         invite_user = User.objects.get(email=invite_str)
                         # check if User already on vocabulary
                         if not vocabulary.profiles.all().filter(user=invite_user).exists():
-                            vocabulary.add_profile(invite_user.profile, 'participant')
+                            vocabulary.add_profile(
+                                invite_user.profile, 'participant')
                         else:
                             return HttpResponse('User is already part of this vocabulary', status=400)
                     elif Group.objects.filter(name=invite_str).exists():
@@ -264,27 +324,50 @@ def members(request: HttpRequest, name):
 
 def terms(request: HttpRequest, name: str):
     vocabulary = Vocabulary.objects.get(name=name)
-    terms = vocabulary.term_set.all()
-    # TODO
-    initial_letter = 'a'
-    if 'location' in request.POST:
-        form = Vocabulary_Terms_Form(request.POST)
-        initial_letter = request.POST['location']
-    else:
-        form = Vocabulary_Terms_Form()
 
-    initial_terms = terms.filter(name__startswith=initial_letter)
-    p = Paginator(terms, 10)
-    page_number = request.GET.get('page')
-    page_obj = p.get_page(page_number)
+    letter = request.GET.get('letter') or 'a'
+    page_number = int(request.GET.get('page') or 1)
 
-    p.allow_empty_first_page
+    limit = 20
+    offset = (page_number-1) * limit
+
+    form = Vocabulary_Terms_Form(
+        initial={'initial_letter': (letter, letter.upper())})
+
+    query = """
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+    SELECT DISTINCT ?sub ?pred ?obj
+    WHERE {{
+        ?sub skos:prefLabel ?obj .
+    FILTER (strstarts(str(?obj), '{letter}'))
+    FILTER (lang(?obj) = 'en')
+    }}
+    ORDER BY ?obj
+    LIMIT {limit} OFFSET {offset}
+    """.format(limit=20, offset=offset, letter=letter)
+
+    thing = fuseki_dev.query(vocabulary, query, 'json')
+
+    terms = []
+    for x in thing['results']['bindings']:
+        obj = x['obj']
+        terms.append({'name': obj['value']})
+
+    # print(json.dumps(thing, indent=4, sort_keys=True))
+
+    #initial_terms = terms.filter(name__startswith=initial_letter)
+    #p = Paginator(terms, 10)
+    #page_number = request.GET.get('page')
+    #page_obj = p.get_page(page_number)
+
+    # p.allow_empty_first_page
 
     # TODO filter queryset by initial letter, sort queryset alphabeticaly
-
+    # form.add_initial_prefix(letter)
     context = {
         'vocabulary': vocabulary,
-        'terms': page_obj,
-        'initial_letter': form
+        'terms': {'data': terms, 'next_page_number': page_number+1, 'previous_page_number': 1 if page_number-1 == 0 else page_number-1, 'start_index': offset, 'end_index': offset+len(terms)},
+        'initial_letter': form,
     }
     return render(request, 'vocabulary_terms.html', context)

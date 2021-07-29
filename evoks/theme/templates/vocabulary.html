@@ -28,7 +28,7 @@
         <!-- Static sidebar for desktop -->
         {% include "sidebars/desktop.html" %}
 
-        <div class="flex-1 max-w-4xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
+        <div class="flex-1 max-w-7xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
             {% include "header/searchbar.html" %}
 
             <main class="flex-1 relative focus:outline-none">
@@ -52,7 +52,11 @@
                             <a href='{% url 'vocabulary_members' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Members
-                            </a> 
+                            </a>
+                            <a href='{% url 'vocabulary_prefixes' name=vocabulary.name %}'
+                            class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            Prefixes
+                             </a>
                             <a href='{% url 'vocabulary_settings' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings
@@ -60,87 +64,31 @@
 
                             <div class="mt-5 border-t border-gray-200">
                                 <dl class="divide-y divide-gray-200">
+                                    {% for key, value in fields.items %}
                                     <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
                                         <dt class="text-sm font-medium text-gray-500">
-                                            <div id="title-subject">Title</div>
+                                            <div id="title-subject">{{ value.type }}</div>
                                         </dt>
-                                        <dd class="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                            <span id="title-value" class="flex-grow">YSO - General Finnish ontology
-                                            </span>
-                                            <span class="ml-4 flex-shrink-0">
-                                                <button type="button" id="title-update-button"
-                                                    class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                    Update
-                                                </button>
-                                            </span>
+                                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                            <div class="grid grid-cols-2 justify-between">
+                                            {% for obj in value.objects %} 
+                                                <span id="title-value" class="flex-grow mt-2">
+
+                                                    {{ obj.value }}
+
+                                                </span>
+                                                <span class="ml-4">
+                                                    <button type="button" id="title-update-button"
+                                                        class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 float-right">
+                                                        Update
+                                                    </button>
+                                                </span>
+                                            {% endfor %}
+                                            </div>
                                         </dd>
                                     </div>
-                                    <div class="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
-                                        <dt class="text-sm font-medium text-gray-500">
-                                            Subject
-                                        </dt>
-                                        <dd class="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                            <span class="flex-grow">general concepts</span>
-                                            <span class="ml-4 flex-shrink-0">
-                                                <button type="button"
-                                                    class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                    Update
-                                                </button>
-                                            </span>
-                                        </dd>
-                                    </div>
-                                    <div class="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
-                                        <dt class="text-sm font-medium text-gray-500">
-                                            Description
-                                        </dt>
-                                        <dd class="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                            <span class="flex-grow">General Finnish Ontology YSO is a trilingual
-                                                ontology consisting mainly of general concepts. YSO has been founded on
-                                                the basis of concepts in Finnish cultural sphere. As an indexing tool it
-                                                is best applicable when indexed material is interdiscliplinary and its
-                                                themes vary to a great extent.</span>
-                                            <span class="ml-4 flex-shrink-0">
-                                                <button type="button"
-                                                    class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                    Update
-                                                </button>
-                                            </span>
-                                        </dd>
-                                    </div>
-                                    <div class="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
-                                        <dt class="text-sm font-medium text-gray-500">
-                                            Creator
-                                        </dt>
-                                        <dd class="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                            <span class="flex-grow">
-                                                National Library of Finland <br>
-                                                Semantic Computing Research Group (SeCo) <br>
-                                                The Finnish Terminology Centre TSK
-                                            </span>
-                                            <span class="ml-4 flex-shrink-0">
-                                                <button type="button"
-                                                    class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                    Update
-                                                </button>
-                                            </span>
-                                        </dd>
-                                    </div>
-                                    <div class="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
-                                        <dt class="text-sm font-medium text-gray-500">
-                                            Last modified
-                                        </dt>
-                                        <dd class="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                            <span class="flex-grow">
-                                                Wednesday, July 14, 2021 00:04:39
-                                            </span>
-                                            <span class="ml-4 flex-shrink-0">
-                                                <button type="button"
-                                                    class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                    Update
-                                                </button>
-                                            </span>
-                                        </dd>
-                                    </div>
+                                    
+                                    {% endfor %}
                                     <div class="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
                                         <dt class="text-sm font-medium text-gray-500">
                                             Download
