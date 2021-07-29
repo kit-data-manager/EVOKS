@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.http.request import HttpRequest
 from django.shortcuts import render
 from .forms import LoginForm, SignupForm
@@ -104,3 +104,7 @@ def signup_view(request: HttpRequest) -> HttpResponse:
     # user.save()
     # else:
     # return HttpResponse('Invalid Verification Link!')
+
+def logout_view(request : HttpRequest):
+    logout(request)
+    return redirect('login')

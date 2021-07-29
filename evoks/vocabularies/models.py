@@ -33,9 +33,6 @@ class Dataformat(enum.Enum):
     TURTLE = 3
 
 # missing triple and searchable Interface TODO
-# TODO delete vocabulary?
-
-
 class Vocabulary(models.Model):
     name = models.SlugField(max_length=50, unique=True)
     profiles = models.ManyToManyField(Profile, blank=True)
@@ -62,7 +59,6 @@ class Vocabulary(models.Model):
         from evoks.fuseki import fuseki_dev
         # TODO return type
         # TODO Save creator in triple field
-        # TODO fuseki create vocabulary
         vocabulary = cls(name=name, urispace=urispace)
         vocabulary.save()
         print(vocabulary.profiles)
@@ -92,7 +88,7 @@ class Vocabulary(models.Model):
         """Imports a Vocabulary
 
         Args:
-            input ([type]): Vocabulary to import
+            input (MultiValueDict): Vocabulary to import
         """
         # mögliche dateiformate: rdf/xml, Json-Ld, Turtle
         placeholder = 'sdf'

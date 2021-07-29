@@ -96,16 +96,16 @@
                                                                             <div class="flex items-center">
                                                                                 <div class="flex-shrink-0 h-10 w-10">
                                                                                     <img class="h-10 w-10 rounded-full"
-                                                                                        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60"
+                                                                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Plato_Silanion_Musei_Capitolini_MC1377.jpg/440px-Plato_Silanion_Musei_Capitolini_MC1377.jpg"
                                                                                         alt="">
                                                                                 </div>
                                                                                 <div class="ml-4">
                                                                                     <div
                                                                                         class="text-sm font-medium text-gray-900">
-                                                                                        {{data.user.username}}<br/>
+                                                                                        {{data.profile.name}}<br/>
                                                                                     </div>
                                                                                     <div class="text-sm text-gray-500">
-                                                                                        {{data.user.email}}<br/>
+                                                                                        {{data.email}}<br/>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -113,7 +113,13 @@
 
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 ">
-                                                                            Member
+                                                                            {% load guardian_tags %}
+                                                                            {% get_obj_perms data for vocabulary as "vocabulary_perms" %}
+
+                                                                            {% if "owner" in vocabulary_perms %} Owner
+                                                                            {% elif "participant" in vocabulary_perms %} Member
+                                                                            {% elif "spectator" in vocabulary_perms %} Spectator
+                                                                            {% endif %}
                                                                         </td>
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
