@@ -2,13 +2,15 @@ from django.test import TestCase
 
 from django.contrib.auth.models import User
 from Profile.models import Profile
+from django.conf import settings
 
 
 class ProfileTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Set up non-modified objects used by all test methods
-        User.objects.create(username='jhon', password='ok')
+        User.objects.create(username='jhon', password='ok',
+                            email='someone@example.com')
 
     def test_verified_false(self):
         user = User.objects.get(username='jhon')
@@ -23,3 +25,8 @@ class ProfileTest(TestCase):
         user = User.objects.get(username='jhon')
         user.profile.verify()
         self.assertTrue(user.profile.verified)
+
+    def test_verified_description(self):
+        user = User.objects.get(username='jhon')
+        user.profile.description = 'hi'
+        self.assertEquals(user.profile.description, 'hi')

@@ -18,3 +18,7 @@ python manage.py migrate
 docker-compose down
 
 docker-compose up
+
+
+## Tests 
+ python evoks/manage.py test evoks/tests  führt alle test_.... dateien im Unterverzeichnis aus

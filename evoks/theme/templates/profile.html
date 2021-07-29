@@ -1,0 +1,185 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Profil</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% tailwind_css %}
+
+</head>
+
+<body>
+    <!-- Create Team Modal -->
+    {% include "modals/create_team.html" %}
+    <!-- Create Vocabulary Modal -->
+    {% include "modals/create_vocabulary.html" %}
+    <!-- Create Vocabulary Modal -->
+    {% include "modals/delete_account.html" %}
+
+    <div class="h-screen bg-white overflow-visible flex">
+
+        <!-- Static sidebar for mobile -->
+        {% include "sidebars/mobile.html" %}
+        <!-- Static sidebar for desktop -->
+        {% include "sidebars/desktop.html" %}
+
+        <div class="flex-1 max-w-4xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
+            {% include "header/no_searchbar.html" %}
+
+            <main class="flex-1 relative focus:outline-none">
+                <div class="py-6">
+                    <div class="px-4 sm:px-6 md:px-0">
+                        <h1 class="text-2xl font-semibold text-gray-900">Your Profile</h1>
+                    </div>
+                    <div class="px-4 sm:px-6 md:px-0">
+                        <!-- Replace with your content -->
+                        <div class="py-4">
+
+                            <form class="space-y-8">
+                                <div class="space-y-8">
+                                    <div>
+                                        <div>
+
+                                            <p class="mt-1 text-sm text-gray-500">
+                                                This information will be public!
+                                            </p>
+                                        </div>
+
+                                        <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                            <div class="sm:col-span-3">
+                                                <label for="name" class="block text-sm font-medium text-gray-700">
+                                                    Name
+                                                </label>
+                                                <div class="mt-1">
+                                                    <input id="name" name="name" type="text" autocomplete="given-name"
+                                                        class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="sm:col-span-6 mt-5">
+                                            <label for="about" class="block text-sm font-medium text-gray-700">
+                                                About
+                                            </label>
+                                            <div class="mt-1">
+                                                <textarea id="about" name="about" rows="3"
+                                                    class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
+                                            </div>
+                                            <p class="mt-2 text-sm text-gray-500">Write a few sentences about
+                                                yourself.</p>
+                                        </div>
+
+                                        <div class="sm:col-span-6 mt-5">
+                                            <label for="photo" class="block text-sm font-medium text-gray-700">
+                                                Photo
+                                            </label>
+                                            <div class="mt-1 flex items-center">
+                                                <span class="h-12 w-12 rounded-full overflow-hidden bg-gray-100">
+                                                    <svg class="h-full w-full text-gray-300" fill="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path
+                                                            d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                    </svg>
+                                                </span>
+                                                <button type="button"
+                                                    class="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                    Change
+                                                </button>
+                                            </div>
+                                            <div class="pt-5">
+                                                <div class="flex justify-end">
+                                                    <button type="button"
+                                                        class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                        Cancel
+                                                    </button>
+                                                    <button type="submit"
+                                                        class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                        Save
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-6 gap-6 mt-5">
+
+                                            <div class="col-span-6 sm:col-span-3">
+
+                                                <!-- This example requires Tailwind CSS v2.0+ -->
+                                                <div class="bg-white shadow sm:rounded-lg">
+                                                    <div class="px-4 py-5 sm:p-6">
+                                                        <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                                            Deactivate your account
+                                                        </h3>
+                                                        <div class="mt-2 max-w-xl text-sm text-gray-500">
+                                                            <p>
+                                                                Once you deactivate your account, all associated data
+                                                                will be deleted. You will still be listed as contributor
+                                                                in your vocabularies
+                                                            </p>
+                                                        </div>
+                                                        <div class="mt-5">
+
+                                                            <button type="button" id="delete-account-button"
+                                                                class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
+                                                                Deactivate account
+                                                            </button>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-span-6 sm:col-span-3">
+
+                                                <!-- This example requires Tailwind CSS v2.0+ -->
+                                                <div class="bg-white shadow sm:rounded-lg">
+                                                    <div class="px-4 py-5 sm:p-6">
+                                                        <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                                            Download your data </h3>
+                                                        <div class="mt-2 max-w-xl text-sm text-gray-500">
+                                                            <p>
+                                                                You can export all the data that is associated with your
+                                                                account here. We will send you a ZIP per E-Mail. It can
+                                                                take a few minutes!
+                                                            </p>
+                                                        </div>
+                                                        <div class="mt-5">
+                                                            <button type="button"
+                                                                class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm">
+                                                                Download data
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                </form>
+
+
+
+        </div>
+    </div>
+    <!-- /End replace -->
+    </div>
+    </div>
+    </main>
+    </div>
+    </div>
+
+</body>
+
+<script src="{% static 'js/profile.js' %}"></script>
+
+</html>
