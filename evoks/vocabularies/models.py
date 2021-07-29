@@ -33,9 +33,6 @@ class Dataformat(enum.Enum):
     TURTLE = 3
 
 # missing triple and searchable Interface TODO
-# TODO delete vocabulary?
-
-
 class Vocabulary(models.Model):
     name = models.SlugField(max_length=50, unique=True)
     profiles = models.ManyToManyField(Profile, blank=True)
@@ -62,9 +59,10 @@ class Vocabulary(models.Model):
         from evoks.fuseki import fuseki_dev
         # TODO return type
         # TODO Save creator in triple field
-        # TODO fuseki create vocabulary
         vocabulary = cls(name=name, urispace=urispace)
         vocabulary.save()
+        print(vocabulary.profiles)
+        print(vocabulary.groups)
         creator.user.save()
         vocabulary.profiles.add(creator)
         assign_perm('owner', creator.user, vocabulary)
@@ -90,7 +88,7 @@ class Vocabulary(models.Model):
         """Imports a Vocabulary
 
         Args:
-            input ([type]): Vocabulary to import
+            input (MultiValueDict): Vocabulary to import
         """
         # mögliche dateiformate: rdf/xml, Json-Ld, Turtle
         placeholder = 'sdf'
@@ -183,7 +181,7 @@ class Vocabulary(models.Model):
         assign_perm(permission, profile.user, self)
 
     # permission required owner
-    def add_group(self, group_profile: GroupProfile, permission: str) -> None:
+    def add_group(self, group_profile : GroupProfile, permission : str) -> None:
         """Adds a group to the Vocabulary
 
         Args:
@@ -194,7 +192,7 @@ class Vocabulary(models.Model):
         assign_perm(permission, group_profile.group, self)
 
     # permission required owner
-    def remove_profile(self, profile: Profile) -> None:
+    def remove_profile(self, profile : Profile) -> None:
         """Removes a User from the Vocabulary
 
         Args:
@@ -207,7 +205,7 @@ class Vocabulary(models.Model):
             remove_perm(key, profile.user, self)
 
     # permission required owner
-    def remove_group(self, group_profile: GroupProfile) -> None:
+    def remove_group(self, group_profile : GroupProfile) -> None:
         """Removes a group from the Vocabulary
 
         Args:

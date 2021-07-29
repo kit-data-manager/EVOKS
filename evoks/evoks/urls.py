@@ -27,8 +27,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('', TemplateView.as_view(template_name='base.html')),
-    path('vocabularies', include('vocabularies.urls')),
+    path('vocabularies/', include('vocabularies.urls')),
     
+    path('logout', views.logout_view, name='logout'),
     path('signup', views.signup_view, name='signup'),
     path('login', views.login_view, name='login'),
     path('reset', TemplateView.as_view(template_name='reset_password.html'), name='password_reset'),

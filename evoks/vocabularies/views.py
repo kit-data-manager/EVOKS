@@ -1,3 +1,4 @@
+import datetime
 from django import template
 from django.db.models import query
 from django.db.models.query_utils import Q
@@ -21,9 +22,11 @@ from .forms import Vocabulary_Terms_Form
 from Term.models import Term
 from Tag.models import Tag
 from evoks.fuseki import fuseki_dev
-from evoks.forms import CreateVocabularyForm
 import xml.dom.minidom
 import json
+from Comment.models import Comment
+from itertools import chain
+from guardian.shortcuts import get_perms
 
 
 def convert_prefixes(prefixes: List[str]):
@@ -59,30 +62,69 @@ def prefixes(request, name):
 
 def index(request, name):
     if request.user.is_authenticated:
+        user = request.user
         vocabulary = Vocabulary.objects.get(name=name)
-        if request.method == 'POST':
-            if request.POST['tag-name'] != '':
-                tag_name = request.POST['tag-name']
-                print(tag_name)
-                tag = Tag.create(name=tag_name, vocabulary=vocabulary)
-                print('Color of the Created Tag: {0}'.format(tag.color))
-                return redirect('vocabulary_overview', name=name)
-            form = CreateVocabularyForm(request.POST, request.FILES)
-            if form.is_valid():
-                if request.FILES['file-upload'] != None:
-                    import_voc = request.FILES['file-upload']
-                    Vocabulary.import_vocabulary(import_voc)
-                elif request.POST['name'] != '' and request.POST['urispace'] != '':
-                    try:
-                        voc_name = form.cleaned_data['name']
-                        urispace = form.cleaned_data['urispace']
-                        Vocabulary.create(
-                            name=voc_name, urispace=urispace, creator=request.user.profile)
-                        print('created smthn vocabulary yaa')
-                    except IntegrityError:
-                        return HttpResponse('vocabulary already exists')
+        user_is_owner = 'owner' in get_perms(user, vocabulary)
+        user_is_participant = 'participant' in get_perms(user, vocabulary)
+        user_is_spectator = 'spectator' in get_perms(user, vocabulary)
+        user_is_staff = user.is_staff
+
+        #check if user is allowed to view vocabulary
+        if user_is_owner or user_is_participant or user_is_spectator or user_is_staff or vocabulary.state == 'Review':
+            #put comments and tags on vocabulary into a list sorted from newest to oldest
+            comments = vocabulary.comment_set.filter()
+            tags = vocabulary.tag_set.filter()
+            activity_list = sorted(
+                chain(comments, tags),
+                key=lambda obj: str(obj.post_date), reverse=True)
+            for index, key in enumerate(activity_list):
+                activity_list[index].type = key.__class__.__name__
+            
+
+            context = {
+                'user': request.user,
+                'vocabulary': vocabulary,
+                'activities' : activity_list
+            }
+
+
+            if request.method == 'POST':
+                
+                #create comment
+                if 'comment' in request.POST:
+                    comment_text = request.POST['comment-text']
+                    Comment.create(text=comment_text, author=user.profile, vocabulary=vocabulary, term=None)
+                    #refresh page so created comment is visible
+                    return redirect('vocabulary_overview', name=name)
+                
+                #create tag
+                elif 'tag' in request.POST:
+                    tag_name = request.POST['tag-name']
+                    tag = Tag.create(name=tag_name, author=user.profile, vocabulary=vocabulary, term=None)
+                    #refresh page so created tag is visible
+                    return redirect('vocabulary_overview', name=name)
+
+                #create vocabulary modal
+                elif 'create-vocabulary' in request.POST:
+                        if 'file-upload' in request.FILES:
+                            import_voc = request.FILES['file-upload']
+                            Vocabulary.import_vocabulary(import_voc)
+                        elif request.POST['name'] != '' and request.POST['urispace'] != '':
+                            try:
+                                voc_name = request.POST['name']
+                                urispace = request.POST['urispace']
+                                Vocabulary.create(name=voc_name, urispace=urispace, creator=user.profile)
+                            except IntegrityError:
+                                return HttpResponse('vocabulary already exists')
+                
+                elif 'create-team' in request.POST:
+                    team_name = request.POST['team-name']
+                    Group.objects.create(name=team_name)
+                    print(Group.objects.get(name=team_name))
         else:
-            form = CreateVocabularyForm()
+            return HttpResponse('your not part of this vocabulary')
+
+    
         # TODO fix csrf
         if request.method == 'DELETE':
             # Delete vocabularyy
@@ -131,104 +173,126 @@ def index(request, name):
 
 
 def settings(request, name):
-    try:
-        vocabulary = Vocabulary.objects.get(name=name)
-        print(vocabulary.state)
-    except ObjectDoesNotExist:
-        return redirect('base')
-
-    context = {
-        'vocabulary': vocabulary
-    }
-
-    if request.method == 'POST':
-        if 'delete' in request.POST:
-            # vocabulary.delete()
-            print('yetetet')
+    if request.user.is_authenticated:
+        try:
+            vocabulary = Vocabulary.objects.get(name=name)
+            print(vocabulary.state)
+        except ObjectDoesNotExist:
             return redirect('base')
-        elif(request.POST['vocabulary-setting'] == 'Live'):
-            vocabulary.set_live()
-        elif(request.POST['vocabulary-setting'] == 'Review'):
-            vocabulary.set_review()
-        elif(request.POST['vocabulary-setting'] == 'Development'):
-            vocabulary.set_dev()
-    return render(request, 'vocabulary_setting.html', context)
+        
+        user = request.user
+        user_is_owner = 'owner' in get_perms(user, vocabulary)
+        user_is_staff = user.is_staff
+
+        context = {
+            'vocabulary': vocabulary
+        }
+
+        if request.method == 'POST':
+            if user_is_owner or user_is_staff:
+                if 'delete' in request.POST:  
+                    # vocabulary.delete()
+                    print('yetetet')
+                    return redirect('base')
+                elif(request.POST['vocabulary-setting'] == 'Live'):
+                    vocabulary.set_live()
+                elif(request.POST['vocabulary-setting'] == 'Review'):
+                    vocabulary.set_review()
+                elif(request.POST['vocabulary-setting'] == 'Development'):
+                    vocabulary.set_dev()
+        return render(request, 'vocabulary_setting.html', context)
+    else:
+        return redirect('login')
 
 
 def members(request: HttpRequest, name):
-    # if request.user.is_authenticated:
-    #user = request.user
-    vocabulary = Vocabulary.objects.get(name=name)
-    profiles = vocabulary.profiles.all()
-    p = Paginator(profiles, 10)
-    page_number = request.GET.get('page')
-    page_obj = p.get_page(page_number)
+    if request.user.is_authenticated:
+        user = request.user
+        vocabulary = Vocabulary.objects.get(name=name)
 
-    # TODO
-    # allow empty list?
-    # does it show all users of group or just groups?
+        profiles_list = vocabulary.profiles.all()
+        user_list = []
+        for key in profiles_list:
+            user_list.append(key.user)
+        groups = vocabulary.groups.all()
+        group_user_list = []
+        for key in groups:
+            group_user_list.extend(key.group.user_set.all())
+        member_list = set()
+        for key in user_list:
+            member_list.add(key)
+        for key in group_user_list:
+            member_list.add(key)
+        member_list = list(member_list)
+        #member_list = list(chain(user_list, group_user_list))
+        print('This member list: {0}'.format(member_list))
 
-    p.allow_empty_first_page
+        p = Paginator(member_list, 10)
+        page_number = request.GET.get('page')
+        page_obj = p.get_page(page_number)
 
-    context = {
-        'vocabulary': vocabulary,
-        'members': page_obj
-    }
+        user_is_owner = 'owner' in get_perms(user, vocabulary)
+        user_is_staff = user.is_staff
 
-    if request.method == 'POST':
-        if 'invite' in request.POST:
-            # still to sensitive should ignore things like whitespace at the end
+        # TODO
+        # allow empty list?
+        # does it show all users of group or just groups?
 
-            # needs permission owner?
-            # if user.has_perm('owner', vocabulary):
-            invite_str = request.POST['email']
-            # add immediately or send invite email?
-            # right error codes?
+        p.allow_empty_first_page
 
-            # check if User/Group exists
-            if User.objects.filter(email=invite_str).exists():
-                invite_user = User.objects.get(email=invite_str)
-                # check if User already on vocabulary
-                if not vocabulary.profiles.all().filter(user=invite_user).exists():
-                    vocabulary.add_profile(invite_user.profile, 'participant')
-                else:
-                    return HttpResponse('User is already part of this vocabulary', status=400)
-            elif Group.objects.filter(name=invite_str).exists():
-                invite_group = Group.objects.get(name=invite_str)
-                # check if Group already on vocabulary
-                if not vocabulary.groups.all().filter(group=invite_group).exists():
-                    vocabulary.add_group(
-                        invite_group.groupprofile, 'participant')
-                else:
-                    return HttpResponse('Group is already part of this vocabulary', status=400)
+        context = {
+            'vocabulary': vocabulary,
+            'members': page_obj
+        }
+
+        if request.method == 'POST':
+            if user_is_owner or user_is_staff:
+
+                if 'invite' in request.POST:
+                    # still too sensitive should ignore things like whitespace at the end
+
+                    invite_str = request.POST['email']
+                    # add immediately or send invite email?
+                    # right error codes?
+
+                    # check if User/Group exists
+                    if User.objects.filter(email=invite_str).exists():
+                        invite_user = User.objects.get(email=invite_str)
+                        # check if User already on vocabulary
+                        if not vocabulary.profiles.all().filter(user=invite_user).exists():
+                            vocabulary.add_profile(invite_user.profile, 'participant')
+                        else:
+                            return HttpResponse('User is already part of this vocabulary', status=400)
+                    elif Group.objects.filter(name=invite_str).exists():
+                        invite_group = Group.objects.get(name=invite_str)
+                        # check if Group already on vocabulary
+                        if not vocabulary.groups.all().filter(group=invite_group).exists():
+                            vocabulary.add_group(
+                                invite_group.groupprofile, 'participant')
+                        else:
+                            return HttpResponse('Group is already part of this vocabulary', status=400)
+                    else:
+                        return HttpResponse('User/Group does not exist', status=404)
+                    # refresh page
+                    return redirect('vocabulary_members', vocabulary.name)
+                elif 'kickall' in request.POST:
+                    for p in vocabulary.profiles.all():
+                        # kick creator too?
+                        vocabulary.remove_profile(p)
+                    return redirect('vocabulary_members', vocabulary.name)
+
+                # for loop ok?
+                for p in vocabulary.profiles.all():
+                    if('kick {0}'.format(p.name) in request.POST):
+                        vocabulary.remove_profile(p)
+                        return redirect('vocabulary_members', vocabulary.name)
+
             else:
-                return HttpResponse('User/Group does not exist', status=404)
-            # refresh page
-            return redirect('vocabulary_members', vocabulary.name)
-            # else
-            #raise PermissionDenied
-        elif 'kickall' in request.POST:
-            # needs permission owner?
-            # if user.has_perm('owner', vocabulary):
-            for p in vocabulary.profiles.all():
-                # kick creator too?
-                vocabulary.remove_profile(p)
-            return redirect('vocabulary_members', vocabulary.name)
-            # else
-            #raise PermissionDenied
+                raise PermissionDenied
 
-        # for loop ok?
-        for p in vocabulary.profiles.all():
-            # needs permission owner?
-            # if user.has_perm('owner', vocabulary):
-            if('kick {0}'.format(p.name) in request.POST):
-                vocabulary.remove_profile(p)
-                return redirect('vocabulary_members', vocabulary.name)
-
-            # else
-                #raise PermissionDenied
-
-    return render(request, 'vocabulary_members.html', context)
+        return render(request, 'vocabulary_members.html', context)
+    else:
+        return redirect('login')
 
 
 def terms(request: HttpRequest, name: str):
