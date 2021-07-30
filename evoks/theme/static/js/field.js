@@ -1,7 +1,7 @@
 function createInput(value, id) {
     return `
     <div class="flex-grow mt-2 col-span-2">
-    <textarea type="text" name="name" id="${id}"
+    <textarea type="text" name="new-obj" id="${id}"
         class="shadow-sm w-full focus:ring-gray-500 focus:border-gray-500 block sm:text-sm border-gray-300 rounded-md"
         >${value}</textarea>
     </div>`.trim()

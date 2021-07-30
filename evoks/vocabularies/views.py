@@ -16,6 +16,7 @@ from rdflib import Graph, Literal
 import time
 from typing import List
 from django.db import IntegrityError
+from urllib.parse import urlparse
 
 from django.core.exceptions import PermissionDenied
 from .forms import Vocabulary_Terms_Form
@@ -66,7 +67,7 @@ def convert_predicate(namespaces, predicate):
         type = predicate.rsplit('/', 1)[-1]
 
     max = 0
-    max_prefix = ''
+    max_prefix = None
     count = 0
     for s, p in namespaces:
         for i, e in enumerate(p):
@@ -74,12 +75,22 @@ def convert_predicate(namespaces, predicate):
                 count += 1
             else:
                 continue
-        if count > max:
+        if count > max and count == len(p):
             max = count
             max_prefix = (s, p)
         count = 0
+    if max_prefix is None:
+        return predicate
     return '{prefix}:{type}'.format(
         prefix=max_prefix[0], type=type)
+
+
+def uri_validator(uri):
+    try:
+        result = urlparse(uri)
+        return all([result.scheme, result.netloc])
+    except:
+        return False
 
 
 def index(request, name):
@@ -110,6 +121,79 @@ def index(request, name):
             }
 
             if request.method == 'POST':
+
+                if 'obj' in request.POST:
+
+                    p = fuseki_dev.query(
+                        vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso>""", 'xml')
+
+                    namespaces = []
+                    for short, uri in p.namespaces():
+                        namespaces.append((short, uri.toPython()))
+                    # print(uri.toPython())
+
+                    # get namespaces from model and vocabulary
+                    key = request.POST['key']
+                    obj = request.POST['obj']
+                    lang = request.POST['lang']
+                    new_obj = request.POST['new-obj']
+                    type = request.POST['obj-type']
+                    prefix_list = []
+                    for k, value in namespaces:
+                        prefix_string = 'prefix {0}: <{1}>'.format(k, value)
+                        prefix_list.append(prefix_string)
+                    query = """"""
+                    for x in prefix_list:
+                        query += '{0} \n'.format(x)
+
+                    if new_obj != '':
+                        if type == 'uri':
+                            if uri_validator(new_obj) != True:
+                                new_object = new_obj
+                            else:
+                                new_object = '<{0}>'.format(new_obj)
+                        else:
+                            new_object = '\'{0}\''.format(new_obj)
+                            if lang != '':
+                                new_object += '@{0}'.format(lang)
+
+                    if type == 'uri':
+                        if uri_validator(obj) != True:
+                            object = obj
+                        else:
+                            object = '<{0}>'.format(obj)
+                    else:
+                        object = '\'{0}\''.format(obj)
+                        if lang != '':
+                            object += '@{0}'.format(lang)
+
+
+
+                    # delete field
+                    if new_obj == '':
+                        query += """
+                        DELETE DATA
+                        {{
+                        <{urispace}> <{predicate}> {object}
+                        }}
+                        """.format(urispace=vocabulary.urispace, predicate=key, object=object)
+                        p = fuseki_dev.query(
+                            vocabulary, query, 'xml', 'update')
+
+                    else:  # edit field
+                        # old
+                        # new
+                        # old
+                        query += """
+                        DELETE {{ <{urispace}> <{predicate}> {object} }}
+                        INSERT {{ <{urispace}> <{predicate}> {new_object} }}
+                        WHERE
+                        {{ <{urispace}> <{predicate}> {object} }}
+                        """.format(new_object=new_object, urispace=vocabulary.urispace, predicate=key, object=object)
+                        print(query)
+                        p = fuseki_dev.query(
+                            vocabulary, query, 'xml', 'update')
+
 
                 # create comment
                 if 'comment' in request.POST:
@@ -146,7 +230,7 @@ def index(request, name):
                     if type == 'uri':
                         object = '<{0}>'.format(object_string)
                     else:
-                        object = '{0}'.format(object_string)
+                        object = '\'{0}\''.format(object_string)
                     urispace = '<{0}>'.format(vocabulary.urispace)
                     prefix_list = []
                     for key, value in namespaces:
@@ -156,19 +240,16 @@ def index(request, name):
                     for x in prefix_list:
                         query += '{0} \n'.format(x)
 
-
-
-
                     query += """
                         INSERT DATA {{ {0} {1} {2} }}
                     """.format('<http://www.yso.fi/onto/yso/>', predicate, object)
                     print('Query String: {0}'.format(query))
                     thing = 123
-                    #thing = fuseki_dev.query(vocabulary=vocabulary, query=query, return_format='json')
+                    # thing = fuseki_dev.query(vocabulary=vocabulary, query=query, return_format='json')
                     print('Query: {0}'.format(thing))
                     print('{0} {1} {2}'.format(predicate, type, object))
 
-                #TODO put in right view, change create_team modal form action
+                # TODO put in right view, change create_team modal form action
                 elif 'create-team' in request.POST:
                     team_name = request.POST['team-name']
                     Group.objects.create(name=team_name)
@@ -198,21 +279,18 @@ def index(request, name):
             if pred not in fields:
                 # print(pred)
                 shortcut = convert_predicate(namespaces, pred)
-                
+
                 fields[pred] = {
                     'type': shortcut, 'objects': []}
             if obj['type'] == 'uri':
                 shortcut = convert_predicate(namespaces, obj['value'])
                 obj['shortcut'] = shortcut if shortcut[-1] != ':' else obj['value']
-            fields[pred]['objects'].append(obj)
 
-        #print(json.dumps(fields, indent=4, sort_keys=True))
-        #dom = xml.dom.minidom.parseString(thing)
-        #pretty_xml_as_string = dom.toprettyxml()
-        # print(pretty_xml_as_string)
-        # print(thing.serialize(format='n3'))
-        # for s, p, o in thing:
-        #    print(p, o)
+            if 'xml:lang' in obj:
+                obj['lang'] = obj['xml:lang']
+            fields[pred]['objects'].append(obj)
+            print(obj)
+
         template = loader.get_template('vocabulary.html')
         context = {
             'user': request.user,
@@ -278,7 +356,7 @@ def members(request: HttpRequest, name):
         for key in group_user_list:
             member_list.add(key)
         member_list = list(member_list)
-        #member_list = list(chain(user_list, group_user_list))
+        # member_list = list(chain(user_list, group_user_list))
         print('This member list: {0}'.format(member_list))
 
         p = Paginator(member_list, 10)
@@ -384,10 +462,10 @@ def terms(request: HttpRequest, name: str):
 
     # print(json.dumps(thing, indent=4, sort_keys=True))
 
-    #initial_terms = terms.filter(name__startswith=initial_letter)
-    #p = Paginator(terms, 10)
-    #page_number = request.GET.get('page')
-    #page_obj = p.get_page(page_number)
+    # initial_terms = terms.filter(name__startswith=initial_letter)
+    # p = Paginator(terms, 10)
+    # page_number = request.GET.get('page')
+    # page_obj = p.get_page(page_number)
 
     # p.allow_empty_first_page
 
@@ -400,20 +478,21 @@ def terms(request: HttpRequest, name: str):
     }
     return render(request, 'vocabulary_terms.html', context)
 
-def base(request : HttpRequest):
+
+def base(request: HttpRequest):
     user = request.user
     if request.method == 'POST':
 
         if 'create-vocabulary' in request.POST:
-                        if 'file-upload' in request.FILES:
-                            import_voc = request.FILES['file-upload']
-                            Vocabulary.import_vocabulary(import_voc)
-                        elif request.POST['name'] != '' and request.POST['urispace'] != '':
-                            try:
-                                voc_name = request.POST['name']
-                                urispace = request.POST['urispace']
-                                Vocabulary.create(
-                                    name=voc_name, urispace=urispace, creator=user.profile)
-                            except IntegrityError:
-                                return HttpResponse('vocabulary already exists')
+            if 'file-upload' in request.FILES:
+                import_voc = request.FILES['file-upload']
+                Vocabulary.import_vocabulary(import_voc)
+            elif request.POST['name'] != '' and request.POST['urispace'] != '':
+                try:
+                    voc_name = request.POST['name']
+                    urispace = request.POST['urispace']
+                    Vocabulary.create(
+                        name=voc_name, urispace=urispace, creator=user.profile)
+                except IntegrityError:
+                    return HttpResponse('vocabulary already exists')
     return render(request, 'base.html')
