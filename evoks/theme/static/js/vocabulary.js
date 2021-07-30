@@ -1,4 +1,4 @@
-
+/* 
 function createInput(value, id) {
     return `
     <div class="">
@@ -37,4 +37,4 @@ document.getElementById('title-update-button').addEventListener('click', functio
         inputSubject.innerHTML = createInput(title.innerText, 'title-subject-input')
         title.replaceChildren(inputSubject.content.firstChild)
     }
-});
+}); */

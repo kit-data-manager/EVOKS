@@ -61,8 +61,25 @@ def prefixes(request, name):
 
 
 def convert_predicate(namespaces, predicate):
+    type = predicate.rsplit('#', 1)[-1]
+    if type == predicate:
+        type = predicate.rsplit('/', 1)[-1]
 
-    return ''
+    max = 0
+    max_prefix = ''
+    count = 0
+    for s, p in namespaces:
+        for i, e in enumerate(p):
+            if len(predicate) > i and e == predicate[i]:
+                count += 1
+            else:
+                continue
+        if count > max:
+            max = count
+            max_prefix = (s, p)
+        count = 0
+    return '{prefix}:{type}'.format(
+        prefix=max_prefix[0], type=type)
 
 
 def index(request, name):
@@ -171,40 +188,23 @@ def index(request, name):
         namespaces = []
         for short, uri in p.namespaces():
             namespaces.append((short, uri.toPython()))
-            #print(uri.toPython())
+            # print(uri.toPython())
 
-        #print('--------------------')
+        # print('--------------------')
         fields = {}
         for x in thing['results']['bindings']:
             pred = x['pred']['value']
             obj = x['obj']
             if pred not in fields:
                 # print(pred)
-                type = pred.rsplit('#', 1)[-1]
-                if type == pred:
-                    type = pred.rsplit('/', 1)[-1]
-
-                max = 0
-                max_prefix = ''
-                count = 0
-                for s, p in namespaces:
-                    for i, e in enumerate(p):
-                        if len(pred) > i and e == pred[i]:
-                            count += 1
-                        else:
-                            continue
-                    if count > max:
-                        max = count
-                        max_prefix = (s, p)
-                    count = 0
-
-                # print(max_prefix)
-                shortcut = '{prefix}:{type}'.format(
-                    prefix=max_prefix[0], type=type)
+                shortcut = convert_predicate(namespaces, pred)
+                
                 fields[pred] = {
-                    'type': shortcut, 'objects': [obj]}
-            else:
-                fields[pred]['objects'].append(obj)
+                    'type': shortcut, 'objects': []}
+            if obj['type'] == 'uri':
+                shortcut = convert_predicate(namespaces, obj['value'])
+                obj['shortcut'] = shortcut if shortcut[-1] != ':' else obj['value']
+            fields[pred]['objects'].append(obj)
 
         #print(json.dumps(fields, indent=4, sort_keys=True))
         #dom = xml.dom.minidom.parseString(thing)
