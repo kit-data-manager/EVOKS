@@ -195,15 +195,17 @@
                             <!-- Tags Thing-->
                             <div class="float-right mt-5">
                                 <span class="mr-0.5">
-                                    {% for tag in vocabulary.tag_set.all %}
-                                        <a href="#"
-                                            class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
-                                            <span class="absolute flex-shrink-0 flex items-center justify-center">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-{{tag.color}}-500" aria-hidden="true"></span>
-                                            </span>
-                                            <span class="ml-3.5 font-medium text-gray-900">{{tag.name}}</span>
-                                        </a>
-                                    {% endfor %}
+                                    <form action="#" method="post"> {% csrf_token %}
+                                        {% for tag in vocabulary.tag_set.all %}
+                                            <button type="submit" name="delete-tag" value="{{tag.name}}"
+                                                class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
+                                                <span class="absolute flex-shrink-0 flex items-center justify-center">
+                                                    <span class="h-1.5 w-1.5 rounded-full bg-{{tag.color}}-500" aria-hidden="true"></span>
+                                                </span>
+                                                <span class="ml-3.5 font-medium text-gray-900">{{tag.name}}</span>
+                                            </button>
+                                        {% endfor %}
+                                    </form>
                                     <!--
                                     <a href="#"
                                         class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">

@@ -110,20 +110,48 @@ def index(request, name):
                     # refresh page so created tag is visible
                     return redirect('vocabulary_overview', name=name)
 
-                # create vocabulary modal
-                elif 'create-vocabulary' in request.POST:
-                    if 'file-upload' in request.FILES:
-                        import_voc = request.FILES['file-upload']
-                        Vocabulary.import_vocabulary(import_voc)
-                    elif request.POST['name'] != '' and request.POST['urispace'] != '':
-                        try:
-                            voc_name = request.POST['name']
-                            urispace = request.POST['urispace']
-                            Vocabulary.create(
-                                name=voc_name, urispace=urispace, creator=user.profile)
-                        except IntegrityError:
-                            return HttpResponse('vocabulary already exists')
+                elif 'delete-tag' in request.POST:
+                    print(request.POST['delete-tag'])
+                    tag = Tag.objects.get(name=request.POST['delete-tag'])
+                    tag.delete()
 
+                elif 'create-property' in request.POST:
+                    p = fuseki_dev.query(
+                        vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""", 'xml')
+
+                    namespaces = []
+                    for short, uri in p.namespaces():
+                        namespaces.append((short, uri.toPython()))
+
+                    predicate = request.POST['predicate']
+                    type = request.POST['type']
+                    object_string = request.POST['object']
+                    if type == 'uri':
+                        object = '<{0}>'.format(object_string)
+                    else:
+                        object = '{0}'.format(object_string)
+                    urispace = '<{0}>'.format(vocabulary.urispace)
+                    prefix_list = []
+                    for key, value in namespaces:
+                        prefix_string = 'prefix {0}: <{1}>'.format(key, value)
+                        prefix_list.append(prefix_string)
+                    query = """"""
+                    for x in prefix_list:
+                        query += '{0} \n'.format(x)
+
+
+
+
+                    query += """
+                        INSERT DATA {{ {0} {1} {2} }}
+                    """.format('<http://www.yso.fi/onto/yso/>', predicate, object)
+                    print('Query String: {0}'.format(query))
+                    thing = 123
+                    #thing = fuseki_dev.query(vocabulary=vocabulary, query=query, return_format='json')
+                    print('Query: {0}'.format(thing))
+                    print('{0} {1} {2}'.format(predicate, type, object))
+
+                #TODO put in right view, change create_team modal form action
                 elif 'create-team' in request.POST:
                     team_name = request.POST['team-name']
                     Group.objects.create(name=team_name)
@@ -178,7 +206,7 @@ def index(request, name):
             else:
                 fields[pred]['objects'].append(obj)
 
-        print(json.dumps(fields, indent=4, sort_keys=True))
+        #print(json.dumps(fields, indent=4, sort_keys=True))
         #dom = xml.dom.minidom.parseString(thing)
         #pretty_xml_as_string = dom.toprettyxml()
         # print(pretty_xml_as_string)
@@ -371,3 +399,21 @@ def terms(request: HttpRequest, name: str):
         'initial_letter': form,
     }
     return render(request, 'vocabulary_terms.html', context)
+
+def base(request : HttpRequest):
+    user = request.user
+    if request.method == 'POST':
+
+        if 'create-vocabulary' in request.POST:
+                        if 'file-upload' in request.FILES:
+                            import_voc = request.FILES['file-upload']
+                            Vocabulary.import_vocabulary(import_voc)
+                        elif request.POST['name'] != '' and request.POST['urispace'] != '':
+                            try:
+                                voc_name = request.POST['name']
+                                urispace = request.POST['urispace']
+                                Vocabulary.create(
+                                    name=voc_name, urispace=urispace, creator=user.profile)
+                            except IntegrityError:
+                                return HttpResponse('vocabulary already exists')
+    return render(request, 'base.html')
