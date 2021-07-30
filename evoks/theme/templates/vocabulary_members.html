@@ -128,7 +128,7 @@
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                                             <form action="#" method="post"> {% csrf_token %}
-                                                                                <button type="submit" name="kick {{data.name}}"
+                                                                                <button type="submit" name="kick-member" value="{{data.profile.name}}"
                                                                                     class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm hidden md:table-cell">
                                                                                     Kick
                                                                                 </button>

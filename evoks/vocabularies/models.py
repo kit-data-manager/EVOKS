@@ -7,7 +7,6 @@ from guardian.shortcuts import assign_perm, remove_perm, get_perms
 import Term.models
 from django.contrib.postgres.fields import ArrayField
 from django.http import HttpResponse
-import xml.dom.minidom
 import json
 
 
@@ -108,14 +107,12 @@ class Vocabulary(models.Model):
             <http://www.yso.fi/onto/yso/> ?predicate ?object
             }"""
         if dataformat == 'json':
-            print('fallalaladjflsjdflksdjflskdjfslkdfjslkdfj')
             thing = fuseki_dev.query(self, query, 'json')
             file_content = json.dumps(thing, indent=4, sort_keys=True)
             response = HttpResponse(file_content, content_type='application/json')
             response['Content-Disposition'] = 'attachment; filename=export.json'
             return response
         elif dataformat == 'N3':
-            print('fallalaladjflsjdflksdjflskdjfslkdfjslkdfj')
             thing = fuseki_dev.query(self, """
             DESCRIBE <http://www.yso.fi/onto/yso/> """, 'N3')
             file_content = thing.serialize(format='n3')
@@ -123,7 +120,6 @@ class Vocabulary(models.Model):
             response['Content-Disposition'] = 'attachment; filename=export.ttl'
             return response
         elif dataformat == 'rdf/xml':
-            print('fallalaladjflsjdflksdjflskdjfslkdfjslkdfj')
             thing = fuseki_dev.query(self, query, 'xml')
             file_content = thing.toprettyxml()
             response = HttpResponse(file_content, content_type='application/xml')

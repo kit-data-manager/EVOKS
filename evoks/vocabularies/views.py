@@ -326,7 +326,16 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
         return redirect('login')
 
 
-def settings(request, name):
+def settings(request : HttpRequest, name : str):
+    """View for settings tab on a vocabulary
+
+    Args:
+        request (HttpRequest): Current request
+        name (str): Name of the vocabulary
+
+    Returns:
+        HttpResponse: Rendered Settings Site
+    """
     if request.user.is_authenticated:
         try:
             vocabulary = Vocabulary.objects.get(name=name)
@@ -336,61 +345,70 @@ def settings(request, name):
 
         user = request.user
         user_is_owner = 'owner' in get_perms(user, vocabulary)
-        user_is_staff = user.is_staff
 
         context = {
             'vocabulary': vocabulary
         }
 
         if request.method == 'POST':
-            if user_is_owner or user_is_staff:
+            if user_is_owner:
+                #delete vocabulary
                 if 'delete' in request.POST:
-                    # vocabulary.delete()
-                    print('yetetet')
+                    vocabulary.delete()
                     return redirect('base')
+                
+                #change state of vocabulary
                 elif(request.POST['vocabulary-setting'] == 'Live'):
                     vocabulary.set_live()
                 elif(request.POST['vocabulary-setting'] == 'Review'):
                     vocabulary.set_review()
                 elif(request.POST['vocabulary-setting'] == 'Development'):
                     vocabulary.set_dev()
+
         return render(request, 'vocabulary_setting.html', context)
+
     else:
         return redirect('login')
 
 
-def members(request: HttpRequest, name):
+def members(request: HttpRequest, name : str):
+    """Members that of the vocabulary views
+
+    Args:
+        request (HttpRequest): Current request
+        name (str): Name of the Vocabulary
+
+    Raises:
+        PermissionDenied: If current User lacks permission
+
+    Returns:
+        HttpResponse: A rendered Page
+    """
     if request.user.is_authenticated:
         user = request.user
         vocabulary = Vocabulary.objects.get(name=name)
 
+        #put all users from groups and regulars into one list
         profiles_list = vocabulary.profiles.all()
         user_list = []
+        member_list = set()
         for key in profiles_list:
             user_list.append(key.user)
         groups = vocabulary.groups.all()
         group_user_list = []
         for key in groups:
             group_user_list.extend(key.group.user_set.all())
-        member_list = set()
         for key in user_list:
             member_list.add(key)
         for key in group_user_list:
             member_list.add(key)
         member_list = list(member_list)
-        # member_list = list(chain(user_list, group_user_list))
-        print('This member list: {0}'.format(member_list))
 
         p = Paginator(member_list, 10)
         page_number = request.GET.get('page')
         page_obj = p.get_page(page_number)
 
         user_is_owner = 'owner' in get_perms(user, vocabulary)
-        user_is_staff = user.is_staff
-
-        # TODO
-        # allow empty list?
-        # does it show all users of group or just groups?
 
         p.allow_empty_first_page
 
@@ -400,52 +418,34 @@ def members(request: HttpRequest, name):
         }
 
         if request.method == 'POST':
-            if user_is_owner or user_is_staff:
-
+            if user_is_owner:
                 if 'invite' in request.POST:
-                    # still too sensitive should ignore things like whitespace at the end
-
                     invite_str = request.POST['email']
-                    # add immediately or send invite email?
-                    # right error codes?
 
                     # check if User/Group exists
                     if User.objects.filter(email=invite_str).exists():
                         invite_user = User.objects.get(email=invite_str)
-                        # check if User already on vocabulary
-                        if not vocabulary.profiles.all().filter(user=invite_user).exists():
-                            vocabulary.add_profile(
-                                invite_user.profile, 'participant')
-                        else:
-                            return HttpResponse('User is already part of this vocabulary', status=400)
+                        vocabulary.add_profile(invite_user.profile, 'participant')
                     elif Group.objects.filter(name=invite_str).exists():
                         invite_group = Group.objects.get(name=invite_str)
-                        # check if Group already on vocabulary
-                        if not vocabulary.groups.all().filter(group=invite_group).exists():
-                            vocabulary.add_group(
-                                invite_group.groupprofile, 'participant')
-                        else:
-                            return HttpResponse('Group is already part of this vocabulary', status=400)
+                        vocabulary.add_group(invite_group.groupprofile, 'participant')
                     else:
                         return HttpResponse('User/Group does not exist', status=404)
-                    # refresh page
-                    return redirect('vocabulary_members', vocabulary.name)
                 elif 'kickall' in request.POST:
-                    for p in vocabulary.profiles.all():
-                        # kick creator too?
-                        vocabulary.remove_profile(p)
-                    return redirect('vocabulary_members', vocabulary.name)
-
-                # for loop ok?
-                for p in vocabulary.profiles.all():
-                    if('kick {0}'.format(p.name) in request.POST):
-                        vocabulary.remove_profile(p)
-                        return redirect('vocabulary_members', vocabulary.name)
+                    vocabulary.profiles.clear()
+                elif 'kick-member' in request.POST:
+                    profile_name = request.POST['kick-member']
+                    profile = vocabulary.profiles.get(name=profile_name)
+                    vocabulary.remove_profile(profile)
+                
+                # refresh page
+                return redirect('vocabulary_members', vocabulary.name)
 
             else:
                 raise PermissionDenied
 
         return render(request, 'vocabulary_members.html', context)
+        
     else:
         return redirect('login')
 
