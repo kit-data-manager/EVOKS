@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     {% tailwind_css %}
+    <script src="{% static 'js/field.js' %}"></script>
 
 </head>
 
@@ -48,15 +49,15 @@
                             <a href='{% url 'vocabulary_terms' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Terms
-                            </a> 
+                            </a>
                             <a href='{% url 'vocabulary_members' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Members
                             </a>
                             <a href='{% url 'vocabulary_prefixes' name=vocabulary.name %}'
-                            class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                            Prefixes
-                             </a>
+                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Prefixes
+                            </a>
                             <a href='{% url 'vocabulary_settings' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings
@@ -67,27 +68,43 @@
                                     {% for key, value in fields.items %}
                                     <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
                                         <dt class="text-sm font-medium text-gray-500">
-                                            <div id="title-subject">{{ value.type }}</div>
+                                            <div id="title-subject-{{forloop.counter}}">{{ value.type }}</div>
                                         </dt>
                                         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                            <div class="grid grid-cols-2 justify-between">
-                                            {% for obj in value.objects %} 
-                                                <span id="title-value" class="flex-grow mt-2">
+                                            <form action="" method="POST"> {% csrf_token %}
+                                                <div class="grid grid-cols-3 justify-between">
+                                                    {% for obj in value.objects %}
+                                                    {% if obj.shortcut != None %}
+                                                    <a href="{{ obj.value }}" target="_blank"
+                                                        id="title-value-{{forloop.parentloop.counter}}-{{forloop.counter}}"
+                                                        class="flex-grow mt-2 col-span-2">
+                                                        {{ obj.shortcut }}
+                                                    </a>
 
-                                                    {{ obj.value }}
+                                                    {% else %}
+                                                    <span
+                                                        id="title-value-{{forloop.parentloop.counter}}-{{forloop.counter}}"
+                                                        class="flex-grow mt-2 col-span-2">
+                                                        {{ obj.value }} </span>
 
-                                                </span>
-                                                <span class="ml-4">
-                                                    <button type="button" id="title-update-button"
-                                                        class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 float-right">
-                                                        Update
-                                                    </button>
-                                                </span>
-                                            {% endfor %}
-                                            </div>
+
+                                                    {% endif %}
+                                                    <span class="ml-4">
+                                                        <button type="button"
+                                                            id="update-button-{{forloop.parentloop.counter}}-{{forloop.counter}}"
+                                                            data-inner="{{forloop.counter}}"
+                                                            data-outer="{{forloop.parentloop.counter}}"
+                                                            onclick="changeToInput(this.id)"
+                                                            class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 float-right">
+                                                            Update
+                                                        </button>
+                                                    </span>
+                                                    {% endfor %}
+                                                </div>
+                                            </form>
                                         </dd>
                                     </div>
-                                    
+
                                     {% endfor %}
                                     <div class="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
                                         <dt class="text-sm font-medium text-gray-500">
@@ -196,13 +213,14 @@
                             <div class="float-right mt-5">
                                 <span class="mr-0.5">
                                     {% for tag in vocabulary.tag_set.all %}
-                                        <a href="#"
-                                            class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
-                                            <span class="absolute flex-shrink-0 flex items-center justify-center">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-{{tag.color}}-500" aria-hidden="true"></span>
-                                            </span>
-                                            <span class="ml-3.5 font-medium text-gray-900">{{tag.name}}</span>
-                                        </a>
+                                    <a href="#"
+                                        class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
+                                        <span class="absolute flex-shrink-0 flex items-center justify-center">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-{{tag.color}}-500"
+                                                aria-hidden="true"></span>
+                                        </span>
+                                        <span class="ml-3.5 font-medium text-gray-900">{{tag.name}}</span>
+                                    </a>
                                     {% endfor %}
                                     <!--
                                     <a href="#"
@@ -344,7 +362,8 @@
                                                                                     class="ml-3.5 font-medium text-gray-900">{{key.name}}</span>
                                                                             </a>
                                                                         </span>
-                                                                        <span class="whitespace-nowrap">at {{key.post_date}}</span>
+                                                                        <span class="whitespace-nowrap">at
+                                                                            {{key.post_date}}</span>
                                                                     </div>
                                                                 </div>
                                                                 {% endif %}
