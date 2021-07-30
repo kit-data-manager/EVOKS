@@ -3,12 +3,12 @@ from django.utils.datastructures import MultiValueDict
 from Profile.models import Profile
 from GroupProfile.models import GroupProfile
 import enum
-from django.contrib.auth.models import Permission
 from guardian.shortcuts import assign_perm, remove_perm, get_perms
 import Term.models
-from django.core.mail import EmailMessage
-from django.http import HttpRequest
 from django.contrib.postgres.fields import ArrayField
+from django.http import HttpResponse
+import xml.dom.minidom
+import json
 
 
 class State(models.TextChoices):
@@ -93,28 +93,42 @@ class Vocabulary(models.Model):
         # mögliche dateiformate: rdf/xml, Json-Ld, Turtle
         placeholder = 'sdf'
 
-    def export_vocabulary(self, dataformat: Dataformat) -> None:
+    def export_vocabulary(self, dataformat : str) -> None:
         """Sends the Vocabulary in the provided dataformat to the users email
 
         Args:
             dataformat (Enum): Desired dataformat
         """
-        # TODO turn vocabulary into file in given format
-        # TODO
-        # TODO either has to take user as argument or sending email part handled in view
-        vocab = 'placeholder'
-        subject = '{0} Vocabulary in the {1} dataformat'.format(
-            self.name, dataformat)
-        body = 'Attached to this email is the requested Vocabulary...'
-        email = EmailMessage(
-            subject,
-            body,
-            'bob@example.com',
-            'jhon@example.com'
-        )
-        formatstring = dataformat.lower()
-        email.attach('{0}.{1}'.format(self.name, formatstring), vocab)
-        email.send()
+        #TODO put urispace in there
+        from evoks.fuseki import fuseki_dev
+        urispace = self.urispace
+        query = """
+            SELECT ?subject ?predicate ?object
+            WHERE {
+            <http://www.yso.fi/onto/yso/> ?predicate ?object
+            }"""
+        if dataformat == 'json':
+            print('fallalaladjflsjdflksdjflskdjfslkdfjslkdfj')
+            thing = fuseki_dev.query(self, query, 'json')
+            file_content = json.dumps(thing, indent=4, sort_keys=True)
+            response = HttpResponse(file_content, content_type='application/json')
+            response['Content-Disposition'] = 'attachment; filename=export.json'
+            return response
+        elif dataformat == 'N3':
+            print('fallalaladjflsjdflksdjflskdjfslkdfjslkdfj')
+            thing = fuseki_dev.query(self, """
+            DESCRIBE <http://www.yso.fi/onto/yso/> """, 'N3')
+            file_content = thing.serialize(format='n3')
+            response = HttpResponse(file_content, content_type='application/ttl')
+            response['Content-Disposition'] = 'attachment; filename=export.ttl'
+            return response
+        elif dataformat == 'rdf/xml':
+            print('fallalaladjflsjdflksdjflskdjfslkdfjslkdfj')
+            thing = fuseki_dev.query(self, query, 'xml')
+            file_content = thing.toprettyxml()
+            response = HttpResponse(file_content, content_type='application/xml')
+            response['Content-Disposition'] = 'attachment; filename=export.xml'
+            return response
 
     def set_live(self) -> None:
         """Sets the state to live and starts the migration process
@@ -231,7 +245,7 @@ class Vocabulary(models.Model):
         #       }'.format(url, type, content)
         placeholder = 123
 
-    def create_field(url: str, type: str, content: str) -> str:
+    def create_field(self, urispace : str, predicate : str, object : str) -> None:
         """Creates a Triple Field on the Fuseki-Dev Instance
 
         Args:
@@ -242,11 +256,26 @@ class Vocabulary(models.Model):
         Returns:
             str: [description]
         """
-        # how to handle prefixes?
-        # fuseki_dev.query(self,
-        #   'CONSTRUCT {{0} {1} {2} ;}'.format(url, type, content))
-        # or 'INSERT DATA {{0} {1} {2} ;}'.format(url, type, content))
-        placeholder = 123
+        from evoks.fuseki import fuseki_dev
+        p = fuseki_dev.query(
+                        self, """DESCRIBE <http://www.yso.fi/onto/yso/>""", 'xml')
+
+        namespaces = []
+        for short, uri in p.namespaces():
+            namespaces.append((short, uri.toPython()))
+        prefix_list = []
+        for key, value in namespaces:
+            prefix_string = 'prefix {0}: <{1}>'.format(key, value)
+            prefix_list.append(prefix_string)
+        query = ''
+        #query += vocabulary.convertPrefixes(self)
+
+        for x in prefix_list:
+            query += '{0} \n'.format(x)
+        
+        #normalerweise ist {0} urispace aber ist noch nicht richtig initialisiert...
+        query += 'INSERT DATA {{ {0} {1} {2} }}'.format('<http://www.yso.fi/onto/yso/>', predicate, object)
+        thing = fuseki_dev.query(vocabulary=self, query=str(query), return_format='json', endpoint='update')
 
     def delete_field(url: str) -> None:
         """Deletes a Triple Field on the Fuseki-Dev Instance

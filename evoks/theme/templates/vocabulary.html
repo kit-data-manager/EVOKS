@@ -112,69 +112,72 @@
                                         </dt>
                                         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                             <ul class="border border-gray-200 rounded-md divide-y divide-gray-200">
-                                                <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
-                                                    <div class="w-0 flex-1 flex items-center">
-                                                        <!-- Heroicon name: solid/paper-clip -->
-                                                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400"
-                                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                            fill="currentColor" aria-hidden="true">
-                                                            <path fill-rule="evenodd"
-                                                                d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                        <span class="ml-2 flex-1 w-0 truncate">
-                                                            RDF/XML
-                                                        </span>
-                                                    </div>
-                                                    <div class="ml-4 flex-shrink-0 flex space-x-4">
-                                                        <button type="button"
-                                                            class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                            Download
-                                                        </button>
-                                                    </div>
-                                                </li>
-                                                <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
-                                                    <div class="w-0 flex-1 flex items-center">
-                                                        <!-- Heroicon name: solid/paper-clip -->
-                                                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400"
-                                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                            fill="currentColor" aria-hidden="true">
-                                                            <path fill-rule="evenodd"
-                                                                d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                        <span class="ml-2 flex-1 w-0 truncate">
-                                                            JSON-LD
-                                                        </span>
-                                                    </div>
-                                                    <div class="ml-4 flex-shrink-0 flex space-x-4">
-                                                        <button type="button"
-                                                            class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                            Download
-                                                        </button>
-                                                    </div>
-                                                </li>
-                                                <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
-                                                    <div class="w-0 flex-1 flex items-center">
-                                                        <!-- Heroicon name: solid/paper-clip -->
-                                                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400"
-                                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                            fill="currentColor" aria-hidden="true">
-                                                            <path fill-rule="evenodd"
-                                                                d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                        <span class="ml-2 flex-1 w-0 truncate">
-                                                            TURTLE
-                                                        </span>
-                                                    </div>
-                                                    <div class="ml-4 flex-shrink-0 flex space-x-4">
-                                                        <button type="button"
-                                                            class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                            Download
-                                                        </button>
-                                                    </div>
-                                                </li>
+                                                <form <form action="#" method="post">
+                                                    {% csrf_token %}
+                                                    <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                                        <div class="w-0 flex-1 flex items-center">
+                                                            <!-- Heroicon name: solid/paper-clip -->
+                                                            <svg class="flex-shrink-0 h-5 w-5 text-gray-400"
+                                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                fill="currentColor" aria-hidden="true">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
+                                                            <span class="ml-2 flex-1 w-0 truncate">
+                                                                RDF/XML
+                                                            </span>
+                                                        </div>
+                                                        <div class="ml-4 flex-shrink-0 flex space-x-4">
+                                                            <button type="submit" name="download" value="rdf/xml"
+                                                                class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                                Download
+                                                            </button>
+                                                        </div>
+                                                    </li>
+                                                    <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                                        <div class="w-0 flex-1 flex items-center">
+                                                            <!-- Heroicon name: solid/paper-clip -->
+                                                            <svg class="flex-shrink-0 h-5 w-5 text-gray-400"
+                                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                fill="currentColor" aria-hidden="true">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
+                                                            <span class="ml-2 flex-1 w-0 truncate">
+                                                                JSON-LD
+                                                            </span>
+                                                        </div>
+                                                        <div class="ml-4 flex-shrink-0 flex space-x-4">
+                                                            <button type="submit" name="download" value="json"
+                                                                class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                                Download
+                                                            </button>
+                                                        </div>
+                                                    </li>
+                                                    <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                                        <div class="w-0 flex-1 flex items-center">
+                                                            <!-- Heroicon name: solid/paper-clip -->
+                                                            <svg class="flex-shrink-0 h-5 w-5 text-gray-400"
+                                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                fill="currentColor" aria-hidden="true">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
+                                                            <span class="ml-2 flex-1 w-0 truncate">
+                                                                TURTLE
+                                                            </span>
+                                                        </div>
+                                                        <div class="ml-4 flex-shrink-0 flex space-x-4">
+                                                            <button type="submit" name="download" value="N3"
+                                                                class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                                Download
+                                                            </button>
+                                                        </div>
+                                                    </li>
+                                                </form>
                                             </ul>
                                         </dd>
                                     </div>
@@ -210,41 +213,43 @@
                                 </dl>
                             </div>
                             <!-- Tags Thing-->
-                            <div class="float-right mt-5">
-                                <span class="mr-0.5">
-                                    {% for tag in vocabulary.tag_set.all %}
-                                    <a href="#"
-                                        class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
-                                        <span class="absolute flex-shrink-0 flex items-center justify-center">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-{{tag.color}}-500"
-                                                aria-hidden="true"></span>
-                                        </span>
-                                        <span class="ml-3.5 font-medium text-gray-900">{{tag.name}}</span>
-                                    </a>
-                                    {% endfor %}
-                                    <!--
-                                    <a href="#"
-                                        class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
-                                        <span class="absolute flex-shrink-0 flex items-center justify-center">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-indigo-500"
-                                                aria-hidden="true"></span>
-                                        </span>
-                                        <span class="ml-3.5 font-medium text-gray-900">Accessibility</span>
-                                    </a> -->
-                                    <a href="#" id="create-tag-button"
-                                        class="relative inline-flex items-center rounded-full border border-gray-300  px-0.5 py-0.5 text-sm bg-regal-blue">
+                            <form action="#" method="post"> {% csrf_token%}
+                                <div class="float-right mt-5">
+                                    <span class="mr-0.5">
+                                        {% for tag in vocabulary.tag_set.all %}
+                                        <button type="submit" name="delete-tag" value="{{tag.name}}"
+                                            class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
+                                            <span class="absolute flex-shrink-0 flex items-center justify-center">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-{{tag.color}}-500"
+                                                    aria-hidden="true"></span>
+                                            </span>
+                                            <span class="ml-3.5 font-medium text-gray-900">{{tag.name}}</span>
+                                        </button>
+                                        {% endfor %}
+                                        <!--
+                                        <a href="#"
+                                            class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
+                                            <span class="absolute flex-shrink-0 flex items-center justify-center">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-indigo-500"
+                                                    aria-hidden="true"></span>
+                                            </span>
+                                            <span class="ml-3.5 font-medium text-gray-900">Accessibility</span>
+                                        </a> -->
+                                        <a href="#" id="create-tag-button"
+                                            class="relative inline-flex items-center rounded-full border border-gray-300  px-0.5 py-0.5 text-sm bg-regal-blue">
 
-                                        <span class="text-white">
-                                            <svg class="inline-block w-5 h-5" fill="none" stroke-linecap="round"
-                                                stroke-linejoin="round" stroke-width="2" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                            </svg>
-                                        </span>
-                                    </a>
-                                </span>
-                            </div>
+                                            <span class="text-white">
+                                                <svg class="inline-block w-5 h-5" fill="none" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg>
+                                            </span>
+                                        </a>
+                                    </span>
+                                </div>
+                            </form>
 
                             <section aria-labelledby="activity-title" class="mt-10 xl:mt-10">
                                 <div>

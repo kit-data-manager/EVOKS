@@ -22,12 +22,9 @@ from .forms import Vocabulary_Terms_Form
 from Term.models import Term
 from Tag.models import Tag
 from evoks.fuseki import fuseki_dev
-import xml.dom.minidom
-import json
 from Comment.models import Comment
 from itertools import chain
 from guardian.shortcuts import get_perms
-
 
 def convert_prefixes(prefixes: List[str]):
     converted: List[str]
@@ -129,46 +126,31 @@ def index(request, name):
 
                 elif 'delete-tag' in request.POST:
                     print(request.POST['delete-tag'])
+                    #TODO make tag name unique!! or for loop
                     tag = Tag.objects.get(name=request.POST['delete-tag'])
                     tag.delete()
+                    return redirect('vocabulary_overview', name=name)
 
                 elif 'create-property' in request.POST:
-                    p = fuseki_dev.query(
-                        vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""", 'xml')
-
-                    namespaces = []
-                    for short, uri in p.namespaces():
-                        namespaces.append((short, uri.toPython()))
-
                     predicate = request.POST['predicate']
                     type = request.POST['type']
                     object_string = request.POST['object']
                     if type == 'uri':
                         object = '<{0}>'.format(object_string)
                     else:
-                        object = '{0}'.format(object_string)
+                        object = '\'{0}\''.format(object_string)
                     urispace = '<{0}>'.format(vocabulary.urispace)
-                    prefix_list = []
-                    for key, value in namespaces:
-                        prefix_string = 'prefix {0}: <{1}>'.format(key, value)
-                        prefix_list.append(prefix_string)
-                    query = """"""
-                    for x in prefix_list:
-                        query += '{0} \n'.format(x)
-
-
-
-
-                    query += """
-                        INSERT DATA {{ {0} {1} {2} }}
-                    """.format('<http://www.yso.fi/onto/yso/>', predicate, object)
-                    print('Query String: {0}'.format(query))
-                    thing = 123
-                    #thing = fuseki_dev.query(vocabulary=vocabulary, query=query, return_format='json')
-                    print('Query: {0}'.format(thing))
-                    print('{0} {1} {2}'.format(predicate, type, object))
-
+                    vocabulary.create_field(urispace, predicate, object)
                 #TODO put in right view, change create_team modal form action
+
+                elif 'download' in request.POST:
+                    type = request.POST['download']
+                    print(type)
+                    response  = vocabulary.export_vocabulary(type)
+                    return response
+
+                    #TODO refactor to vocabulary.export_vocabulary()
+
                 elif 'create-team' in request.POST:
                     team_name = request.POST['team-name']
                     Group.objects.create(name=team_name)
