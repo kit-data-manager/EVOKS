@@ -299,14 +299,13 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
                     ?s skos:prefLabel ?o .
                 FILTER (strstarts(str(?o), '{0}'))
                 }}
-                ORDER BY ?o
-                LIMIT 10
             """.format(search), 'json')
 
             for x in query_result['results']['bindings']:
                 s = x['s']['value']
                 value = x['o']['value']
-                search_results.append((s, value))
+                id = s.split(vocabulary.urispace)[1]
+                search_results.append((id, value))
 
         template = loader.get_template('vocabulary.html')
         context = {
@@ -490,8 +489,10 @@ def terms(request: HttpRequest, name: str) -> HttpResponse:
     # manipulate terms for easier templating
     terms = []
     for x in thing['results']['bindings']:
+        sub = x['sub']['value']
+        id = sub.split(vocabulary.urispace)[1]
         obj = x['obj']
-        terms.append({'name': obj['value']})
+        terms.append({'name': obj['value'], 'name': id})
 
     next_page_number = page_number + 1  # going over page limit does not matter
     previous_page_number = 1 if page_number - \
@@ -523,4 +524,38 @@ def base(request: HttpRequest):
             if 'file-upload' in request.FILES:
                 import_voc = request.FILES['file-upload']
                 vocabulary.import_vocabulary(input=import_voc)
-    return render(request, 'base.html')
+
+
+
+    search = request.GET.get('search')
+    search_results = None
+    if search != None:
+        search_results = []
+        # TODO: add filter for vocabulary
+        for vocabulary in Vocabulary.objects.all():
+
+            # query all fields of the vocabulary
+            query_result = fuseki_dev.query(vocabulary, """
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+                SELECT DISTINCT ?s ?p ?o
+                WHERE {{
+                    ?s skos:prefLabel ?o .
+                FILTER (strstarts(str(?o), '{0}'))
+                }}
+            """.format(search), 'json')
+
+            for x in query_result['results']['bindings']:
+                s = x['s']['value']
+                value = x['o']['value']
+                id = s.split(vocabulary.urispace)[1]
+                search_results.append((id, value))
+
+    context = {
+        'user': request.user,
+        'vocabulary': vocabulary,
+        'search_results': search_results,
+        'search_term': search,
+    }
+
+    return render(request, 'base.html', context)

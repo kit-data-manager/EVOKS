@@ -4,7 +4,7 @@ from Profile.models import Profile
 from GroupProfile.models import GroupProfile
 import enum
 from guardian.shortcuts import assign_perm, remove_perm, get_perms
-import Term.models
+from Term.models import Term
 from django.contrib.postgres.fields import ArrayField
 from django.http import HttpResponse, HttpRequest
 import json
@@ -99,8 +99,8 @@ class Vocabulary(models.Model):
         password = settings.FUSEKI_PASSWORD
 
         data = input.open().read()
-        
-        #if not turtle different thing needed
+
+        # if not turtle different thing needed
         #n3: text/n3; charset=utf-8
         #nt: text/plain
         #rdf: application/rdf+xml
@@ -109,9 +109,30 @@ class Vocabulary(models.Model):
         #trig: application/trig
         #jsonld: application/ld+json
         headers = {'Content-Type': 'text/turtle;charset=utf-8'}
-        r = requests.put('http://fuseki-dev:3030/{0}/data'.format(self.name), data=data, auth=(user, password), headers=headers)
+        r = requests.put('http://fuseki-dev:3030/{0}/data'.format(
+            self.name), data=data, auth=(user, password), headers=headers)
+
+        query = """        
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+            SELECT DISTINCT ?s
+            WHERE {{
+                ?s skos:prefLabel ?o .
+            FILTER (strstarts(str(?s), '{0}'))
+            }}
+        """.format(self.urispace)
+        result = fuseki_dev.query(self, query, 'json')
+
+        for x in result['results']['bindings']:
+            try:
+                uri = x['s']['value']
+                id = uri.split(self.urispace)[1]
+                self.add_term(id)
+            except Exception as e:
+                print(e)
+                print(x)
+
         print(r)
- 
 
     def get_namespaces(self) -> List[Tuple[str, str]]:
         """Returns list of namespaces from fuseki and the prefixes tab
@@ -255,7 +276,7 @@ class Vocabulary(models.Model):
         Args:
             name (str): Name of the Term
         """
-        self.term_set.add(Term.models.Term.create(name=name))
+        self.term_set.add(Term.create(name=name))
         self.term_count += 1
         # record user who added Term as contributor if not already done
 
@@ -339,7 +360,7 @@ class Vocabulary(models.Model):
 
         # normalerweise ist {0} urispace aber ist noch nicht richtig initialisiert...
         query += 'INSERT DATA {{ {0} {1} {2} }}'.format(
-            '<http://www.yso.fi/onto/yso/>', predicate, object)
+            urispace, predicate, object)
         fuseki_dev.query(vocabulary=self, query=str(
             query), return_format='json', endpoint='update')
 

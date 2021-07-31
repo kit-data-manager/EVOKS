@@ -27,11 +27,11 @@
         {% include "sidebars/desktop.html" %}
 
         <div class="flex-1 max-w-7xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
-            {% include "header/searchbar.html" %}
+			{% include "header/searchbar_globally.html" %}
 
 			<main class="flex-1 relative overflow-y-auto focus:outline-none">
 				<div class="py-6">
-					<div class="px-4 sm:px-6 md:px-0">
+					<div class="px-4 sm:px-6 md:px-0 {% if search_results != None %} mt-6 {% endif %}">
 						<h1 class="text-2xl font-semibold text-gray-900">Vocabulary Dashboard</h1>
 					</div>
 					<div class="px-4 sm:px-6 md:px-0">
