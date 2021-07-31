@@ -65,8 +65,6 @@ class Vocabulary(models.Model):
         # TODO Save creator in triple field
         vocabulary = cls(name=name, urispace=urispace)
         vocabulary.save()
-        print(vocabulary.profiles)
-        print(vocabulary.groups)
         creator.user.save()
         vocabulary.profiles.add(creator)
         assign_perm('owner', creator.user, vocabulary)

@@ -248,6 +248,11 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
                 urispace = '<{0}>'.format(vocabulary.urispace)
                 vocabulary.create_field(urispace, predicate, object)
 
+            elif 'download' in request.POST:
+                dataformat = request.POST['download']
+                result = vocabulary.export_vocabulary(dataformat)
+                return result
+
         # query all fields of the vocabulary
         query_result = fuseki_dev.query(vocabulary, """
             SELECT * WHERE {
