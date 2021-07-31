@@ -8,6 +8,7 @@ import Term.models
 from django.contrib.postgres.fields import ArrayField
 from django.http import HttpResponse
 import json
+from typing import List, Tuple
 
 
 class State(models.TextChoices):
@@ -32,6 +33,8 @@ class Dataformat(enum.Enum):
     TURTLE = 3
 
 # missing triple and searchable Interface TODO
+
+
 class Vocabulary(models.Model):
     name = models.SlugField(max_length=50, unique=True)
     profiles = models.ManyToManyField(Profile, blank=True)
@@ -54,7 +57,7 @@ class Vocabulary(models.Model):
         ]
 
     @classmethod
-    def create(cls, name: str, urispace : str, creator: Profile):
+    def create(cls, name: str, urispace: str, creator: Profile):
         from evoks.fuseki import fuseki_dev
         # TODO return type
         # TODO Save creator in triple field
@@ -92,13 +95,69 @@ class Vocabulary(models.Model):
         # mögliche dateiformate: rdf/xml, Json-Ld, Turtle
         placeholder = 'sdf'
 
-    def export_vocabulary(self, dataformat : str) -> None:
+    def get_namespaces(self) -> List[Tuple[str, str]]:
+        """Returns list of namespaces from fuseki and the prefixes tab
+
+        Args:
+            vocabulary (Vocabulary): vocabulary to get namespaces from
+
+        Returns:
+            List[Tuple[str, str]]: [description]
+        """
+        from evoks.fuseki import fuseki_dev
+        p = fuseki_dev.query(
+            self, """DESCRIBE <{0}>""".format(self.urispace), 'xml')
+
+        namespaces = []
+
+        v_prefixes = self.split_prefixes(self.convert_prefixes(self.prefixes))
+        for prefix in v_prefixes:
+            namespaces.append(prefix)
+
+        for short, uri in p.namespaces():
+            namespaces.append((short, uri.toPython()))
+
+        return namespaces
+
+    def prefixes_to_str(self, namespaces: List[Tuple[str, str]]) -> str:
+        prefix_list: List[str] = []
+        for k, value in namespaces:
+            prefix_string = 'prefix {0}: <{1}>'.format(k, value)
+            prefix_list.append(prefix_string)
+        query = '\n'.join(prefix_list)
+        return query
+
+    def split_prefixes(self, prefixes: List[str]):
+        splitted: List[Tuple[str, str]] = []
+        for prefix in prefixes:
+            parts = prefix.split()
+            splitted.append((parts[1], parts[2][1:-1]))
+        return splitted
+
+    def convert_prefixes(self, prefixes: List[str]):
+        """Turns a list of prefixes from this format: @prefix allars:   <http://www.yso.fi/onto/allars/> . to PREFIX allars <http://www.yso.fi/onto/allars/>
+
+        Args:
+            prefixes (List[str]): List of prefixes
+
+        Returns:
+            List[str]: List of converted prefixes
+        """
+        converted: List[str] = []
+        for prefix in prefixes:
+            parts = prefix.split()
+            converted.append('PREFIX {prefix} {url}'.format(
+                prefix=parts[1][:-1], url=parts[2]))
+
+        return converted
+
+    def export_vocabulary(self, dataformat: str) -> None:
         """Sends the Vocabulary in the provided dataformat to the users email
 
         Args:
             dataformat (Enum): Desired dataformat
         """
-        #TODO put urispace in there
+        # TODO put urispace in there
         from evoks.fuseki import fuseki_dev
         urispace = self.urispace
         query = """
@@ -109,20 +168,23 @@ class Vocabulary(models.Model):
         if dataformat == 'json':
             thing = fuseki_dev.query(self, query, 'json')
             file_content = json.dumps(thing, indent=4, sort_keys=True)
-            response = HttpResponse(file_content, content_type='application/json')
+            response = HttpResponse(
+                file_content, content_type='application/json')
             response['Content-Disposition'] = 'attachment; filename=export.json'
             return response
         elif dataformat == 'N3':
             thing = fuseki_dev.query(self, """
             DESCRIBE <http://www.yso.fi/onto/yso/> """, 'N3')
             file_content = thing.serialize(format='n3')
-            response = HttpResponse(file_content, content_type='application/ttl')
+            response = HttpResponse(
+                file_content, content_type='application/ttl')
             response['Content-Disposition'] = 'attachment; filename=export.ttl'
             return response
         elif dataformat == 'rdf/xml':
             thing = fuseki_dev.query(self, query, 'xml')
             file_content = thing.toprettyxml()
-            response = HttpResponse(file_content, content_type='application/xml')
+            response = HttpResponse(
+                file_content, content_type='application/xml')
             response['Content-Disposition'] = 'attachment; filename=export.xml'
             return response
 
@@ -191,7 +253,7 @@ class Vocabulary(models.Model):
         assign_perm(permission, profile.user, self)
 
     # permission required owner
-    def add_group(self, group_profile : GroupProfile, permission : str) -> None:
+    def add_group(self, group_profile: GroupProfile, permission: str) -> None:
         """Adds a group to the Vocabulary
 
         Args:
@@ -202,7 +264,7 @@ class Vocabulary(models.Model):
         assign_perm(permission, group_profile.group, self)
 
     # permission required owner
-    def remove_profile(self, profile : Profile) -> None:
+    def remove_profile(self, profile: Profile) -> None:
         """Removes a User from the Vocabulary
 
         Args:
@@ -215,7 +277,7 @@ class Vocabulary(models.Model):
             remove_perm(key, profile.user, self)
 
     # permission required owner
-    def remove_group(self, group_profile : GroupProfile) -> None:
+    def remove_group(self, group_profile: GroupProfile) -> None:
         """Removes a group from the Vocabulary
 
         Args:
@@ -241,7 +303,7 @@ class Vocabulary(models.Model):
         #       }'.format(url, type, content)
         placeholder = 123
 
-    def create_field(self, urispace : str, predicate : str, object : str) -> None:
+    def create_field(self, urispace: str, predicate: str, object: str) -> None:
         """Creates a Triple Field on the Fuseki-Dev Instance
 
         Args:
@@ -253,25 +315,15 @@ class Vocabulary(models.Model):
             str: [description]
         """
         from evoks.fuseki import fuseki_dev
-        p = fuseki_dev.query(
-                        self, """DESCRIBE <http://www.yso.fi/onto/yso/>""", 'xml')
 
-        namespaces = []
-        for short, uri in p.namespaces():
-            namespaces.append((short, uri.toPython()))
-        prefix_list = []
-        for key, value in namespaces:
-            prefix_string = 'prefix {0}: <{1}>'.format(key, value)
-            prefix_list.append(prefix_string)
-        query = ''
-        #query += vocabulary.convertPrefixes(self)
+        namespaces = self.get_namespaces()
+        query = self.prefixes_to_str(namespaces)
 
-        for x in prefix_list:
-            query += '{0} \n'.format(x)
-        
-        #normalerweise ist {0} urispace aber ist noch nicht richtig initialisiert...
-        query += 'INSERT DATA {{ {0} {1} {2} }}'.format('<http://www.yso.fi/onto/yso/>', predicate, object)
-        thing = fuseki_dev.query(vocabulary=self, query=str(query), return_format='json', endpoint='update')
+        # normalerweise ist {0} urispace aber ist noch nicht richtig initialisiert...
+        query += 'INSERT DATA {{ {0} {1} {2} }}'.format(
+            '<http://www.yso.fi/onto/yso/>', predicate, object)
+        fuseki_dev.query(vocabulary=self, query=str(
+            query), return_format='json', endpoint='update')
 
     def delete_field(url: str) -> None:
         """Deletes a Triple Field on the Fuseki-Dev Instance

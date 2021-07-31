@@ -20,24 +20,6 @@ from itertools import chain
 from guardian.shortcuts import get_perms
 
 
-def convert_prefixes(prefixes: List[str]):
-    """Turns a list of prefixes from this format: @prefix allars:   <http://www.yso.fi/onto/allars/> . to PREFIX allars <http://www.yso.fi/onto/allars/>
-
-    Args:
-        prefixes (List[str]): List of prefixes
-
-    Returns:
-        List[str]: List of converted prefixes
-    """
-    converted: List[str]
-    for prefix in prefixes:
-        parts = prefix.split()
-        converted.append('PREFIX {prefix} {url}'.format(
-            prefix=parts[1], url=parts[2]))
-
-    return converted
-
-
 def prefixes(request: HttpRequest, name: str) -> HttpResponse:
     """Views for prefixes tab
 
@@ -126,25 +108,6 @@ def uri_validator(uri: str) -> bool:
 # TODO: put in vocabulary model
 
 
-def get_namespaces(vocabulary: Vocabulary) -> List[Tuple[str, str]]:
-    """Returns list of namespaces from fuseki and the prefixes tab
-
-    Args:
-        vocabulary (Vocabulary): vocabulary to get namespaces from
-
-    Returns:
-        List[Tuple[str, str]]: [description]
-    """
-    p = fuseki_dev.query(
-        vocabulary, """DESCRIBE <{0}>""".format(vocabulary.urispace), 'xml')
-
-    namespaces = []
-    for short, uri in p.namespaces():
-        namespaces.append((short, uri.toPython()))
-
-    return namespaces
-
-
 def index(request: HttpRequest, name: str) -> HttpResponse:
     """View for vocabulary overview
 
@@ -181,25 +144,23 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
             if request.method == 'POST':
 
                 if 'obj' in request.POST:
-                    namespaces = get_namespaces(vocabulary)
+                    namespaces = vocabulary.get_namespaces()
 
                     key = request.POST['key']
                     obj = request.POST['obj']
                     lang = request.POST['lang']
                     new_obj = request.POST['new-obj']
                     type = request.POST['obj-type']
-                    prefix_list = []
-
+                    query = vocabulary.prefixes_to_str(namespaces)
+                    print(query)
                     # convert prefixes to sparql format
-                    for k, value in namespaces:
-                        prefix_string = 'prefix {0}: <{1}>'.format(k, value)
-                        prefix_list.append(prefix_string)
-                    query = '\n'.join(prefix_list)
+
                     # if we want to edit a field
                     if new_obj != '':
                         if type == 'uri':
                             # if uri is not valid its using a prefix and does not need braces
                             if uri_validator(new_obj) != True:
+                                print('valid blyaaaaaaaaaaat')
                                 new_object = new_obj
                             else:
                                 new_object = '<{0}>'.format(new_obj)
@@ -268,7 +229,11 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
                     type = request.POST['type']
                     object_string = request.POST['object']
                     if type == 'uri':
-                        object = '<{0}>'.format(object_string)
+                        # if uri is not valid its using a prefix and does not need braces
+                        if uri_validator(object_string) != True:
+                            object = object_string
+                        else:
+                            object = '<{0}>'.format(object_string)
                     else:
                         object = '\'{0}\''.format(object_string)
                     urispace = '<{0}>'.format(vocabulary.urispace)
@@ -289,7 +254,7 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
             }
         """, 'json')
 
-        namespaces = get_namespaces(vocabulary)
+        namespaces = vocabulary.get_namespaces()
 
         # manipulate fields to make the templating easier
         fields = {}
@@ -326,7 +291,7 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
         return redirect('login')
 
 
-def settings(request : HttpRequest, name : str):
+def settings(request: HttpRequest, name: str):
     """View for settings tab on a vocabulary
 
     Args:
@@ -352,12 +317,12 @@ def settings(request : HttpRequest, name : str):
 
         if request.method == 'POST':
             if user_is_owner:
-                #delete vocabulary
+                # delete vocabulary
                 if 'delete' in request.POST:
                     vocabulary.delete()
                     return redirect('base')
-                
-                #change state of vocabulary
+
+                # change state of vocabulary
                 elif(request.POST['vocabulary-setting'] == 'Live'):
                     vocabulary.set_live()
                 elif(request.POST['vocabulary-setting'] == 'Review'):
@@ -371,7 +336,7 @@ def settings(request : HttpRequest, name : str):
         return redirect('login')
 
 
-def members(request: HttpRequest, name : str):
+def members(request: HttpRequest, name: str):
     """Members that of the vocabulary views
 
     Args:
@@ -388,7 +353,7 @@ def members(request: HttpRequest, name : str):
         user = request.user
         vocabulary = Vocabulary.objects.get(name=name)
 
-        #put all users from groups and regulars into one list
+        # put all users from groups and regulars into one list
         profiles_list = vocabulary.profiles.all()
         user_list = []
         member_list = set()
@@ -425,10 +390,12 @@ def members(request: HttpRequest, name : str):
                     # check if User/Group exists
                     if User.objects.filter(email=invite_str).exists():
                         invite_user = User.objects.get(email=invite_str)
-                        vocabulary.add_profile(invite_user.profile, 'participant')
+                        vocabulary.add_profile(
+                            invite_user.profile, 'participant')
                     elif Group.objects.filter(name=invite_str).exists():
                         invite_group = Group.objects.get(name=invite_str)
-                        vocabulary.add_group(invite_group.groupprofile, 'participant')
+                        vocabulary.add_group(
+                            invite_group.groupprofile, 'participant')
                     else:
                         return HttpResponse('User/Group does not exist', status=404)
                 elif 'kickall' in request.POST:
@@ -437,7 +404,7 @@ def members(request: HttpRequest, name : str):
                     profile_name = request.POST['kick-member']
                     profile = vocabulary.profiles.get(name=profile_name)
                     vocabulary.remove_profile(profile)
-                
+
                 # refresh page
                 return redirect('vocabulary_members', vocabulary.name)
 
@@ -445,7 +412,7 @@ def members(request: HttpRequest, name : str):
                 raise PermissionDenied
 
         return render(request, 'vocabulary_members.html', context)
-        
+
     else:
         return redirect('login')
 
