@@ -4,7 +4,7 @@ from Term.models import Term
 from vocabularies.models import Vocabulary
 from itertools import chain
 
-def term_detail(request : HttpRequest, name : str,term_slug : str):
+def term_detail(request : HttpRequest, name : str, term_name : str):
     """View for the Term Detail Page
 
     Args:
