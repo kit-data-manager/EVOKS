@@ -177,7 +177,7 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
                     new_object = '\'{0}\''.format(new_obj)
                     if lang != '':  # add lang tag if it exists
                         new_object += '@{0}'.format(lang)
-                
+
                 # format the old object correctly
                 if type == 'uri':
                     if uri_validator(obj) != True:
@@ -280,12 +280,37 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
             # append object to list of objects with same predicate
             fields[pred]['objects'].append(obj)
 
+        search = request.GET.get('search')
+        search_results = None
+        if search != None:
+            search_results = []
+
+            # query all fields of the vocabulary
+            query_result = fuseki_dev.query(vocabulary, """
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+                SELECT DISTINCT ?s ?p ?o
+                WHERE {{
+                    ?s skos:prefLabel ?o .
+                FILTER (strstarts(str(?o), '{0}'))
+                }}
+                ORDER BY ?o
+                LIMIT 10
+            """.format(search), 'json')
+
+            for x in query_result['results']['bindings']:
+                s = x['s']['value']
+                value = x['o']['value']
+                search_results.append((s, value))
+
         template = loader.get_template('vocabulary.html')
         context = {
             'user': request.user,
             'vocabulary': vocabulary,
             'fields': fields,
-            'activities': activity_list
+            'activities': activity_list,
+            'search_results': search_results,
+            'search_term': search,
         }
         return HttpResponse(template.render(context, request))
 
