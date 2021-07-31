@@ -294,8 +294,6 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
                     ?s skos:prefLabel ?o .
                 FILTER (strstarts(str(?o), '{0}'))
                 }}
-                ORDER BY ?o
-                LIMIT 10
             """.format(search), 'json')
 
             for x in query_result['results']['bindings']:
