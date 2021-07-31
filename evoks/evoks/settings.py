@@ -62,6 +62,8 @@ ALLOWED_HOSTS: list[str] = []
 
 LOGIN_REDIRECT_URL = '/vocabularies'
 
+LOGIN_URL = '/login'
+
 
 # Application definition
 

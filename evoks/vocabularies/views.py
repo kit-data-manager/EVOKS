@@ -26,6 +26,7 @@ from evoks.fuseki import fuseki_dev
 from Comment.models import Comment
 from itertools import chain
 from guardian.shortcuts import get_perms
+from django.contrib.auth.decorators import login_required
 
 def convert_prefixes(prefixes: List[str]):
     converted: List[str]
@@ -90,9 +91,10 @@ def uri_validator(uri):
         return False
 
 
+@login_required()
 def index(request, name):
 
-    if request.user.is_authenticated:
+    #if request.user.is_authenticated:
         user = request.user
         vocabulary = Vocabulary.objects.get(name=name)
         user_is_owner = 'owner' in get_perms(user, vocabulary)
@@ -285,8 +287,8 @@ def index(request, name):
         }
         return HttpResponse(template.render(context, request))
         # return HttpResponse('pls login')
-    else:
-        return redirect('login')
+    #else:
+        #return redirect('login')
 
 
 def settings(request : HttpRequest, name : str):
