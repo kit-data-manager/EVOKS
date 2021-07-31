@@ -19,7 +19,6 @@ from Comment.models import Comment
 from itertools import chain
 from guardian.shortcuts import get_perms
 from django.contrib.auth.decorators import login_required, user_passes_test
-from evoks.decorators import group_required
 
 
 def prefixes(request: HttpRequest, name: str) -> HttpResponse:
