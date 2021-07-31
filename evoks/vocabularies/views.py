@@ -107,7 +107,7 @@ def uri_validator(uri: str) -> bool:
         return False
 
 
-@login_required()
+
 def index(request: HttpRequest, name: str) -> HttpResponse:
     """View for vocabulary overview
 
@@ -322,7 +322,6 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
         return HttpResponse('your not part of this vocabulary')
 
 
-@login_required
 def settings(request: HttpRequest, name: str):
     """View for settings tab on a vocabulary
 
@@ -364,7 +363,6 @@ def settings(request: HttpRequest, name: str):
     return render(request, 'vocabulary_setting.html', context)
 
 
-@login_required()
 def members(request: HttpRequest, name: str):
     """Members that of the vocabulary views
 
@@ -441,7 +439,6 @@ def members(request: HttpRequest, name: str):
     return render(request, 'vocabulary_members.html', context)
 
 
-@login_required()
 def terms(request: HttpRequest, name: str) -> HttpResponse:
     """
     View for displaying all terms of a vocabulary
@@ -508,7 +505,6 @@ def terms(request: HttpRequest, name: str) -> HttpResponse:
 # TODO should get merged into the vocabulary dashboard view
 
 
-@login_required()
 def base(request: HttpRequest):
     user = request.user
     if request.method == 'POST':
