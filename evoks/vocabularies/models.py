@@ -6,8 +6,10 @@ import enum
 from guardian.shortcuts import assign_perm, remove_perm, get_perms
 import Term.models
 from django.contrib.postgres.fields import ArrayField
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 import json
+import requests
+from django.conf import settings
 
 
 class State(models.TextChoices):
@@ -83,14 +85,32 @@ class Vocabulary(models.Model):
         if self.state is State.LIVE:
             self.set_dev()
 
-    def import_vocabulary(input: MultiValueDict) -> None:
+    def import_vocabulary(self, input) -> None:
         """Imports a Vocabulary
 
         Args:
-            input (MultiValueDict): Vocabulary to import
+            input (): Vocabulary to import
         """
-        # mögliche dateiformate: rdf/xml, Json-Ld, Turtle
-        placeholder = 'sdf'
+        # TODO mögliche dateiformate: ?
+        from evoks.fuseki import fuseki_dev
+
+        user = settings.FUSEKI_USER
+        password = settings.FUSEKI_PASSWORD
+
+        data = input.open().read()
+        
+        #if not turtle different thing needed
+        #n3: text/n3; charset=utf-8
+        #nt: text/plain
+        #rdf: application/rdf+xml
+        #owl: application/rdf+xml
+        #nq: application/n-quads
+        #trig: application/trig
+        #jsonld: application/ld+json
+        headers = {'Content-Type': 'text/turtle;charset=utf-8'}
+        r = requests.put('http://fuseki-dev:3030/{0}/data'.format(self.name), data=data, auth=(user, password), headers=headers)
+        print(r)
+ 
 
     def export_vocabulary(self, dataformat : str) -> None:
         """Sends the Vocabulary in the provided dataformat to the users email

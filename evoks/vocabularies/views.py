@@ -18,7 +18,8 @@ from evoks.fuseki import fuseki_dev
 from Comment.models import Comment
 from itertools import chain
 from guardian.shortcuts import get_perms
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from evoks.decorators import group_required
 
 
 def convert_prefixes(prefixes: List[str]):
@@ -511,15 +512,14 @@ def base(request: HttpRequest):
     if request.method == 'POST':
 
         if 'create-vocabulary' in request.POST:
+            try:
+                voc_name = request.POST['name']
+                urispace = request.POST['urispace']
+                vocabulary = Vocabulary.create(
+                    name=voc_name, urispace=urispace, creator=user.profile)
+            except IntegrityError:
+                return HttpResponse('vocabulary already exists')
             if 'file-upload' in request.FILES:
                 import_voc = request.FILES['file-upload']
-                Vocabulary.import_vocabulary(import_voc)
-            elif request.POST['name'] != '' and request.POST['urispace'] != '':
-                try:
-                    voc_name = request.POST['name']
-                    urispace = request.POST['urispace']
-                    Vocabulary.create(
-                        name=voc_name, urispace=urispace, creator=user.profile)
-                except IntegrityError:
-                    return HttpResponse('vocabulary already exists')
+                vocabulary.import_vocabulary(input=import_voc)
     return render(request, 'base.html')
