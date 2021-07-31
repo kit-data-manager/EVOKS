@@ -177,20 +177,36 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
                     new_object = '\'{0}\''.format(new_obj)
                     if lang != '':  # add lang tag if it exists
                         new_object += '@{0}'.format(lang)
+                
                 # format the old object correctly
                 if type == 'uri':
                     if uri_validator(obj) != True:
                         object = obj
                     else:
-                        query += """
-                        DELETE {{ <{urispace}> <{predicate}> {object} }}
-                        INSERT {{ <{urispace}> <{predicate}> {new_object} }}
-                        WHERE
-                        {{ <{urispace}> <{predicate}> {object} }}
-                        """.format(new_object=new_object, urispace=vocabulary.urispace, predicate=key, object=object)
-                        fuseki_dev.query(
-                            vocabulary, query, 'xml', 'update')
+                        object = '<{0}>'.format(obj)
+                else:
+                    object = '\'{0}\''.format(obj)
+                    if lang != '':
+                        object += '@{0}'.format(lang)
 
+                # delete field
+                if new_obj == '':
+                    query += """
+                    DELETE DATA
+                    {{ <{urispace}> <{predicate}> {object} }}
+                    """.format(urispace=vocabulary.urispace, predicate=key, object=object)
+                    fuseki_dev.query(
+                        vocabulary, query, 'xml', 'update')
+                # edit field
+                else:
+                    query += """
+                    DELETE {{ <{urispace}> <{predicate}> {object} }}
+                    INSERT {{ <{urispace}> <{predicate}> {new_object} }}
+                    WHERE
+                    {{ <{urispace}> <{predicate}> {object} }}
+                    """.format(new_object=new_object, urispace=vocabulary.urispace, predicate=key, object=object)
+                    fuseki_dev.query(
+                        vocabulary, query, 'xml', 'update')
             # create comment
             elif 'comment' in request.POST:
                 comment_text = request.POST['comment-text']
