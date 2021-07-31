@@ -1,26 +1,18 @@
-import datetime
-from django import template
-from django.db.models import query
-from django.db.models.query_utils import Q
 from django.http.request import HttpRequest
 from django.shortcuts import render
 from django.http import HttpResponse
 from .models import *
 from django.template import loader
-from SPARQLWrapper import SPARQLWrapper, JSON
 from django.contrib.auth.models import User, Group
-from django.shortcuts import redirect, reverse
+from django.shortcuts import redirect
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
-from rdflib import Graph, Literal
-import time
-from typing import List
+from typing import List, Tuple
 from django.db import IntegrityError
 from urllib.parse import urlparse
 
 from django.core.exceptions import PermissionDenied
 from .forms import Vocabulary_Terms_Form
-from Term.models import Term
 from Tag.models import Tag
 from evoks.fuseki import fuseki_dev
 from Comment.models import Comment
@@ -28,7 +20,16 @@ from itertools import chain
 from guardian.shortcuts import get_perms
 from django.contrib.auth.decorators import login_required
 
+
 def convert_prefixes(prefixes: List[str]):
+    """Turns a list of prefixes from this format: @prefix allars:   <http://www.yso.fi/onto/allars/> . to PREFIX allars <http://www.yso.fi/onto/allars/>
+
+    Args:
+        prefixes (List[str]): List of prefixes
+
+    Returns:
+        List[str]: List of converted prefixes
+    """
     converted: List[str]
     for prefix in prefixes:
         parts = prefix.split()
@@ -38,15 +39,24 @@ def convert_prefixes(prefixes: List[str]):
     return converted
 
 
-def prefixes(request, name):
+def prefixes(request: HttpRequest, name: str) -> HttpResponse:
+    """Views for prefixes tab
+
+    Args:
+        request (HttpRequest): request object
+        name (HttpResponse): name of vocabulary
+
+    Returns:
+        HttpResponse: HttpResponse
+    """
     vocabulary = Vocabulary.objects.get(name=name)
 
     if request.method == 'POST':
         prefixes = request.POST['prefixes'].split(
             '\r\n')  # could lead to problems with \r\n
+        # remove all empty lines
         non_empty_prefixes = [line for line in prefixes if line.strip() != ""]
-        vocabulary.prefixes = non_empty_prefixes
-        convert_prefixes(non_empty_prefixes)
+        vocabulary.prefixes = non_empty_prefixes  # save prefixes in vocabulary
         vocabulary.save()
 
     template = loader.get_template('vocabulary_prefixes.html')
@@ -59,42 +69,95 @@ def prefixes(request, name):
     return HttpResponse(template.render(context, request))
 
 
-def convert_predicate(namespaces, predicate):
+def convert_predicate(namespaces: List[Tuple[str, str]], predicate: str) -> str:
+    """Convert a URI predicate to a shortened predicate with namespaces
+
+    Args:
+        namespaces (List[(str, str)]): List of namespace tuples (prefix, url)
+        predicate (str): predicate to be shortened
+
+    Returns:
+        str: shortened predicate
+    """
+    # get type of predicate
     type = predicate.rsplit('#', 1)[-1]
     if type == predicate:
         type = predicate.rsplit('/', 1)[-1]
 
+    # algorithm to find the longest prefix that is a perfect match
     max = 0
     max_prefix = None
     count = 0
+    # iterate over namespaces
     for s, p in namespaces:
+        # iterate over letters in predicate
         for i, e in enumerate(p):
+            # if not out of range and letters are equal
             if len(predicate) > i and e == predicate[i]:
                 count += 1
-            else:
+            else:  # out of range, bad luck:(
                 continue
+        # new best match and matching on complete length
         if count > max and count == len(p):
             max = count
             max_prefix = (s, p)
         count = 0
+
+    # no prefix found, predicate is just a normal URI
     if max_prefix is None:
         return predicate
     return '{prefix}:{type}'.format(
         prefix=max_prefix[0], type=type)
 
 
-def uri_validator(uri):
+def uri_validator(uri: str) -> bool:
+    """validates a URI
+    Args:
+        uri (str): uri to be validated
+
+    Returns:
+        bool: true if valid, false if not
+    """
     try:
         result = urlparse(uri)
         return all([result.scheme, result.netloc])
     except:
         return False
 
+# TODO: put in vocabulary model
 
-@login_required()
-def index(request, name):
 
-    #if request.user.is_authenticated:
+def get_namespaces(vocabulary: Vocabulary) -> List[Tuple[str, str]]:
+    """Returns list of namespaces from fuseki and the prefixes tab
+
+    Args:
+        vocabulary (Vocabulary): vocabulary to get namespaces from
+
+    Returns:
+        List[Tuple[str, str]]: [description]
+    """
+    p = fuseki_dev.query(
+        vocabulary, """DESCRIBE <{0}>""".format(vocabulary.urispace), 'xml')
+
+    namespaces = []
+    for short, uri in p.namespaces():
+        namespaces.append((short, uri.toPython()))
+
+    return namespaces
+
+
+def index(request: HttpRequest, name: str) -> HttpResponse:
+    """View for vocabulary overview
+
+    Args:
+        request (HttpRequest): request object
+        name (str): name of vocabulary
+
+    Returns:
+        HttpResponse: Http Response object
+    """
+    # TODO put this shit in a middleware
+    if request.user.is_authenticated:
         user = request.user
         vocabulary = Vocabulary.objects.get(name=name)
         user_is_owner = 'owner' in get_perms(user, vocabulary)
@@ -104,58 +167,48 @@ def index(request, name):
 
         # check if user is allowed to view vocabulary
         if user_is_owner or user_is_participant or user_is_spectator or user_is_staff or vocabulary.state == 'Review':
+
             # put comments and tags on vocabulary into a list sorted from newest to oldest
             comments = vocabulary.comment_set.filter()
             tags = vocabulary.tag_set.filter()
             activity_list = sorted(
                 chain(comments, tags),
                 key=lambda obj: str(obj.post_date), reverse=True)
+
+            # add type of activity to activity list so we can render it differently
             for index, key in enumerate(activity_list):
                 activity_list[index].type = key.__class__.__name__
-
-            context = {
-                'user': request.user,
-                'vocabulary': vocabulary,
-                'activities': activity_list
-            }
 
             if request.method == 'POST':
 
                 if 'obj' in request.POST:
+                    namespaces = get_namespaces(vocabulary)
 
-                    p = fuseki_dev.query(
-                        vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso>""", 'xml')
-
-                    namespaces = []
-                    for short, uri in p.namespaces():
-                        namespaces.append((short, uri.toPython()))
-                    # print(uri.toPython())
-
-                    # get namespaces from model and vocabulary
                     key = request.POST['key']
                     obj = request.POST['obj']
                     lang = request.POST['lang']
                     new_obj = request.POST['new-obj']
                     type = request.POST['obj-type']
                     prefix_list = []
+
+                    # convert prefixes to sparql format
                     for k, value in namespaces:
                         prefix_string = 'prefix {0}: <{1}>'.format(k, value)
                         prefix_list.append(prefix_string)
-                    query = """"""
-                    for x in prefix_list:
-                        query += '{0} \n'.format(x)
-
+                    query = '\n'.join(prefix_list)
+                    # if we want to edit a field
                     if new_obj != '':
                         if type == 'uri':
+                            # if uri is not valid its using a prefix and does not need braces
                             if uri_validator(new_obj) != True:
                                 new_object = new_obj
                             else:
                                 new_object = '<{0}>'.format(new_obj)
                         else:
                             new_object = '\'{0}\''.format(new_obj)
-                            if lang != '':
+                            if lang != '':  # add lang tag if it exists
                                 new_object += '@{0}'.format(lang)
-
+                    # format the old object correctly
                     if type == 'uri':
                         if uri_validator(obj) != True:
                             object = obj
@@ -166,36 +219,27 @@ def index(request, name):
                         if lang != '':
                             object += '@{0}'.format(lang)
 
-
-
                     # delete field
                     if new_obj == '':
                         query += """
                         DELETE DATA
-                        {{
-                        <{urispace}> <{predicate}> {object}
-                        }}
+                        {{ <{urispace}> <{predicate}> {object} }}
                         """.format(urispace=vocabulary.urispace, predicate=key, object=object)
-                        p = fuseki_dev.query(
+                        fuseki_dev.query(
                             vocabulary, query, 'xml', 'update')
-
-                    else:  # edit field
-                        # old
-                        # new
-                        # old
+                    # edit field
+                    else:
                         query += """
                         DELETE {{ <{urispace}> <{predicate}> {object} }}
                         INSERT {{ <{urispace}> <{predicate}> {new_object} }}
                         WHERE
                         {{ <{urispace}> <{predicate}> {object} }}
                         """.format(new_object=new_object, urispace=vocabulary.urispace, predicate=key, object=object)
-                        print(query)
-                        p = fuseki_dev.query(
+                        fuseki_dev.query(
                             vocabulary, query, 'xml', 'update')
 
-
                 # create comment
-                if 'comment' in request.POST:
+                elif 'comment' in request.POST:
                     comment_text = request.POST['comment-text']
                     Comment.create(
                         text=comment_text, author=user.profile, vocabulary=vocabulary, term=None)
@@ -205,16 +249,19 @@ def index(request, name):
                 # create tag
                 elif 'tag' in request.POST:
                     tag_name = request.POST['tag-name']
-                    tag = Tag.create(
+
+                    # we only want 1 tag with the same name per vocabulary
+                    Tag.objects.filter(
+                        name=tag_name, vocabulary=vocabulary).delete()
+                    # create new tag
+                    Tag.create(
                         name=tag_name, author=user.profile, vocabulary=vocabulary, term=None)
-                    # refresh page so created tag is visible
                     return redirect('vocabulary_overview', name=name)
 
                 elif 'delete-tag' in request.POST:
-                    print(request.POST['delete-tag'])
-                    #TODO make tag name unique!! or for loop
-                    tag = Tag.objects.get(name=request.POST['delete-tag'])
-                    tag.delete()
+                    tag_name = request.POST['delete-tag']
+                    Tag.objects.filter(
+                        name=tag_name, vocabulary=vocabulary).delete()
                     return redirect('vocabulary_overview', name=name)
 
                 elif 'create-property' in request.POST:
@@ -227,56 +274,46 @@ def index(request, name):
                         object = '\'{0}\''.format(object_string)
                     urispace = '<{0}>'.format(vocabulary.urispace)
                     vocabulary.create_field(urispace, predicate, object)
-                #TODO put in right view, change create_team modal form action
 
                 elif 'download' in request.POST:
                     type = request.POST['download']
-                    print(type)
-                    response  = vocabulary.export_vocabulary(type)
+                    response = vocabulary.export_vocabulary(type)
                     return response
 
-                    #TODO refactor to vocabulary.export_vocabulary()
-
-                elif 'create-team' in request.POST:
-                    team_name = request.POST['team-name']
-                    Group.objects.create(name=team_name)
-                    print(Group.objects.get(name=team_name))
         else:
             return HttpResponse('your not part of this vocabulary')
 
-        thing = fuseki_dev.query(vocabulary, """
+        # query all fields of the vocabulary
+        query_result = fuseki_dev.query(vocabulary, """
             SELECT * WHERE {
                 <http://www.yso.fi/onto/yso/> ?pred ?obj .
             }
         """, 'json')
 
-        p = fuseki_dev.query(
-            vocabulary, """DESCRIBE <http://www.yso.fi/onto/yso/>""", 'xml')
+        namespaces = get_namespaces(vocabulary)
 
-        namespaces = []
-        for short, uri in p.namespaces():
-            namespaces.append((short, uri.toPython()))
-            # print(uri.toPython())
-
-        # print('--------------------')
+        # manipulate fields to make the templating easier
         fields = {}
-        for x in thing['results']['bindings']:
+        for x in query_result['results']['bindings']:
             pred = x['pred']['value']
             obj = x['obj']
             if pred not in fields:
-                # print(pred)
+                # create new predicate shortcut and initialize object list
                 shortcut = convert_predicate(namespaces, pred)
-
                 fields[pred] = {
                     'type': shortcut, 'objects': []}
+
+            # if uri, add shortcut if possible
             if obj['type'] == 'uri':
                 shortcut = convert_predicate(namespaces, obj['value'])
                 obj['shortcut'] = shortcut if shortcut[-1] != ':' else obj['value']
 
+            # add language tag
             if 'xml:lang' in obj:
                 obj['lang'] = obj['xml:lang']
+
+            # append object to list of objects with same predicate
             fields[pred]['objects'].append(obj)
-            print(obj)
 
         template = loader.get_template('vocabulary.html')
         context = {
@@ -286,9 +323,8 @@ def index(request, name):
             'activities': activity_list
         }
         return HttpResponse(template.render(context, request))
-        # return HttpResponse('pls login')
-    #else:
-        #return redirect('login')
+    else:
+        return redirect('login')
 
 
 def settings(request : HttpRequest, name : str):
@@ -415,18 +451,34 @@ def members(request: HttpRequest, name : str):
         return redirect('login')
 
 
-def terms(request: HttpRequest, name: str):
+def terms(request: HttpRequest, name: str) -> HttpResponse:
+    """
+    View for displaying all terms of a vocabulary
+    Args:
+        request (HttpRequest): request object
+        name (str): vocabulary name
+
+    Returns:
+        HttpResponse: response object
+    """
+
     vocabulary = Vocabulary.objects.get(name=name)
 
+    # get letter from querystring or default a
     letter = request.GET.get('letter') or 'a'
+    # get page number from querystring or default 1
     page_number = int(request.GET.get('page') or 1)
 
+    # pagination limit
     limit = 20
+    # get all terms starting at offset
     offset = (page_number-1) * limit
 
+    # A-Z select option
     form = Vocabulary_Terms_Form(
         initial={'initial_letter': (letter, letter.upper())})
 
+    # get limit terms starting at offset starting with letter
     query = """
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
@@ -440,30 +492,27 @@ def terms(request: HttpRequest, name: str):
     LIMIT {limit} OFFSET {offset}
     """.format(limit=20, offset=offset, letter=letter)
 
+    # query fuseki_dev and return json
     thing = fuseki_dev.query(vocabulary, query, 'json')
 
+    # manipulate terms for easier templating
     terms = []
     for x in thing['results']['bindings']:
         obj = x['obj']
         terms.append({'name': obj['value']})
 
-    # print(json.dumps(thing, indent=4, sort_keys=True))
+    next_page_number = page_number + 1  # going over page limit does not matter
+    previous_page_number = 1 if page_number - \
+        1 == 0 else page_number-1  # dont go to page 0
 
-    # initial_terms = terms.filter(name__startswith=initial_letter)
-    # p = Paginator(terms, 10)
-    # page_number = request.GET.get('page')
-    # page_obj = p.get_page(page_number)
-
-    # p.allow_empty_first_page
-
-    # TODO filter queryset by initial letter, sort queryset alphabeticaly
-    # form.add_initial_prefix(letter)
     context = {
         'vocabulary': vocabulary,
-        'terms': {'data': terms, 'next_page_number': page_number+1, 'previous_page_number': 1 if page_number-1 == 0 else page_number-1, 'start_index': offset, 'end_index': offset+len(terms)},
+        'terms': {'data': terms, 'next_page_number': next_page_number, 'previous_page_number': previous_page_number, 'start_index': offset, 'end_index': offset+len(terms)},
         'initial_letter': form,
     }
     return render(request, 'vocabulary_terms.html', context)
+
+# TODO should get merged into the vocabulary dashboard view
 
 
 def base(request: HttpRequest):
