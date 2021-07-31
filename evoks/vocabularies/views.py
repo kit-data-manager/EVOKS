@@ -145,7 +145,7 @@ def get_namespaces(vocabulary: Vocabulary) -> List[Tuple[str, str]]:
 
     return namespaces
 
-
+@login_required()
 def index(request: HttpRequest, name: str) -> HttpResponse:
     """View for vocabulary overview
 
@@ -157,176 +157,173 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
         HttpResponse: Http Response object
     """
     # TODO put this shit in a middleware
-    if request.user.is_authenticated:
-        user = request.user
-        vocabulary = Vocabulary.objects.get(name=name)
-        user_is_owner = 'owner' in get_perms(user, vocabulary)
-        user_is_participant = 'participant' in get_perms(user, vocabulary)
-        user_is_spectator = 'spectator' in get_perms(user, vocabulary)
-        user_is_staff = user.is_staff
+    user = request.user
+    vocabulary = Vocabulary.objects.get(name=name)
+    user_is_owner = 'owner' in get_perms(user, vocabulary)
+    user_is_participant = 'participant' in get_perms(user, vocabulary)
+    user_is_spectator = 'spectator' in get_perms(user, vocabulary)
 
         # check if user is allowed to view vocabulary
-        if user_is_owner or user_is_participant or user_is_spectator or user_is_staff or vocabulary.state == 'Review':
+    if user_is_owner or user_is_participant or user_is_spectator or vocabulary.state == 'Review':
 
-            # put comments and tags on vocabulary into a list sorted from newest to oldest
-            comments = vocabulary.comment_set.filter()
-            tags = vocabulary.tag_set.filter()
-            activity_list = sorted(
-                chain(comments, tags),
-                key=lambda obj: str(obj.post_date), reverse=True)
+        # put comments and tags on vocabulary into a list sorted from newest to oldest
+        comments = vocabulary.comment_set.filter()
+        tags = vocabulary.tag_set.filter()
+        activity_list = sorted(
+            chain(comments, tags),
+            key=lambda obj: str(obj.post_date), reverse=True)
 
-            # add type of activity to activity list so we can render it differently
-            for index, key in enumerate(activity_list):
-                activity_list[index].type = key.__class__.__name__
+        # add type of activity to activity list so we can render it differently
+        for index, key in enumerate(activity_list):
+            activity_list[index].type = key.__class__.__name__
 
-            if request.method == 'POST':
+        if request.method == 'POST':
 
-                if 'obj' in request.POST:
-                    namespaces = get_namespaces(vocabulary)
+            if 'obj' in request.POST:
+                namespaces = get_namespaces(vocabulary)
 
-                    key = request.POST['key']
-                    obj = request.POST['obj']
-                    lang = request.POST['lang']
-                    new_obj = request.POST['new-obj']
-                    type = request.POST['obj-type']
-                    prefix_list = []
+                key = request.POST['key']
+                obj = request.POST['obj']
+                lang = request.POST['lang']
+                new_obj = request.POST['new-obj']
+                type = request.POST['obj-type']
+                prefix_list = []
 
-                    # convert prefixes to sparql format
-                    for k, value in namespaces:
-                        prefix_string = 'prefix {0}: <{1}>'.format(k, value)
-                        prefix_list.append(prefix_string)
-                    query = '\n'.join(prefix_list)
-                    # if we want to edit a field
-                    if new_obj != '':
-                        if type == 'uri':
-                            # if uri is not valid its using a prefix and does not need braces
-                            if uri_validator(new_obj) != True:
-                                new_object = new_obj
-                            else:
-                                new_object = '<{0}>'.format(new_obj)
-                        else:
-                            new_object = '\'{0}\''.format(new_obj)
-                            if lang != '':  # add lang tag if it exists
-                                new_object += '@{0}'.format(lang)
-                    # format the old object correctly
+                # convert prefixes to sparql format
+                for k, value in namespaces:
+                    prefix_string = 'prefix {0}: <{1}>'.format(k, value)
+                    prefix_list.append(prefix_string)
+                query = '\n'.join(prefix_list)
+                # if we want to edit a field
+                if new_obj != '':
                     if type == 'uri':
-                        if uri_validator(obj) != True:
-                            object = obj
+                        # if uri is not valid its using a prefix and does not need braces
+                        if uri_validator(new_obj) != True:
+                            new_object = new_obj
                         else:
-                            object = '<{0}>'.format(obj)
+                            new_object = '<{0}>'.format(new_obj)
                     else:
-                        object = '\'{0}\''.format(obj)
-                        if lang != '':
-                            object += '@{0}'.format(lang)
-
-                    # delete field
-                    if new_obj == '':
-                        query += """
-                        DELETE DATA
-                        {{ <{urispace}> <{predicate}> {object} }}
-                        """.format(urispace=vocabulary.urispace, predicate=key, object=object)
-                        fuseki_dev.query(
-                            vocabulary, query, 'xml', 'update')
-                    # edit field
+                        new_object = '\'{0}\''.format(new_obj)
+                        if lang != '':  # add lang tag if it exists
+                            new_object += '@{0}'.format(lang)
+                # format the old object correctly
+                if type == 'uri':
+                    if uri_validator(obj) != True:
+                        object = obj
                     else:
-                        query += """
-                        DELETE {{ <{urispace}> <{predicate}> {object} }}
-                        INSERT {{ <{urispace}> <{predicate}> {new_object} }}
-                        WHERE
-                        {{ <{urispace}> <{predicate}> {object} }}
-                        """.format(new_object=new_object, urispace=vocabulary.urispace, predicate=key, object=object)
-                        fuseki_dev.query(
-                            vocabulary, query, 'xml', 'update')
+                        object = '<{0}>'.format(obj)
+                else:
+                    object = '\'{0}\''.format(obj)
+                    if lang != '':
+                        object += '@{0}'.format(lang)
 
-                # create comment
-                elif 'comment' in request.POST:
-                    comment_text = request.POST['comment-text']
-                    Comment.create(
-                        text=comment_text, author=user.profile, vocabulary=vocabulary, term=None)
-                    # refresh page so created comment is visible
-                    return redirect('vocabulary_overview', name=name)
+                # delete field
+                if new_obj == '':
+                    query += """
+                    DELETE DATA
+                    {{ <{urispace}> <{predicate}> {object} }}
+                    """.format(urispace=vocabulary.urispace, predicate=key, object=object)
+                    fuseki_dev.query(
+                        vocabulary, query, 'xml', 'update')
+                # edit field
+                else:
+                    query += """
+                    DELETE {{ <{urispace}> <{predicate}> {object} }}
+                    INSERT {{ <{urispace}> <{predicate}> {new_object} }}
+                    WHERE
+                    {{ <{urispace}> <{predicate}> {object} }}
+                    """.format(new_object=new_object, urispace=vocabulary.urispace, predicate=key, object=object)
+                    fuseki_dev.query(
+                        vocabulary, query, 'xml', 'update')
 
-                # create tag
-                elif 'tag' in request.POST:
-                    tag_name = request.POST['tag-name']
+            # create comment
+            elif 'comment' in request.POST:
+                comment_text = request.POST['comment-text']
+                Comment.create(
+                    text=comment_text, author=user.profile, vocabulary=vocabulary, term=None)
+                # refresh page so created comment is visible
+                return redirect('vocabulary_overview', name=name)
 
-                    # we only want 1 tag with the same name per vocabulary
-                    Tag.objects.filter(
-                        name=tag_name, vocabulary=vocabulary).delete()
-                    # create new tag
-                    Tag.create(
-                        name=tag_name, author=user.profile, vocabulary=vocabulary, term=None)
-                    return redirect('vocabulary_overview', name=name)
+            # create tag
+            elif 'tag' in request.POST:
+                tag_name = request.POST['tag-name']
 
-                elif 'delete-tag' in request.POST:
-                    tag_name = request.POST['delete-tag']
-                    Tag.objects.filter(
-                        name=tag_name, vocabulary=vocabulary).delete()
-                    return redirect('vocabulary_overview', name=name)
+                # we only want 1 tag with the same name per vocabulary
+                Tag.objects.filter(
+                    name=tag_name, vocabulary=vocabulary).delete()
+                # create new tag
+                Tag.create(
+                    name=tag_name, author=user.profile, vocabulary=vocabulary, term=None)
+                return redirect('vocabulary_overview', name=name)
 
-                elif 'create-property' in request.POST:
-                    predicate = request.POST['predicate']
-                    type = request.POST['type']
-                    object_string = request.POST['object']
-                    if type == 'uri':
-                        object = '<{0}>'.format(object_string)
-                    else:
-                        object = '\'{0}\''.format(object_string)
-                    urispace = '<{0}>'.format(vocabulary.urispace)
-                    vocabulary.create_field(urispace, predicate, object)
+            elif 'delete-tag' in request.POST:
+                tag_name = request.POST['delete-tag']
+                Tag.objects.filter(
+                    name=tag_name, vocabulary=vocabulary).delete()
+                return redirect('vocabulary_overview', name=name)
 
-                elif 'download' in request.POST:
-                    type = request.POST['download']
-                    response = vocabulary.export_vocabulary(type)
-                    return response
+            elif 'create-property' in request.POST:
+                predicate = request.POST['predicate']
+                type = request.POST['type']
+                object_string = request.POST['object']
+                if type == 'uri':
+                    object = '<{0}>'.format(object_string)
+                else:
+                    object = '\'{0}\''.format(object_string)
+                urispace = '<{0}>'.format(vocabulary.urispace)
+                vocabulary.create_field(urispace, predicate, object)
 
-        else:
-            return HttpResponse('your not part of this vocabulary')
+            elif 'download' in request.POST:
+                type = request.POST['download']
+                response = vocabulary.export_vocabulary(type)
+                return response
 
-        # query all fields of the vocabulary
-        query_result = fuseki_dev.query(vocabulary, """
-            SELECT * WHERE {
-                <http://www.yso.fi/onto/yso/> ?pred ?obj .
-            }
-        """, 'json')
-
-        namespaces = get_namespaces(vocabulary)
-
-        # manipulate fields to make the templating easier
-        fields = {}
-        for x in query_result['results']['bindings']:
-            pred = x['pred']['value']
-            obj = x['obj']
-            if pred not in fields:
-                # create new predicate shortcut and initialize object list
-                shortcut = convert_predicate(namespaces, pred)
-                fields[pred] = {
-                    'type': shortcut, 'objects': []}
-
-            # if uri, add shortcut if possible
-            if obj['type'] == 'uri':
-                shortcut = convert_predicate(namespaces, obj['value'])
-                obj['shortcut'] = shortcut if shortcut[-1] != ':' else obj['value']
-
-            # add language tag
-            if 'xml:lang' in obj:
-                obj['lang'] = obj['xml:lang']
-
-            # append object to list of objects with same predicate
-            fields[pred]['objects'].append(obj)
-
-        template = loader.get_template('vocabulary.html')
-        context = {
-            'user': request.user,
-            'vocabulary': vocabulary,
-            'fields': fields,
-            'activities': activity_list
-        }
-        return HttpResponse(template.render(context, request))
     else:
-        return redirect('login')
+        return HttpResponse('your not part of this vocabulary')
+
+    # query all fields of the vocabulary
+    query_result = fuseki_dev.query(vocabulary, """
+        SELECT * WHERE {
+            <http://www.yso.fi/onto/yso/> ?pred ?obj .
+        }
+    """, 'json')
+
+    namespaces = get_namespaces(vocabulary)
+
+    # manipulate fields to make the templating easier
+    fields = {}
+    for x in query_result['results']['bindings']:
+        pred = x['pred']['value']
+        obj = x['obj']
+        if pred not in fields:
+            # create new predicate shortcut and initialize object list
+            shortcut = convert_predicate(namespaces, pred)
+            fields[pred] = {
+                'type': shortcut, 'objects': []}
+
+        # if uri, add shortcut if possible
+        if obj['type'] == 'uri':
+            shortcut = convert_predicate(namespaces, obj['value'])
+            obj['shortcut'] = shortcut if shortcut[-1] != ':' else obj['value']
+
+        # add language tag
+        if 'xml:lang' in obj:
+            obj['lang'] = obj['xml:lang']
+
+        # append object to list of objects with same predicate
+        fields[pred]['objects'].append(obj)
+
+    template = loader.get_template('vocabulary.html')
+    context = {
+        'user': request.user,
+        'vocabulary': vocabulary,
+        'fields': fields,
+        'activities': activity_list
+    }
+    return HttpResponse(template.render(context, request))
 
 
+@login_required
 def settings(request : HttpRequest, name : str):
     """View for settings tab on a vocabulary
 
@@ -337,41 +334,38 @@ def settings(request : HttpRequest, name : str):
     Returns:
         HttpResponse: Rendered Settings Site
     """
-    if request.user.is_authenticated:
-        try:
-            vocabulary = Vocabulary.objects.get(name=name)
-            print(vocabulary.state)
-        except ObjectDoesNotExist:
-            return redirect('base')
+    try:
+        vocabulary = Vocabulary.objects.get(name=name)
+        print(vocabulary.state)
+    except ObjectDoesNotExist:
+        return redirect('base')
 
-        user = request.user
-        user_is_owner = 'owner' in get_perms(user, vocabulary)
+    user = request.user
+    user_is_owner = 'owner' in get_perms(user, vocabulary)
 
-        context = {
-            'vocabulary': vocabulary
-        }
+    context = {
+        'vocabulary': vocabulary
+    }
 
-        if request.method == 'POST':
-            if user_is_owner:
-                #delete vocabulary
-                if 'delete' in request.POST:
-                    vocabulary.delete()
-                    return redirect('base')
+    if request.method == 'POST':
+        if user_is_owner:
+            #delete vocabulary
+            if 'delete' in request.POST:
+                vocabulary.delete()
+                return redirect('base')
                 
-                #change state of vocabulary
-                elif(request.POST['vocabulary-setting'] == 'Live'):
-                    vocabulary.set_live()
-                elif(request.POST['vocabulary-setting'] == 'Review'):
-                    vocabulary.set_review()
-                elif(request.POST['vocabulary-setting'] == 'Development'):
-                    vocabulary.set_dev()
+            #change state of vocabulary
+            elif(request.POST['vocabulary-setting'] == 'Live'):
+                vocabulary.set_live()
+            elif(request.POST['vocabulary-setting'] == 'Review'):
+                vocabulary.set_review()
+            elif(request.POST['vocabulary-setting'] == 'Development'):
+                vocabulary.set_dev()
 
-        return render(request, 'vocabulary_setting.html', context)
-
-    else:
-        return redirect('login')
+    return render(request, 'vocabulary_setting.html', context)
 
 
+@login_required()
 def members(request: HttpRequest, name : str):
     """Members that of the vocabulary views
 
@@ -385,72 +379,69 @@ def members(request: HttpRequest, name : str):
     Returns:
         HttpResponse: A rendered Page
     """
-    if request.user.is_authenticated:
-        user = request.user
-        vocabulary = Vocabulary.objects.get(name=name)
+    user = request.user
+    vocabulary = Vocabulary.objects.get(name=name)
 
-        #put all users from groups and regulars into one list
-        profiles_list = vocabulary.profiles.all()
-        user_list = []
-        member_list = set()
-        for key in profiles_list:
-            user_list.append(key.user)
-        groups = vocabulary.groups.all()
-        group_user_list = []
-        for key in groups:
-            group_user_list.extend(key.group.user_set.all())
-        for key in user_list:
-            member_list.add(key)
-        for key in group_user_list:
-            member_list.add(key)
-        member_list = list(member_list)
+    #put all users from groups and regulars into one list
+    profiles_list = vocabulary.profiles.all()
+    user_list = []
+    member_list = set()
+    for key in profiles_list:
+        user_list.append(key.user)
+    groups = vocabulary.groups.all()
+    group_user_list = []
+    for key in groups:
+        group_user_list.extend(key.group.user_set.all())
+    for key in user_list:
+        member_list.add(key)
+    for key in group_user_list:
+        member_list.add(key)
+    member_list = list(member_list)
 
-        p = Paginator(member_list, 10)
-        page_number = request.GET.get('page')
-        page_obj = p.get_page(page_number)
+    p = Paginator(member_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = p.get_page(page_number)
 
-        user_is_owner = 'owner' in get_perms(user, vocabulary)
+    user_is_owner = 'owner' in get_perms(user, vocabulary)
 
-        p.allow_empty_first_page
+    p.allow_empty_first_page
 
-        context = {
-            'vocabulary': vocabulary,
-            'members': page_obj
-        }
+    context = {
+        'vocabulary': vocabulary,
+        'members': page_obj
+    }
 
-        if request.method == 'POST':
-            if user_is_owner:
-                if 'invite' in request.POST:
-                    invite_str = request.POST['email']
+    if request.method == 'POST':
+        if user_is_owner:
+            if 'invite' in request.POST:
+                invite_str = request.POST['email']
 
-                    # check if User/Group exists
-                    if User.objects.filter(email=invite_str).exists():
-                        invite_user = User.objects.get(email=invite_str)
-                        vocabulary.add_profile(invite_user.profile, 'participant')
-                    elif Group.objects.filter(name=invite_str).exists():
-                        invite_group = Group.objects.get(name=invite_str)
-                        vocabulary.add_group(invite_group.groupprofile, 'participant')
-                    else:
-                        return HttpResponse('User/Group does not exist', status=404)
-                elif 'kickall' in request.POST:
-                    vocabulary.profiles.clear()
-                elif 'kick-member' in request.POST:
-                    profile_name = request.POST['kick-member']
-                    profile = vocabulary.profiles.get(name=profile_name)
-                    vocabulary.remove_profile(profile)
+                # check if User/Group exists
+                if User.objects.filter(email=invite_str).exists():
+                    invite_user = User.objects.get(email=invite_str)
+                    vocabulary.add_profile(invite_user.profile, 'participant')
+                elif Group.objects.filter(name=invite_str).exists():
+                    invite_group = Group.objects.get(name=invite_str)
+                    vocabulary.add_group(invite_group.groupprofile, 'participant')
+                else:
+                    return HttpResponse('User/Group does not exist', status=404)
+            elif 'kickall' in request.POST:
+                vocabulary.profiles.clear()
+            elif 'kick-member' in request.POST:
+                profile_name = request.POST['kick-member']
+                profile = vocabulary.profiles.get(name=profile_name)
+                vocabulary.remove_profile(profile)
                 
-                # refresh page
-                return redirect('vocabulary_members', vocabulary.name)
+            # refresh page
+            return redirect('vocabulary_members', vocabulary.name)
 
-            else:
-                raise PermissionDenied
+        else:
+            raise PermissionDenied
 
-        return render(request, 'vocabulary_members.html', context)
-        
-    else:
-        return redirect('login')
+    return render(request, 'vocabulary_members.html', context)
 
 
+@login_required()
 def terms(request: HttpRequest, name: str) -> HttpResponse:
     """
     View for displaying all terms of a vocabulary
@@ -514,7 +505,7 @@ def terms(request: HttpRequest, name: str) -> HttpResponse:
 
 # TODO should get merged into the vocabulary dashboard view
 
-
+@login_required()
 def base(request: HttpRequest):
     user = request.user
     if request.method == 'POST':
