@@ -22,25 +22,21 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 
+
 urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
 
-    path('', TemplateView.as_view(template_name='base.html')),
-    path('vocabularies/', include('vocabularies.urls')),
+    # path('vocabularies', TemplateView.as_view(template_name='base.html')),
+
+    path('vocabularies', include('vocabularies.urls')),
     
-    path('logout', views.logout_view, name='logout'),
-    path('signup', views.signup_view, name='signup'),
-    path('login', views.login_view, name='login'),
-    path('reset', TemplateView.as_view(template_name='reset_password.html'), name='password_reset'),
-    path('profile', TemplateView.as_view(template_name='profile.html'), name='profile'),
-
-    path('teams', TemplateView.as_view(template_name='teams.html'), name='teams'),
-    path('teams/<slug:name>', TemplateView.as_view(template_name='team_detail.html')),
-
-    path('help', TemplateView.as_view(template_name='help_page.html'), name='help'),
-
-    path('main', TemplateView.as_view(template_name='base.html'), name='dashboard')
+    path('signup', TemplateView.as_view(template_name='signup.html')),
+    path('login', TemplateView.as_view(template_name='login.html')),
+    path('reset', TemplateView.as_view(template_name='reset_password.html')),
+    path('profile', include('Profile.urls')),
+    path('teams', include('GroupProfile.urls')),
+    path('help', TemplateView.as_view(template_name='help_page.html')),
     
 
 ]

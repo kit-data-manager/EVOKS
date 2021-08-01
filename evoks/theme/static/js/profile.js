@@ -10,3 +10,5 @@ function createInput(value, id) {
 document.getElementById("delete-account-button").addEventListener("click", function(e) {
     document.getElementById("delete-account-modal").classList.toggle("invisible");
 });
+
+

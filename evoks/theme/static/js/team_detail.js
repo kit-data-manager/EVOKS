@@ -10,3 +10,7 @@ function createInput(value, id) {
 document.getElementById("delete-team-button").addEventListener("click", function(e) {
     document.getElementById("delete-team-modal").classList.toggle("invisible");
 });
+
+document.getElementById("kick-all-members-button").addEventListener("click", function(e) {
+    document.getElementById("kick-all-members").classList.toggle("invisible");
+});

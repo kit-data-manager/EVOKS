@@ -1,4 +1,4 @@
-<form action="{% url 'teams' %}" method="post">
+<form action="{% url 'teams' 'error' %}" method="post">
     {% csrf_token %}
     <div class="fixed z-50 inset-0 invisible" aria-labelledby="modal-title" role="dialog" id="create-team-modal"
         aria-modal="true">
@@ -27,7 +27,7 @@
                                         <div>
                                             <label for="team-name" class="block text-sm font-medium text-gray-700">Name</label>
                                             <div class="mt-1">
-                                                <input type="text" name="team-name" id="text"
+                                                <input type="text" name="team-name" id="team-name"
                                                     class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                                     placeholder="cooles_vokabular123">
                                             </div>
