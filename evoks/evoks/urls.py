@@ -29,7 +29,7 @@ urlpatterns = [
 
     # path('vocabularies', TemplateView.as_view(template_name='base.html')),
 
-    path('vocabularies', include('vocabularies.urls')),
+    path('vocabularies/', include('vocabularies.urls')),
     
     path('ToS', TemplateView.as_view(template_name='ToS.html'), name='ToS'),
     path('signup', views.signup_view, name='signup'),

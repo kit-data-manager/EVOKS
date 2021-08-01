@@ -17,7 +17,7 @@
     <!-- Create Vocabulary Modal -->
     {% include "modals/create_vocabulary.html" %}
     <!-- Create Vocabulary Modal -->
-    {% include "modals/delete_vocabulary.html"}
+    {% include "modals/delete_vocabulary.html" %}
 
 
     <div class="h-screen bg-white overflow-visible flex">
@@ -40,23 +40,23 @@
                         <!-- Replace with your content -->
                         <div class="py-4">
                             <!-- This example requires Tailwind CSS v2.0+ -->
-                            <a href='{% url 'vocabulary_overview' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_overview' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Overview
                             </a>
-                            <a href='{% url 'vocabulary_terms' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_terms' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Terms
                             </a> 
-                            <a href='{% url 'vocabulary_members' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_members' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Members
-                            </a>
-                            <a href='{% url 'vocabulary_prefixes' name=vocabulary.name %}'
-                            class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                            Prefixes
-                            </a>
-                            <a href='{% url 'vocabulary_settings' name=vocabulary.name %}'
+                            </a> 
+                            <a href='{% url 'vocabulary_prefixes' voc_name=vocabulary.name %}'
+                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Prefixes
+                             </a>
+                            <a href='{% url 'vocabulary_settings' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings
                             </a>
@@ -173,7 +173,7 @@
                                                 <div class="mt-5">
                                                     <!-- <form action="#" method="post"> -->
                                                     {% csrf_token %}
-                                                    <button type="submit" id="delete-vocabulary-button" name='delete'
+                                                    <button type="button" id="delete-vocabulary-button" name='delete'
                                                         class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
                                                         Delete
                                                     </button>

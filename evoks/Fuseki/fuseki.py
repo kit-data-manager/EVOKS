@@ -9,6 +9,7 @@ from .copy import Copy
 from http import HTTPStatus
 import os
 from django.conf import settings
+from time import sleep
 
 user = settings.FUSEKI_USER
 password = settings.FUSEKI_PASSWORD
@@ -26,8 +27,6 @@ class Fuseki:
             environment (str): Environment of server
             backup_path (str): Relative path to the backup folder
 
-        Raises:
-            ValueError: Fuseki server is not reachable under the given Host+Port
         """
         self.host = host
         self.port = port
@@ -38,10 +37,10 @@ class Fuseki:
 
         valid = self.ping()
         if not valid:
-            raise ValueError(
-                'Invalid Fuseki configuration. Failed to ping server')
+            print('Invalid Fuseki configuration. Failed to ping server')
+                
 
-    def build_sparql_endpoint(self, vocabulary: Vocabulary) -> str:
+    def build_sparql_endpoint(self, vocabulary: Vocabulary, skosmos = True) -> str:
         """
             builds the SPARQL endpoint for a given vocabulary
         Args:
@@ -77,7 +76,7 @@ class Fuseki:
             Exception: Vocabulary deleting failed for unknown reasons. Status code added as argument
         """
         response = requests.delete(
-            '{base}datasets/{name}'.format(base=self.api_url, name=vocabulary.get_name()), auth=(user, password))
+            '{base}datasets/{name}'.format(base=self.api_url, name=vocabulary.name), auth=(user, password))
 
         if response.status_code == HTTPStatus.NOT_FOUND:
             raise ValueError('Vocabulary does not exist')
@@ -116,15 +115,27 @@ class Fuseki:
             ValueError: Vocabulary name is already used
             Exception: Unexpected error. Status code is in args
         """
-        backup = open(copy.path, 'rb')
         response = requests.post('{base}datasets?dbName={name}&dbType={type}'.format(
-            base=self.api_url, name=vocabulary.get_name(), type='TDB2'), files={'file': backup},  auth=(user, password))
+            base=self.api_url, name=vocabulary.get_name(), type='TDB2'), auth=(user, password))
 
         if response.status_code == HTTPStatus.CONFLICT:
             raise ValueError('This vocabulary name is already used')
 
         if not response.ok:
             raise Exception('Restoring Copy failed')
+
+        # SORRY FOR THIS
+        # Fuseki sagt dass das backup fertig ist, ist es aber nicht. Fuseki ist kaum buggy :^)
+        # daher das sleep. Könnte vermutlich kürzer sein, so crashed es aber bis jetzt fast nie
+        sleep(5)
+
+        backup = open(copy.path, 'rb')
+        filename = copy.path.split(os.sep)[-1]
+
+        file_upload_response = requests.post('{base}{name}'.format(
+            base=self.url, name=vocabulary.name), auth=(user, password), data={}, files=[('files', (filename, backup, 'application/octet-stream'))])
+        # graph=name
+        print(file_upload_response.status_code)
 
     def start_vocabulary_copy(self, vocabulary: Vocabulary) -> str:
         """

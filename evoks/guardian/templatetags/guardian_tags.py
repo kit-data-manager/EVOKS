@@ -47,7 +47,6 @@ class ObjectPermissionsNode(template.Node):
         context[self.context_var] = perms
         return ''
 
-
 @register.tag
 def get_obj_perms(parser, token):
     """

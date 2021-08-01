@@ -6,3 +6,6 @@ document.getElementById("create-tag-button").addEventListener("click", function(
 document.getElementById("create-property-button").addEventListener("click", function(e) {
     document.getElementById("create-property-modal").classList.toggle("invisible");
 });
+document.getElementById("delete-term-button").addEventListener("click", function(e) {
+    document.getElementById("delete-term-modal").classList.toggle("invisible");
+});

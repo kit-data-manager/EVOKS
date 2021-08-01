@@ -1,5 +1,5 @@
 from rdflib import Graph, Literal
-from rdflib.namespace import URIRef
+from rdflib.namespace import URIRef, Namespace, SKOS, VOID
 from django.conf import settings
 import os
 from pathlib import Path
@@ -39,19 +39,31 @@ class Skosmos:
 
         vocabulary_uri = URIRef(
             self.__build_vocabulary_uri(vocabulary_name))
+        print('lets go')
+        print(vocabulary_uri)
         g.parse(self.config_path, format='n3')
         g.remove((vocabulary_uri, None, None))
 
         config_file = open(self.config_path, 'w')
-        config_file.write(g.serialize(format='turtle').decode('utf-8'))
+        config_file.write(g.serialize(format='turtle'))
         config_file.close()
 
     def add_vocabulary(self, config: SkosmosVocabularyConfig) -> None:
 
         g = Graph()
+        
+        DC = Namespace('http://purl.org/dc/terms/')
+        g.bind('void', VOID)
+        g.bind('dc', DC)
+        g.bind('skos', SKOS)
+
         g.parse(self.config_path, format="n3")
 
-        vocabulary_uri = self.__build_vocabulary_uri(config.title)
+        vocabulary_uri = self.__build_vocabulary_uri(config.name)
+
+
+        g.add((URIRef(vocabulary_uri),
+              URIRef('http://purl.org/net/skosmos#fullAlphabeticalIndex'), Literal(True)))
 
         g.add((URIRef(vocabulary_uri),
               URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('http://purl.org/net/skosmos#Vocabulary')))
@@ -59,14 +71,13 @@ class Skosmos:
         g.add((URIRef(vocabulary_uri),
               URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('http://rdfs.org/ns/void#Dataset')))
 
-        g.add((URIRef(vocabulary_uri),
-              URIRef('http://purl.org/dc/terms/title'), Literal(config.title)))
+        g.add((URIRef(vocabulary_uri), DC.title, Literal(config.title)))
 
         g.add((URIRef(vocabulary_uri),
               URIRef('http://purl.org/net/skosmos#language'), Literal(config.default_language)))
 
         g.add((URIRef(vocabulary_uri),
-              URIRef('http://purl.org/dc/terms/subject'), URIRef(self.__build_vocabulary_uri(config.subject))))
+              DC.subject, URIRef(self.__build_vocabulary_uri(config.subject))))
 
         g.add((URIRef(vocabulary_uri),
               URIRef('http://rdfs.org/ns/void#sparqlEndpoint'), URIRef(config.sparql_endpoint)))
@@ -75,4 +86,4 @@ class Skosmos:
               URIRef('http://rdfs.org/ns/void#uriSpace'), Literal(config.uri_space)))
 
         f = open(self.config_path, "w")
-        f.write(g.serialize(format="turtle").decode("utf-8"))
+        f.write(g.serialize(format="turtle"))

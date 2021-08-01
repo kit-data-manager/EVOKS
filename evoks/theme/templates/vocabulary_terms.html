@@ -40,23 +40,23 @@
                         <!-- Replace with your content -->
                         <div class="py-4">
                             <!-- This example requires Tailwind CSS v2.0+ -->
-                            <a href='{% url 'vocabulary_overview' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_overview' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Overview
                             </a>
-                            <a href='{% url 'vocabulary_terms' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_terms' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Terms
-                            </a>
-                            <a href='{% url 'vocabulary_members' name=vocabulary.name %}'
+                            </a> 
+                            <a href='{% url 'vocabulary_members' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Members
-                            </a>
-                            <a href='{% url 'vocabulary_prefixes' name=vocabulary.name %}'
-                            class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                            Prefixes
+                            </a> 
+                            <a href='{% url 'vocabulary_prefixes' voc_name=vocabulary.name %}'
+                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Prefixes
                              </a>
-                            <a href='{% url 'vocabulary_settings' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_settings' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings
                             </a>
@@ -104,7 +104,7 @@
                                                             <td class="px-6 py-4 whitespace-nowrap">
                                                                 <div class="flex items-center">
                                                                     <div class="text-sm text-gray-900">
-                                                                        {{term.name}}
+                                                                        {{term.display_name}}
                                                                     </div>
                                                                 </div>
                                                             </td>
@@ -112,7 +112,7 @@
                                                             <td
                                                                 class="px-6 py-4 whitespace-nowrap text-sm text-regal-blue">
                                                                 <a
-                                                                    href='{% url 'term_detail' name=vocabulary.name term_name=term.name %}'>Edit
+                                                                    href='{% url 'term_detail' voc_name=vocabulary.name term_name=term.name %}'>Edit
                                                                 </a>
                                                             </td>
                                                         </tr>

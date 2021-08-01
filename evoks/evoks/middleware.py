@@ -1,3 +1,4 @@
+from django.http.response import HttpResponse
 from vocabularies.models import Vocabulary
 from django.shortcuts import redirect
 
@@ -18,7 +19,6 @@ class LoginRequiredMiddleware:
 
         if not request.user.is_authenticated:
             if not any(url == path for url in LOGIN_EXEMPT_URLS):
-                print(path)
                 return redirect('login')
 
 
@@ -34,14 +34,21 @@ class PartOfVocabularyMiddleware:
     
     def process_view(self, request, view_func, view_args, view_kwargs):
         if len(view_kwargs) != 0:
-            if 'name' in view_kwargs:
-                name = view_kwargs.get('name')
-                print(name)
-                assert Vocabulary.objects.filter(name=name).exists()
+            if 'voc_name' in view_kwargs:
+                name = view_kwargs.get('voc_name')
+                try:
+                    assert Vocabulary.objects.filter(name=name).exists()
+                except AssertionError:
+                    return HttpResponse('The vocabulary you`re looking for doesn`t exist')
+
                 voc = Vocabulary.objects.get(name=name)
                 part = voc.state == 'Review'
-                for key in voc.profiles.all():
-                    if key.user == request.user:
+                for profile in voc.profiles.all():
+                    if profile.user == request.user:
                         part = True
+                for group_profile in voc.groups.all():
+                    for user in group_profile.group.user_set.all():
+                        if user == request.user:
+                            part = True
                 if not part:
-                    return redirect('dashboard')
+                    return redirect('base')

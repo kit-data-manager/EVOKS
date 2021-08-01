@@ -39,23 +39,23 @@
                         <!-- Replace with your content -->
                         <div class="py-4">
                             <!-- This example requires Tailwind CSS v2.0+ -->
-                            <a href='{% url 'vocabulary_overview' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_overview' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Overview
                             </a>
-                            <a href='{% url 'vocabulary_terms' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_terms' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Terms
                             </a> 
-                            <a href='{% url 'vocabulary_members' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_members' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Members
                             </a> 
-                            <a href='{% url 'vocabulary_prefixes' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_prefixes' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Prefixes
                              </a>
-                            <a href='{% url 'vocabulary_settings' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_settings' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings
                             </a>
@@ -106,10 +106,15 @@
                                                                                 <div class="ml-4">
                                                                                     <div
                                                                                         class="text-sm font-medium text-gray-900">
-                                                                                        {{data.profile.name}}<br/>
+                                                                                        {{data.name}}<br/>
                                                                                     </div>
                                                                                     <div class="text-sm text-gray-500">
-                                                                                        {{data.email}}<br/>
+                                                                                        {% if data.type == 'Profile' %}
+                                                                                        {{data.email}}
+                                                                                        {% else %}
+                                                                                        {{data.description}}
+                                                                                        {% endif %}
+                                                                                        <br/>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -117,18 +122,14 @@
 
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 ">
-                                                                            {% load guardian_tags %}
-                                                                            {% get_obj_perms data for vocabulary as "vocabulary_perms" %}
-
-                                                                            {% if "owner" in vocabulary_perms %} Owner
-                                                                            {% elif "participant" in vocabulary_perms %} Member
-                                                                            {% elif "spectator" in vocabulary_perms %} Spectator
-                                                                            {% endif %}
+                                                                            {{ data.role }}
                                                                         </td>
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                                             <form action="#" method="post"> {% csrf_token %}
-                                                                                <button type="submit" name="kick-member" value="{{data.profile.name}}"
+                                                                                <input type="hidden" name="type" value="{{data.type}}">
+
+                                                                                <button type="submit" name="kick-member" value='{% if data.type == 'Profile' %}{{data.email}}{% else %}{{data.name}}{% endif %}'
                                                                                     class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm hidden md:table-cell">
                                                                                     Kick
                                                                                 </button>
@@ -146,36 +147,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <!-- This example requires Tailwind CSS v2.0+ -->
-                                            <nav class="bg-white px-4 py-3 flex items-center justify-between sm:px-6 mt-5"
-                                                aria-label="Pagination">
-                                                <div class="hidden sm:block">
-                                                    <p class="text-sm text-gray-700">
-                                                        Showing
-                                                        <span class="font-medium">{{members.start_index}}</span>
-                                                        to
-                                                        <span class="font-medium">{{members.end_index}}</span>
-                                                        of
-                                                        <span class="font-medium">{{members.paginator.count}}</span>
-                                                        results
-                                                    </p>
-                                                </div>
-                                                <div class="flex-1 flex justify-between sm:justify-end">
-                                                    {% if members.has_previous %}
-                                                        <a href="?page={{ members.previous_page_number }}"
-                                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                                            Previous
-                                                        </a>
-                                                    {% endif %}
-                                                    {% if members.has_next %}
-                                                        <a href="?page={{ members.next_page_number }}"
-                                                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                                            Next
-                                                        </a>
-                                                    {% endif %}
-                                                </div>
-                                            </nav>
                                         </div>
                                         <!-- /End replace -->
                                     </div>
