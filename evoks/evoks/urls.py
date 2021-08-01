@@ -31,15 +31,16 @@ urlpatterns = [
 
     path('vocabularies', include('vocabularies.urls')),
     
-    path('signup', TemplateView.as_view(template_name='signup.html')),
-    path('login', TemplateView.as_view(template_name='login.html')),
+    path('ToS', TemplateView.as_view(template_name='ToS.html'), name='ToS'),
+    path('signup', views.signup_view, name='signup'),
+    path('login', views.login_view, name='login'),
     path('reset', TemplateView.as_view(template_name='reset_password.html')),
     path('profile', include('Profile.urls')),
     path('teams', include('GroupProfile.urls')),
-    path('help', TemplateView.as_view(template_name='help_page.html')),
+    path('help', TemplateView.as_view(template_name='help_page.html'), name='help'),
     
 
-]
+    ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL,
