@@ -12,13 +12,12 @@
 </head>
 
 <body>
-
     <!-- Create Team Modal -->
     {% include "modals/create_team.html" %}
     <!-- Create Vocabulary Modal -->
     {% include "modals/create_vocabulary.html" %}
     <!-- Create Vocabulary Modal -->
-    {% include "modals/delete_vocabulary.html" %}
+    {% include "modals/delete_vocabulary.html"}
 
 
     <div class="h-screen bg-white overflow-visible flex">
@@ -49,10 +48,10 @@
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Terms
                             </button> <button type="button"
-                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Members
                             </button> <button type="button"
-                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings
                             </button>
                             <main>
@@ -65,57 +64,80 @@
 
                                             <fieldset>
                                                 <legend class="sr-only">
-                                                 Vocabulary setting
+                                                    Vocabulary setting
                                                 </legend>
                                                 <div class="bg-white rounded-md -space-y-px">
-                                                  <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
-                                                  <label class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">
-                                                    <input type="radio" name="vocabulary-setting" value="Live" class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue" aria-labelledby="privacy-setting-0-label" aria-describedby="privacy-setting-0-description">
-                                                    <div class="ml-3 flex flex-col">
-                                                      <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
-                                                      <span id="vocabulary-setting-0-label" class="text-gray-900 block text-sm font-medium">
-                                                        Live
-                                                      </span>
-                                                      <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
-                                                      <span id="vocabulary-setting-0-description" class="text-gray-500 block text-sm">
-                                                        This vocabulary will be migrated to the live Skosmos instance and won't be editable anymore.
-                                                      </span>
-                                                    </div>
-                                                  </label>
-                                              
-                                                  <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
-                                                  <label class="border-gray-200 relative border p-4 flex cursor-pointer">
-                                                    <input type="radio" name="vocabulary-setting" value="Development" class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue" aria-labelledby="privacy-setting-1-label" aria-describedby="privacy-setting-1-description">
-                                                    <div class="ml-3 flex flex-col">
-                                                      <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
-                                                      <span id="vocabulary-setting-1-label" class="text-gray-900 block text-sm font-medium">
-                                                        Review
-                                                      </span>
-                                                      <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
-                                                      <span id="vocabulary-setting-1-description" class="text-gray-500 block text-sm">
-                                                        All users will have read-only access to this vocabulary.
-                                                      </span>
-                                                    </div>
-                                                  </label>
-                                              
-                                                  <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
-                                                  <label class="border-gray-200 rounded-bl-md rounded-br-md relative border p-4 flex cursor-pointer">
-                                                    <input type="radio" name="vocabulary-setting" value="Private to you" class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue" aria-labelledby="privacy-setting-2-label" aria-describedby="privacy-setting-2-description">
-                                                    <div class="ml-3 flex flex-col">
-                                                      <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
-                                                      <span id="vocabulary-setting-2-label" class="text-gray-900 block text-sm font-medium">
-                                                       Development
-                                                      </span>
-                                                      <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
-                                                      <span id="vocabulary-setting-2-description" class="text-gray-500 block text-sm">
-                                                        Only members of this vocabulary have reading and writing rights.
-                                                      </span>
-                                                    </div>
-                                                  </label>
+                                                    <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
+                                                    <label
+                                                        class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">
+                                                        <input type="radio" name="vocabulary-setting" value="Live" 
+                                                        {% ifequal vocabulary.state "LIVE" %} checked {% endifequal %}
+                                                            class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
+                                                            aria-labelledby="privacy-setting-0-label"
+                                                            aria-describedby="privacy-setting-0-description">
+                                                        <div class="ml-3 flex flex-col">
+                                                            <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
+                                                            <span id="vocabulary-setting-0-label"
+                                                                class="text-gray-900 block text-sm font-medium">
+                                                                Live
+                                                            </span>
+                                                            <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
+                                                            <span id="vocabulary-setting-0-description"
+                                                                class="text-gray-500 block text-sm">
+                                                                This vocabulary will be migrated to the live Skosmos
+                                                                instance and won't be editable anymore.
+                                                            </span>
+                                                        </div>
+                                                    </label>
+
+                                                    <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
+                                                    <label
+                                                        class="border-gray-200 relative border p-4 flex cursor-pointer">
+                                                        <input type="radio" name="vocabulary-setting"
+                                                            value="Development" {% ifequal vocabulary.state "REVIEW" %} checked {% endifequal %}
+                                                            class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
+                                                            aria-labelledby="privacy-setting-1-label"
+                                                            aria-describedby="privacy-setting-1-description">
+                                                        <div class="ml-3 flex flex-col">
+                                                            <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
+                                                            <span id="vocabulary-setting-1-label"
+                                                                class="text-gray-900 block text-sm font-medium">
+                                                                Review
+                                                            </span>
+                                                            <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
+                                                            <span id="vocabulary-setting-1-description"
+                                                                class="text-gray-500 block text-sm">
+                                                                All users will have read-only access to this vocabulary.
+                                                            </span>
+                                                        </div>
+                                                    </label>
+
+                                                    <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
+                                                    <label
+                                                        class="border-gray-200 rounded-bl-md rounded-br-md relative border p-4 flex cursor-pointer">
+                                                        <input type="radio" name="vocabulary-setting" {% ifequal vocabulary.state "DEVELOPMENT" %} checked {% endifequal %}
+                                                            value="Private to you"
+                                                            class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
+                                                            aria-labelledby="privacy-setting-2-label"
+                                                            aria-describedby="privacy-setting-2-description">
+                                                        <div class="ml-3 flex flex-col">
+                                                            <!-- Checked: "text-indigo-900", Not Checked: "text-gray-900" -->
+                                                            <span id="vocabulary-setting-2-label"
+                                                                class="text-gray-900 block text-sm font-medium">
+                                                                Development
+                                                            </span>
+                                                            <!-- Checked: "text-indigo-700", Not Checked: "text-gray-500" -->
+                                                            <span id="vocabulary-setting-2-description"
+                                                                class="text-gray-500 block text-sm">
+                                                                Only members of this vocabulary have reading and writing
+                                                                rights.
+                                                            </span>
+                                                        </div>
+                                                    </label>
                                                 </div>
-                                              </fieldset>
-                                            
-                                       
+                                            </fieldset>
+
+
                                         </div>
                                         <!-- /End replace -->
                                     </div>
@@ -137,7 +159,8 @@
                                                     Delete Vocabulary </h3>
                                                 <div class="mt-2 max-w-xl text-sm text-gray-500">
                                                     <p>
-                                                        Once you delete this vocabulary it is gone. Previous live versions will still be visible in Skosmos, but not in Evoks.
+                                                        Once you delete this vocabulary it is gone. Previous live
+                                                        versions will still be visible in Skosmos, but not in Evoks.
                                                     </p>
                                                 </div>
                                                 <div class="mt-5">

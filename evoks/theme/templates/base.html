@@ -14,20 +14,20 @@
 <body>
 
 	<!-- Create Team Modal -->
-    {% include "modals/create_team.html" %}
-    <!-- Create Vocabulary Modal -->
-    {% include "modals/create_vocabulary.html" %}
+	{% include "modals/create_team.html" %}
+	<!-- Create Vocabulary Modal -->
+	{% include "modals/create_vocabulary.html" %}
 
 
-    <div class="h-screen bg-white overflow-visible flex">
+	<div class="h-screen bg-white overflow-visible flex">
 
-        <!-- Static sidebar for mobile -->
-        {% include "sidebars/mobile.html" %}
-        <!-- Static sidebar for desktop -->
-        {% include "sidebars/desktop.html" %}
+		<!-- Static sidebar for mobile -->
+		{% include "sidebars/mobile.html" %}
+		<!-- Static sidebar for desktop -->
+		{% include "sidebars/desktop.html" %}
 
-        <div class="flex-1 max-w-4xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
-            {% include "header/searchbar.html" %}
+		<div class="flex-1 max-w-4xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
+			{% include "header/searchbar_globally.html" %}
 
 			<main class="flex-1 relative overflow-y-auto focus:outline-none">
 				<div class="py-6">
@@ -37,97 +37,116 @@
 					<div class="px-4 sm:px-6 md:px-0">
 						<!-- Replace with your content -->
 						<div class="py-4">
+							<form method='POST' action="">{% csrf_token %}
+								<!-- This example requires Tailwind CSS v2.0+ -->
+								<div class="flex flex-col">
+									<div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+										<div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+											<div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+												<table class="min-w-full divide-y divide-gray-200">
+													<thead class="bg-gray-50">
+														<tr>
+															<th scope="col"
+																class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+																Name
+															</th>
+															<th scope="col"
+																class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+																Team
+															</th>
+															<th scope="col"
+																class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+																Status
+															</th>
+															<th scope="col"
+																class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+																Role
+															</th>
 
-							<!-- This example requires Tailwind CSS v2.0+ -->
-							<div class="flex flex-col">
-								<div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-									<div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-										<div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-											<table class="min-w-full divide-y divide-gray-200">
-												<thead class="bg-gray-50">
-													<tr>
-														<th scope="col"
-															class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-															Name
-														</th>
-														<th scope="col"
-															class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-															Team
-														</th>
-														<th scope="col"
-															class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-															Status
-														</th>
-														<th scope="col"
-															class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-															Role
-														</th>
-
-													</tr>
-												</thead>
-												<tbody class="bg-white divide-y divide-gray-200">
-													<tr>
-														<td class="px-6 py-4 whitespace-nowrap">
-															<div class="flex items-center">
-																<div class="ml-4">
-																	<div class="text-sm text-gray-900">
-																		<a href="/vocabularies/123">
-																			Cooles Vokabular
-																		</a>
+														</tr>
+													</thead>
+													<tbody class="bg-white divide-y divide-gray-200">
+														{% for voc in vocabularies_page %}
+														<tr>
+															<td class="px-6 py-4 whitespace-nowrap">
+																<div class="flex items-center">
+																	<div class="ml-4">
+																		<div class="text-sm text-gray-900">
+																			<a href="/vocabularies/{{voc.name}}">
+																				{{voc.name}}
+																			</a>
+																		</div>
 																	</div>
 																</div>
-															</div>
-														</td>
-														<td class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
-															<div class="text-sm text-gray-900">Vokabular Fans KIT
-															</div>
-															<div class="text-sm text-gray-500">Vokabeln sind cool!
-															</div>
-														</td>
-														<td class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
-															<span
-																class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 hidden md:table-cell">
-																Live
-															</span>
-														</td>
-														<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-															Spectator
-														</td>
-													</tr>
-													<!-- More people... -->
-												</tbody>
-											</table>
+															</td>
+															<td
+																class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+																<div class="text-sm text-gray-900">Vokabular Fans KIT
+																</div>
+																<div class="text-sm text-gray-500">Vokabeln sind cool!
+																</div>
+															</td>
+															<td
+																class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+																<span
+																	class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 hidden md:table-cell">
+																	Live
+																</span>
+															</td>
+															<td
+																class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+																Spectator
+															</td>
+														</tr>
+														{% endfor %}
+													</tbody>
+												</table>
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-							<!-- This example requires Tailwind CSS v2.0+ -->
-							<nav class="bg-white px-4 py-3 flex items-center justify-between sm:px-6 mt-5"
-								aria-label="Pagination">
-								<div class="hidden sm:block">
-									<p class="text-sm text-gray-700">
-										Showing
-										<span class="font-medium">1</span>
-										to
-										<span class="font-medium">10</span>
-										of
-										<span class="font-medium">20</span>
-										results
-									</p>
-								</div>
-								<div class="flex-1 flex justify-between sm:justify-end">
-									<a href="#"
-										class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-										Previous
-									</a>
-									<a href="#"
-										class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-										Next
-									</a>
-								</div>
-							</nav>
+								<!-- This example requires Tailwind CSS v2.0+ -->
+								<nav class="bg-white px-4 py-3 flex items-center justify-between sm:px-6 mt-5"
+									aria-label="Pagination">
+									<div class="hidden sm:block">
+										<p class="text-sm text-gray-700">
+											Showing
+											<span class="font-medium">{{vocabularies_page.start_index}}</span>
+											to
+											<span class="font-medium">{{vocabularies_page.end_index}}</span>
+											of
+											<span class="font-medium">{{vocabularies.count}}</span>
+											results
+										</p>
+									</div>
+									<div class="flex-1 flex justify-between sm:justify-end">
+										{% if vocabularies_page.has_previous %}
+										<button type="submit" name="page"
+											value="{{vocabularies_page.previous_page_number  }}"
+											class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+											Previous
+										</button>
+										{% else %}
+										<button type="submit" name="page" value="{{vocabularies_page  }}"
+											class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+											Previous
+										</button>
+										{%endif%}
+										{% if vocabularies_page.has_next %}
+										<button type="submit" name='page' value='{{vocabularies_page.next_page_number}}'
+											class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+											Next
+										</button>
+										{% else %}
+										<button type="submit" name='page' value='{{vocabularies_page}}'
+											class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+											Next
+										</button>
+										{%endif%}
+									</div>
+								</nav>
 
-
+							</form>
 						</div>
 						<!-- /End replace -->
 					</div>

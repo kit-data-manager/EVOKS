@@ -4,12 +4,11 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
 class GroupProfile(models.Model):
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
     description = models.TextField(max_length=500, blank=True)
-    group_owner = models.OneToOneField(User, on_delete=models.PROTECT,null=True)
-    size = models.IntegerField(default=1)
+    group_owner = models.ForeignKey(User, on_delete=models.PROTECT,null=True)
+    size = models.IntegerField(default=0)
 
     
     @receiver(post_save, sender=Group)

@@ -2,6 +2,7 @@
 from pathlib import Path
 import socket
 import environ
+import os
 
 env = environ.Env(
     FUSEKI_USER=(str, 'admin'),
@@ -94,7 +95,7 @@ ROOT_URLCONF = 'evoks.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [str(BASE_DIR.joinpath('templates'))],
+        'DIRS': [os.path.join(BASE_DIR,'evoks/theme/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
