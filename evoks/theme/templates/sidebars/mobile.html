@@ -22,7 +22,7 @@
         </div>
         <div class="mt-5 flex-1 h-0 overflow-y-auto">
             <nav class="px-2 space-y-1">
-                <a href="{% url 'dashboard' %}"
+                <a href="{% url 'base' %}"
                     class="bg-gray-100 text-gray-900 group rounded-md py-2 px-2 flex items-center text-base font-medium">
 
                     <svg class="text-gray-500 mr-4 flex-shrink-0 h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -33,7 +33,7 @@
                     Dashboard
                 </a>
 
-                <a href="{% url 'teams' %}"
+                <a href="{% url 'team_list' %}"
                     class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group rounded-md py-2 px-2 flex items-center text-base font-medium">
                     <!-- Heroicon name: outline/users -->
                     <svg class="text-gray-400 group-hover:text-gray-500 mr-4 flex-shrink-0 h-6 w-6"
@@ -55,6 +55,19 @@
                     </svg>
 
                     Help
+                </a>
+
+                <a href="{% url 'ToS' %}"
+                    class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group rounded-md py-2 px-2 flex items-center text-base font-medium">
+                    <!-- Heroicon name: outline/users -->
+                    <svg class="text-gray-400 group-hover:text-gray-500 mr-4 flex-shrink-0 h-6 w-6"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+
+                    Terms of Service
                 </a>
 
                 <div href="#"

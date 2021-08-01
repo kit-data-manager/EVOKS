@@ -29,7 +29,7 @@ def login_view(request: HttpRequest) -> HttpResponse:
                 if user.is_active:
                     login(request, user)
                     # redirect to homepage/dashboard
-                    return redirect('dashboard')
+                    return redirect('base')
 
             return HttpResponse('Unauthorized', status=401)
 

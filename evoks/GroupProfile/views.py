@@ -27,22 +27,22 @@ def teams_view(request):
     return redirect('/login')
     # redirect to login page if user is not authenticated
 
-def team_detail_view(request, name):
+def team_detail_view(request, group_name):
     if 'create-team' in request.POST:
         #creates a team with the content of team-name
-        name = request.POST.get('team-name')
-        if Group.objects.filter(name=name).exists():
+        new_name = request.POST.get('team-name')
+        if Group.objects.filter(name=new_name).exists():
             return HttpResponse('already exists')
         else:           
-            group=Group.objects.create(name=name)
+            group=Group.objects.create(name=new_name)
             group.groupprofile.group_owner=request.user
             group.save()
             group.groupprofile.add_user(request.user) 
-            return redirect('/teams/'+name)
+            return redirect('/teams/'+new_name)
 
     if request.user.is_authenticated:
         user = request.user
-        team = Group.objects.get(name=name) 
+        team = Group.objects.get(name=group_name) 
         if user in team.user_set.all():      
             pagesize=2
             member_all = team.user_set.all()
@@ -68,7 +68,7 @@ def team_detail_view(request, name):
                         if User.objects.filter(email=request.POST.get('email')).exists():
                             new_member=User.objects.get(email=request.POST.get('email'))
                             team.groupprofile.add_user(new_member)
-                            return redirect('/teams/'+name)
+                            return redirect('/teams/'+group_name)
                         else:
                             return HttpResponse('error: does not exist') 
                     else: 
@@ -80,7 +80,7 @@ def team_detail_view(request, name):
                         for mem in member_all:
                             if team.groupprofile.group_owner!=mem:
                                 team.groupprofile.remove_user(mem)
-                        return redirect('/teams/'+name)
+                        return redirect('/teams/'+group_name)
                     else: 
                         return HttpResponse('insufficient permission')
 
@@ -101,7 +101,7 @@ def team_detail_view(request, name):
                             return HttpResponse('can\'t kick yourself')
                         else:
                             team.groupprofile.remove_user(kick_mem)
-                            return redirect('/teams/'+name)
+                            return redirect('/teams/'+group_name)
                     else: 
                         return HttpResponse('insufficient permission') 
                     
