@@ -549,7 +549,6 @@ def base(request: HttpRequest):
 
     context = {
         'user': request.user,
-        'vocabulary': vocabulary,
         'search_results': search_results,
         'search_term': search,
     }

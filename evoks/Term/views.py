@@ -168,13 +168,13 @@ def term_detail(request: HttpRequest, name: str, term_name: str):
             # create new tag
             Tag.create(
                 name=tag_name, author=user.profile, vocabulary=None, term=term)
-            return redirect('vocabulary_overview', name=name)
+            return redirect('term_detail', name=name, term_name=term_name)
 
         elif 'delete-tag' in request.POST:
             tag_name = request.POST['delete-tag']
             Tag.objects.filter(
-                name=tag_name, vocabulary=vocabulary).delete()
-            return redirect('vocabulary_overview', name=name)
+                name=tag_name, term=term).delete()
+            return redirect('term_detail', name=name, term_name=term_name)
 
         elif 'create-property' in request.POST:
             predicate = request.POST['predicate']

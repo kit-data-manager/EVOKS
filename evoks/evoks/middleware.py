@@ -15,7 +15,6 @@ class LoginRequiredMiddleware:
         LOGIN_EXEMPT_URLS = ['logout', 'signup', 'login', 'reset']
         assert hasattr(request, 'user')
         path = request.path_info.lstrip('/')
-        print(path)
 
         if not request.user.is_authenticated:
             if not any(url == path for url in LOGIN_EXEMPT_URLS):
@@ -35,16 +34,14 @@ class PartOfVocabularyMiddleware:
     
     def process_view(self, request, view_func, view_args, view_kwargs):
         if len(view_kwargs) != 0:
-            print(view_kwargs)
-            name = view_kwargs.get('name')
-            print(name)
-            assert Vocabulary.objects.filter(name=name).exists()
-            voc = Vocabulary.objects.get(name=name)
-            part = False
-            for key in voc.profiles.all():
-                if key.user == request.user:
-                    part = True
-                    print('PPPPPPP')
-
-            if not part:
-                return redirect('dashboard')
+            if 'name' in view_kwargs:
+                name = view_kwargs.get('name')
+                print(name)
+                assert Vocabulary.objects.filter(name=name).exists()
+                voc = Vocabulary.objects.get(name=name)
+                part = voc.state == 'Review'
+                for key in voc.profiles.all():
+                    if key.user == request.user:
+                        part = True
+                if not part:
+                    return redirect('dashboard')
