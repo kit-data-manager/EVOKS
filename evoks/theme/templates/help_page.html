@@ -16,7 +16,7 @@
     {% include "modals/create_team.html" %}
     <!-- Create Vocabulary Modal -->
     {% include "modals/create_vocabulary.html" %}
-    
+
     <div class="h-screen bg-white overflow-visible flex">
 
         <!-- Static sidebar for mobile -->
@@ -27,32 +27,57 @@
         <div class="flex-1 max-w-4xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
             {% include "header/no_searchbar.html" %}
 
- 
-                <main class="flex-1 relative overflow-y-auto focus:outline-none">
-                    <div class="py-6">
-                        <div class="px-4 sm:px-6 md:px-0">
-                            <h1 class="text-2xl font-semibold text-gray-900">Get some help</h1>
-                        </div>
-                        <div class="px-4 sm:px-6 md:px-0">
-                            <h2 class="text-lg font-bold leading-7 text-gray-900 sm:text-lg sm:truncate">
-                                Dashboard
-                            </h2>
-                            <div class="text-sm text-gray-900">
-                                Erklärbär Text zu Teams
-                            </div>
-                            <div class="px-4 sm:px-6 md:px-0">
-                                <h2 class="text-lg font-bold leading-7 text-gray-900 sm:text-lg sm:truncate">
-                                    Teams
-                                </h2>
-                                <div class="text-sm text-gray-900">
-                                    Erklärbär Text zu Teams
-                                </div>
-                            </div>
-                        </div>
-                </main>
 
-            </div>
+            <main class="flex-1 relative overflow-y-auto focus:outline-none">
+                <div class="py-6">
+                    <div class="px-4 sm:px-6 md:px-0">
+                        <h1 class="text-2xl font-semibold text-gray-900">Q&A</h1>
+                    </div>
+                    <div class="px-4 sm:px-6 md:px-0">
+                        <h2 class="text-lg font-bold leading-7 text-gray-900 sm:text-lg sm:truncate">
+                            Create Vocabulary
+                        </h2>
+                        <div class="text-sm text-gray-900">
+                            You can find the "Create Vocabulary" button in the left sidebar. You can either import a
+                            vocabulary by uploading an RDF/Turtle file or create a new vocabulary by entering a
+                            vocabulary name. You can then further edit the vocabulary fields on the vocabulary details
+                            page. You can get there by clicking the newly created vocabulary on the Dashboard page.
+                        </div>
+                        <h2 class="text-lg font-bold leading-7 text-gray-900 sm:text-lg sm:truncate">
+                            Modify Vocabulary and Terms
+                        </h2>
+                        <div class="text-sm text-gray-900">
+                            Terms and vocabularies can be changed on their detail pages. Either change the text in
+                            the input field and click "Update", or create a new field and enter it. </div>
+                    </div>
+                    <h2 class="text-lg font-bold leading-7 text-gray-900 sm:text-lg sm:truncate">
+                        Create new prefix </h2>
+                    <div class="text-sm text-gray-900">
+                        To create a new prefix for a vocabulary, go to the Prefix page. You can find this page
+                        by clicking on the vocabulary in the Dashboard. You then get to the vocabularies Detail
+                        page. Under the search bar there are five tabs, one of them is called "Prefix". When you
+                        click on it, you can add prefixes in the large text box. The changes will not be applied
+                        until you click "Save".
+                    </div>
+                    <h2 class="text-lg font-bold leading-7 text-gray-900 sm:text-lg sm:truncate">
+                        Create Team </h2>
+                    <div class="text-sm text-gray-900">
+                        You can create a new team by clicking the "Create Team" button in the left sidebar. Then a
+                        pop-up window will open where you enter a team name and click "Create". Clicking "Teams" in the
+                        sidebar will take you to a page listing all the teams you belong to. Find the newly created team
+                        and click on it. You will find a listing of all members and an input field to add members by
+                        their mail address. You can kick members by clicking on „kick“ in the listing.
+                    </div>
+                    <h2 class="text-lg font-bold leading-7 text-gray-900 sm:text-lg sm:truncate">
+                        Other questions </h2>
+                    <div class="text-sm text-gray-900">
+                        For technical questions, please contact your administrator.
+                    </div>
+                </div>
         </div>
+        </main>
+
+    </div>
 
 </body>
 <script src="{% static 'js/main.js' %}"></script>

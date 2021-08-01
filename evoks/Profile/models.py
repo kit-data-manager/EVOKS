@@ -34,3 +34,7 @@ class Profile(models.Model):
         """
         self.verified = True
         self.user.save()
+
+    def export_data(self):
+        self.user.email_user(subject='userdata from evoks',message='name: ',from_email=settings.EVOKS_MAIL)
+        return
