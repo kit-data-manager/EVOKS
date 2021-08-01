@@ -11,16 +11,18 @@ class LoginRequiredMiddleware:
     def __call__(self, request):
         response = self.get_response(request)
         return response
-    
+
     def process_view(self, request, view_func, view_args, view_kwargs):
-        LOGIN_EXEMPT_URLS = ['logout', 'signup', 'login', 'reset', 'ToS']
+        LOGIN_EXEMPT_URLS = ['logout', 'signup', 'login', 'reset_password/',
+                             'reset_password_sent/', 'reset_password_complete/', 'ToS']
         assert hasattr(request, 'user')
         path = request.path_info.lstrip('/')
+        if request.path.startswith('/reset/'):
+            return None
 
         if not request.user.is_authenticated:
             if not any(url == path for url in LOGIN_EXEMPT_URLS):
                 return redirect('login')
-
 
 
 class PartOfVocabularyMiddleware:
@@ -31,7 +33,7 @@ class PartOfVocabularyMiddleware:
     def __call__(self, request):
         response = self.get_response(request)
         return response
-    
+
     def process_view(self, request, view_func, view_args, view_kwargs):
         if len(view_kwargs) != 0:
             if 'voc_name' in view_kwargs:
