@@ -42,23 +42,23 @@
                         <!-- Replace with your content -->
                         <div class="py-4">
                             <!-- This example requires Tailwind CSS v2.0+ -->
-                            <a href='{% url 'vocabulary_overview' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_overview' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Overview
                             </a>
-                            <a href='{% url 'vocabulary_terms' name=vocabulary.name %}'
+                            <a href='{% url 'vocabulary_terms' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Terms
-                            </a>
-                            <a href='{% url 'vocabulary_members' name=vocabulary.name %}'
+                            </a> 
+                            <a href='{% url 'vocabulary_members' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Members
-                            </a>
-                            <a href='{% url 'vocabulary_prefixes' name=vocabulary.name %}'
+                            </a> 
+                            <a href='{% url 'vocabulary_prefixes' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Prefixes
-                            </a>
-                            <a href='{% url 'vocabulary_settings' name=vocabulary.name %}'
+                             </a>
+                            <a href='{% url 'vocabulary_settings' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings
                             </a>
@@ -194,7 +194,8 @@
                                 </dl>
                                 <div class="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
                                     <dt class="text-sm font-medium text-regal-blue">
-                                        <a href="#">Open in Skosmos</a>
+                                        {% if vocabulary.state != 'Development' %}
+                                        <a href="{{skosmos_url}}" target="_blank">Open in Skosmos</a>
                                         <svg class="text-gray-500 inline-block mr-4 flex-shrink-0 h-6 w-6"
                                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor" aria-hidden="true">
@@ -202,6 +203,7 @@
                                                 d="M17 8l4 4m0 0l-4 4m4-4H3" />
 
                                         </svg>
+                                        {% endif %}
                                     </dt>
                                     <dd class="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                         <span class="flex-grow">

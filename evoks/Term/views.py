@@ -67,7 +67,7 @@ def uri_validator(uri: str) -> bool:
         return False
 
 
-def term_detail(request: HttpRequest, name: str, term_name: str):
+def term_detail(request: HttpRequest, voc_name: str, term_name: str):
     """View for the Term Detail Page
 
     Args:
@@ -80,11 +80,19 @@ def term_detail(request: HttpRequest, name: str, term_name: str):
     """
     user = request.user
 
-    vocabulary = Vocabulary.objects.get(name=name)
+    vocabulary = Vocabulary.objects.get(name=voc_name)
     # TODO turn slug into term name
     term = Term.objects.get(name=term_name)
 
     if request.method == 'POST':
+
+        if 'delete-term' in request.POST:
+            query = """
+            DELETE {{ ?s ?p ?o . }} WHERE {{ VALUES ?s {{ <{0}> }} ?s ?p ?o }}
+            """.format(vocabulary.urispace + term.name)
+            fuseki_dev.query(vocabulary, query, 'json', 'update')
+            term.delete()
+            return redirect('vocabulary_overview', voc_name=vocabulary.name)
 
         if 'obj' in request.POST:
             namespaces = vocabulary.get_namespaces()
@@ -156,7 +164,7 @@ def term_detail(request: HttpRequest, name: str, term_name: str):
             Comment.create(
                 text=comment_text, author=user.profile, vocabulary=None, term=term)
             # refresh page so created comment is visible
-            return redirect('term_detail', name=name, term_name=term_name)
+            return redirect('term_detail', name=voc_name, term_name=term_name)
 
         # create tag
         elif 'tag' in request.POST:
@@ -168,13 +176,13 @@ def term_detail(request: HttpRequest, name: str, term_name: str):
             # create new tag
             Tag.create(
                 name=tag_name, author=user.profile, vocabulary=None, term=term)
-            return redirect('term_detail', name=name, term_name=term_name)
+            return redirect('term_detail', name=voc_name, term_name=term_name)
 
         elif 'delete-tag' in request.POST:
             tag_name = request.POST['delete-tag']
             Tag.objects.filter(
                 name=tag_name, term=term).delete()
-            return redirect('term_detail', name=name, term_name=term_name)
+            return redirect('term_detail', name=voc_name, term_name=term_name)
 
         elif 'create-property' in request.POST:
             predicate = request.POST['predicate']
@@ -190,6 +198,11 @@ def term_detail(request: HttpRequest, name: str, term_name: str):
                 object = '\'{0}\''.format(object_string)
             urispace = '<{0}{1}>'.format(vocabulary.urispace, term.name)
             vocabulary.create_field(urispace, predicate, object)
+        
+        elif 'download' in request.POST:
+                dataformat = request.POST['download']
+                result = term.export_term(dataformat)
+                return result
 
     # put comments and tags on vocabulary into a list sorted from newest to oldest
     # TODO term

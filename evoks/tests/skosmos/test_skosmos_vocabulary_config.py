@@ -7,13 +7,14 @@ class SkosmosVocabularyConfigTest(TestCase):
     def test_config_equal_to_input(self):
         subject = "Alkoholkonsum der Studenten"
         title = "Bier"
+        name = "beer"
         languages = "Vodka, Rum"
         sparql_endpoint = "http:Schnaps"
         uri_space = "http:schnaps"
         default_language = "Vodka"
 
         config = SkosmosVocabularyConfig(
-            subject, title, languages, sparql_endpoint, uri_space, default_language)
+            subject, title, name, languages, sparql_endpoint, uri_space, default_language)
 
         self.assertEqual(config.subject, subject)
         self.assertEqual(config.title, title)

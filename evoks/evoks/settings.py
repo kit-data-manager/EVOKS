@@ -43,12 +43,23 @@ DOCKER_BASE_DIR = BASE_DIR.parent
 FUSEKI_USER = env('FUSEKI_USER')
 FUSEKI_PASSWORD = env('FUSEKI_PASSWORD')
 
+FUSEKI_DEV_HOST = 'fuseki-dev'
+FUSEKI_LIVE_HOST = 'fuseki-live'
+
+FUSEKI_DEV_BACKUP_PATH = 'fuseki-dev/backup'
+FUSEKI_LIVE_BACKUP_PATH = 'fuseki-live/backup'
+
+FUSEKI_PORT = 3030
+
 EVOKS_MAIL = env('EVOKS_MAIL')
 
 SKOSMOS_DEV_DIR = "skosmos-dev/config.ttl"
 SKOSMOS_LIVE_DIR = "skosmos-live/config.ttl"
 SKOSMOS_TEST_CONFIG = "evoks/tests/skosmos/config.ttl"
 
+
+SKOSMOS_DEV_URI = "http://localhost:9090/"
+SKOSMOS_LIVE_URI = "http://localhost:9080/"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/

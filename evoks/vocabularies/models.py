@@ -1,3 +1,4 @@
+from Skosmos.skosmos_vocabulary_config import SkosmosVocabularyConfig
 from django.db import models
 from django.utils.datastructures import MultiValueDict
 from Profile.models import Profile
@@ -11,6 +12,7 @@ import json
 import requests
 from django.conf import settings
 from typing import List, Tuple
+from evoks.skosmos import skosmos_dev, skosmos_live
 
 
 class State(models.TextChoices):
@@ -44,6 +46,7 @@ class Vocabulary(models.Model):
     term_count = models.IntegerField(default=0)
     groups = models.ManyToManyField(GroupProfile, blank=True)
     prefixes = ArrayField(models.CharField(max_length=100), default=list)
+    version = models.IntegerField(default=1)
     # many-to-one-fields belong in the 'one' models
     state = models.CharField(
         choices=State.choices,
@@ -72,6 +75,14 @@ class Vocabulary(models.Model):
         fuseki_dev.create_vocabulary(vocabulary)
         return vocabulary
 
+    def name_with_version(self) -> str:
+        """Returns the name of the Vocabulary with the version
+
+        Returns:
+            str: name-version
+        """
+        return '{0}-{1}'.format(self.name, self.version)
+
     def get_name(self) -> str:
         """Returns the name of the Vocabulary
 
@@ -79,12 +90,6 @@ class Vocabulary(models.Model):
             str: Name of the Vocabulary
         """
         return self.name
-
-    def set_dev_if_live(self) -> None:
-        """Sets Vocabulary state to DEV if it is LIVE
-        """
-        if self.state is State.LIVE:
-            self.set_dev()
 
     def import_vocabulary(self, input) -> None:
         """Imports a Vocabulary
@@ -201,38 +206,55 @@ class Vocabulary(models.Model):
         urispace = self.urispace
         query = """
             SELECT ?subject ?predicate ?object
-            WHERE {
-            <http://www.yso.fi/onto/yso/> ?predicate ?object
-            }"""
+            WHERE {{
+            <{0}> ?predicate ?object
+            }}""".format(urispace)
         if dataformat == 'json':
             thing = fuseki_dev.query(self, query, 'json')
             file_content = json.dumps(thing, indent=4, sort_keys=True)
             response = HttpResponse(
                 file_content, content_type='application/json')
-            response['Content-Disposition'] = 'attachment; filename=export.json'
+            response['Content-Disposition'] = 'attachment; filename={0}.json'.format(self.name)
             return response
         elif dataformat == 'N3':
             thing = fuseki_dev.query(self, """
-            DESCRIBE <http://www.yso.fi/onto/yso/> """, 'N3')
+            DESCRIBE {0} """.format(urispace), 'N3')
             file_content = thing.serialize(format='n3')
             response = HttpResponse(
                 file_content, content_type='application/ttl')
-            response['Content-Disposition'] = 'attachment; filename=export.ttl'
+            response['Content-Disposition'] = 'attachment; filename={0}.ttl'.format(self.name)
             return response
         elif dataformat == 'rdf/xml':
             thing = fuseki_dev.query(self, query, 'xml')
             file_content = thing.toprettyxml()
             response = HttpResponse(
                 file_content, content_type='application/xml')
-            response['Content-Disposition'] = 'attachment; filename=export.xml'
+            response['Content-Disposition'] = 'attachment; filename={0}.xml'.format(self.name)
             return response
 
     def set_live(self) -> None:
         """Sets the state to live and starts the migration process
         """
+        from Migration.migration_context import MigrationContext
+        from Migration.backup_migration_strategy import BackupMigrationStrategy
+        from evoks.fuseki import fuseki_live
+
+   
         if self.state != State.LIVE:
+
+            if self.state == State.REVIEW:
+                skosmos_dev.delete_vocabulary(self.name)
+
+            if self.version > 1:
+                skosmos_live.delete_vocabulary(self.name)
+                fuseki_live.delete_vocabulary(self)
+
+            context = MigrationContext(BackupMigrationStrategy())
+            context.start(self)
             self.state = State.LIVE
-            # thread?
+            self.version += 1
+            self.save()
+         # thread?
             # fuseki.startvocabularycopy...
             # versionsnummer?
             # migration
@@ -241,20 +263,29 @@ class Vocabulary(models.Model):
     def set_review(self) -> None:
         """Sets the state to review
         """
+        from evoks.fuseki import fuseki_dev, fuseki_live
+
+        
         if self.state != State.REVIEW:
+            config = SkosmosVocabularyConfig('cat_general', self.name_with_version(), self.name, [
+                                             'en'], fuseki_dev.build_sparql_endpoint(self), self.urispace, 'en')
+            skosmos_dev.add_vocabulary(config)
             self.state = State.REVIEW
-        # add to skosmos_dev
-        #skosmos_dev = Skosmos.objects.filter(port=9080)
-        # skosmos_dev.add_vocabulary(SkosmosConfig....)
+            self.save()
+
 
     def set_dev(self) -> None:
         """Sets the state to dev
         """
+        from evoks.fuseki import fuseki_dev, fuseki_live
+
         if self.state != State.DEV:
+            # if we are in review, just remove from skosmos dev
+            if self.state == State.REVIEW:
+                skosmos_dev.delete_vocabulary(self.name)
+            # if we are in live, remove from skosmos live and fuseki live
             self.state = State.DEV
-        # remove from skosmos
-        #skosmos_dev = Skosmos.objects.filter(port=9080)
-        # skosmos_dev.delete_vocabulary(self.name)
+            self.save()
 
     # permission required participant or owner
     def remove_term(self, name: str) -> None:

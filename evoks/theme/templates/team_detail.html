@@ -38,20 +38,20 @@
                         <!-- Replace with your content -->
                         <div class="py-4">
 
-                            
-                                <div class="space-y-8 divide-y divide-gray-200">
-                                    <div>
 
-                                        <!-- This example requires Tailwind CSS v2.0+ -->
-                                        <div class="flex flex-col">
-                                            <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                                                <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                                                    <div
-                                                        class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-                                                        <table class="min-w-full divide-y divide-gray-200">
-                                                        <form method='POST' action="">{% csrf_token %}  
+                            <div class="space-y-8 divide-y divide-gray-200">
+                                <div>
+
+                                    <!-- This example requires Tailwind CSS v2.0+ -->
+                                    <div class="flex flex-col">
+                                        <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                                            <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                                                <div
+                                                    class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                                                    <table class="min-w-full divide-y divide-gray-200">
+                                                        <form method='POST' action="">{% csrf_token %}
                                                             <thead class="bg-gray-50">
-                                                                
+
                                                                 <tr>
                                                                     <th scope="col"
                                                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -71,12 +71,12 @@
                                                             <tbody class="bg-white divide-y divide-gray-200">
                                                                 {% for mem in member_page %}
                                                                 <tr>
-                                                                    
+
                                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                                         <div class="flex items-center">
                                                                             <div class="flex-shrink-0 h-10 w-10">
                                                                                 <img class="h-10 w-10 rounded-full"
-                                                                                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60"
+                                                                                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Plato_Silanion_Musei_Capitolini_MC1377.jpg/440px-Plato_Silanion_Musei_Capitolini_MC1377.jpg"
                                                                                     alt="">
                                                                             </div>
                                                                             <div class="ml-4">
@@ -94,13 +94,14 @@
                                                                     <td
                                                                         class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 ">
                                                                         {% if mem == owner %} Owner
-                                                                        {% else %} Member 
+                                                                        {% else %} Member
                                                                         {% endif %}
                                                                     </td>
                                                                     <td
                                                                         class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
 
-                                                                        <button type="submit" name="kick" value="{{mem.email}}"
+                                                                        <button type="submit" name="kick"
+                                                                            value="{{mem.email}}"
                                                                             class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm hidden md:table-cell">
                                                                             Kick
                                                                         </button>
@@ -112,12 +113,12 @@
 
                                                             </tbody>
                                                         </form>
-                                                        </table>
-                                                    </div>
+                                                    </table>
                                                 </div>
                                             </div>
                                         </div>
-                                        <form method='POST' action="">{% csrf_token %}
+                                    </div>
+                                    <form method='POST' action="">{% csrf_token %}
                                         <!-- This example requires Tailwind CSS v2.0+ -->
                                         <nav class="bg-white px-4 py-3 flex items-center justify-between sm:px-6 mt-5"
                                             aria-label="Pagination">
@@ -134,7 +135,8 @@
                                             </div>
                                             <div class="flex-1 flex justify-between sm:justify-end">
                                                 {% if member_page.has_previous %}
-                                                <button type="submit" name="page" value="{{member_page.previous_page_number  }}"
+                                                <button type="submit" name="page"
+                                                    value="{{member_page.previous_page_number  }}"
                                                     class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                     Previous
                                                 </button>
@@ -145,7 +147,8 @@
                                                 </button>
                                                 {%endif%}
                                                 {% if member_page.has_next %}
-                                                <button type="submit" name='page' value='{{member_page.next_page_number}}'
+                                                <button type="submit" name='page'
+                                                    value='{{member_page.next_page_number}}'
                                                     class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                     Next
                                                 </button>
@@ -157,11 +160,11 @@
                                                 {%endif%}
                                             </div>
                                         </nav>
-                                        </form>
-                                        <div class="grid grid-cols-6 gap-6 mt-5">
+                                    </form>
+                                    <div class="grid grid-cols-6 gap-6 mt-5">
 
-                                            <div class="col-span-6 sm:col-span-3">
-                                                <form method='POST' action="">{% csrf_token %}
+                                        <div class="col-span-6 sm:col-span-3">
+                                            <form method='POST' action="">{% csrf_token %}
                                                 <!-- This example requires Tailwind CSS v2.0+ -->
                                                 <div class="bg-white shadow sm:rounded-lg">
                                                     <div class="px-4 py-5 sm:p-6">
@@ -183,45 +186,44 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                </form>
-                                            </div>
-                                            <div class="col-span-6 sm:col-span-3">
+                                            </form>
+                                        </div>
+                                        <div class="col-span-6 sm:col-span-3">
 
-                                                <!-- This example requires Tailwind CSS v2.0+ -->
-                                                <form method='POST' action="">{% csrf_token %}
-                                                    <div class="bg-white shadow sm:rounded-lg">
-                                                        <div class="px-4 py-5 sm:p-6">
+                                            <!-- This example requires Tailwind CSS v2.0+ -->
+                                            <form method='POST' action="">{% csrf_token %}
+                                                <div class="bg-white shadow sm:rounded-lg">
+                                                    <div class="px-4 py-5 sm:p-6">
 
-                                                            <div>
-                                                                <label for="description"
-                                                                    class="block text-sm font-medium text-gray-700">Change
-                                                                    team
-                                                                    description </label>
-                                                                <div class="mt-1">
-                                                                    <input type="text" name="description"
-                                                                        id="description"
-                                                                        class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                                                        placeholder="{{team.groupprofile.description}}">
-                                                                </div>
+                                                        <div>
+                                                            <label for="description"
+                                                                class="block text-sm font-medium text-gray-700">Change
+                                                                team
+                                                                description </label>
+                                                            <div class="mt-1">
+                                                                <input type="text" name="description" id="description"
+                                                                    class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                                                    placeholder="{{team.groupprofile.description}}">
                                                             </div>
-                                                            <div class="mt-5">
-                                                                <button type="submit" name='save' 
-                                                                    class="inline-flex items-center justify-center px-10 py-2 border border-transparent font-medium rounded-md text-white bg-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
-                                                                    Save
-                                                                </button>
-                                                            </div>
-
                                                         </div>
+                                                        <div class="mt-5">
+                                                            <button type="submit" name='save'
+                                                                class="inline-flex items-center justify-center px-10 py-2 border border-transparent font-medium rounded-md text-white bg-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
+                                                                Save
+                                                            </button>
+                                                        </div>
+
                                                     </div>
-                                                </form>
-                                            </div>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
+                                </div>
 
 
 
 
-                                    <form method='POST' action="">{% csrf_token %}    
+                                <form method='POST' action="">{% csrf_token %}
                                     <div class="grid grid-cols-6 gap-6 mt-5">
 
                                         <div class="col-span-6 sm:col-span-3">
@@ -272,7 +274,7 @@
                                         </div>
                                     </div>
                                     <form method='POST' action="">{% csrf_token %}
-                                </div>
+                            </div>
                             </form>
                         </div>
                     </div>
@@ -282,7 +284,7 @@
                 </div>
 
 
-                
+
 
 
 

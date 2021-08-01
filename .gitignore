@@ -1,3 +1,7 @@
+
+fuseki-dev/config/*
+fuseki-live/config/*
+
 .log
 *.pot
 *.pyc

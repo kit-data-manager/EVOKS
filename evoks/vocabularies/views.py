@@ -1,3 +1,4 @@
+from enum import unique
 from django.http.request import HttpRequest
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -11,6 +12,7 @@ from typing import List, Tuple
 from django.db import IntegrityError
 from urllib.parse import urlparse
 
+from evoks.settings import SKOSMOS_LIVE_URI, SKOSMOS_DEV_URI
 from django.core.exceptions import PermissionDenied
 from .forms import Vocabulary_Terms_Form
 from Tag.models import Tag
@@ -21,7 +23,7 @@ from guardian.shortcuts import get_perms
 from django.contrib.auth.decorators import login_required, user_passes_test
 
 
-def prefixes(request: HttpRequest, name: str) -> HttpResponse:
+def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
     """Views for prefixes tab
 
     Args:
@@ -31,7 +33,7 @@ def prefixes(request: HttpRequest, name: str) -> HttpResponse:
     Returns:
         HttpResponse: HttpResponse
     """
-    vocabulary = Vocabulary.objects.get(name=name)
+    vocabulary = Vocabulary.objects.get(name=voc_name)
 
     if request.method == 'POST':
         prefixes = request.POST['prefixes'].split(
@@ -108,7 +110,7 @@ def uri_validator(uri: str) -> bool:
 
 
 
-def index(request: HttpRequest, name: str) -> HttpResponse:
+def index(request: HttpRequest, voc_name: str) -> HttpResponse:
     """View for vocabulary overview
 
     Args:
@@ -118,9 +120,9 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
     Returns:
         HttpResponse: Http Response object
     """
-    # TODO put this shit in a middleware
+
     user = request.user
-    vocabulary = Vocabulary.objects.get(name=name)
+    vocabulary = Vocabulary.objects.get(name=voc_name)
     user_is_owner = 'owner' in get_perms(user, vocabulary)
     user_is_participant = 'participant' in get_perms(user, vocabulary)
     user_is_spectator = 'spectator' in get_perms(user, vocabulary)
@@ -213,7 +215,7 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
                 Comment.create(
                     text=comment_text, author=user.profile, vocabulary=vocabulary, term=None)
                 # refresh page so created comment is visible
-                return redirect('vocabulary_overview', name=name)
+                return redirect('vocabulary_overview', name=voc_name)
 
             # create tag
             elif 'tag' in request.POST:
@@ -225,13 +227,13 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
                 # create new tag
                 Tag.create(
                     name=tag_name, author=user.profile, vocabulary=vocabulary, term=None)
-                return redirect('vocabulary_overview', name=name)
+                return redirect('vocabulary_overview', name=voc_name)
 
             elif 'delete-tag' in request.POST:
                 tag_name = request.POST['delete-tag']
                 Tag.objects.filter(
                     name=tag_name, vocabulary=vocabulary).delete()
-                return redirect('vocabulary_overview', name=name)
+                return redirect('vocabulary_overview', name=voc_name)
 
             elif 'create-property' in request.POST:
                 predicate = request.POST['predicate']
@@ -308,6 +310,7 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
                 search_results.append((id, value))
 
         template = loader.get_template('vocabulary.html')
+        skosmos_url = SKOSMOS_DEV_URI if vocabulary.state == State.REVIEW else SKOSMOS_LIVE_URI
         context = {
             'user': request.user,
             'vocabulary': vocabulary,
@@ -315,6 +318,7 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
             'activities': activity_list,
             'search_results': search_results,
             'search_term': search,
+            'skosmos_url': skosmos_url + vocabulary.name,
         }
         return HttpResponse(template.render(context, request))
 
@@ -322,7 +326,7 @@ def index(request: HttpRequest, name: str) -> HttpResponse:
         return HttpResponse('your not part of this vocabulary')
 
 
-def settings(request: HttpRequest, name: str):
+def settings(request: HttpRequest, voc_name: str):
     """View for settings tab on a vocabulary
 
     Args:
@@ -333,7 +337,7 @@ def settings(request: HttpRequest, name: str):
         HttpResponse: Rendered Settings Site
     """
     try:
-        vocabulary = Vocabulary.objects.get(name=name)
+        vocabulary = Vocabulary.objects.get(name=voc_name)
         print(vocabulary.state)
     except ObjectDoesNotExist:
         return redirect('base')
@@ -349,6 +353,9 @@ def settings(request: HttpRequest, name: str):
         if user_is_owner:
             # delete vocabulary
             if 'delete' in request.POST:
+                if vocabulary.state == State.REVIEW:
+                    skosmos_dev.delete_vocabulary(vocabulary.name)
+                fuseki_dev.delete_vocabulary(vocabulary)
                 vocabulary.delete()
                 return redirect('base')
 
@@ -363,7 +370,7 @@ def settings(request: HttpRequest, name: str):
     return render(request, 'vocabulary_setting.html', context)
 
 
-def members(request: HttpRequest, name: str):
+def members(request: HttpRequest, voc_name: str):
     """Members that of the vocabulary views
 
     Args:
@@ -377,35 +384,27 @@ def members(request: HttpRequest, name: str):
         HttpResponse: A rendered Page
     """
     user = request.user
-    vocabulary = Vocabulary.objects.get(name=name)
+    vocabulary = Vocabulary.objects.get(name=voc_name)
+    user_is_owner = 'owner' in get_perms(user, vocabulary)
 
     # put all users from groups and regulars into one list
     profiles_list = vocabulary.profiles.all()
-    user_list = []
-    member_list = set()
-    for key in profiles_list:
-        user_list.append(key.user)
-    groups = vocabulary.groups.all()
-    group_user_list = []
-    for key in groups:
-        group_user_list.extend(key.group.user_set.all())
-    for key in user_list:
-        member_list.add(key)
-    for key in group_user_list:
-        member_list.add(key)
-    member_list = list(member_list)
 
-    p = Paginator(member_list, 10)
-    page_number = request.GET.get('page')
-    page_obj = p.get_page(page_number)
+    group_profile_list = vocabulary.groups.all()
 
-    user_is_owner = 'owner' in get_perms(user, vocabulary)
+    member_list = []
 
-    p.allow_empty_first_page
+    for group in group_profile_list:
+        g = {'name': group.group.name, 'description': group.description, 'type': group.__class__.__name__, 'role': 'Member'}
+        member_list.append(g)
+
+    for profile in profiles_list:
+        g = {'name': profile.name, 'email': profile.user.email, 'type': profile.__class__.__name__, 'role': 'Owner' if profile.user.email == user.email else 'Member'}
+        member_list.append(g)
 
     context = {
         'vocabulary': vocabulary,
-        'members': page_obj
+        'members': member_list
     }
 
     if request.method == 'POST':
@@ -425,11 +424,19 @@ def members(request: HttpRequest, name: str):
                     return HttpResponse('User/Group does not exist', status=404)
             elif 'kickall' in request.POST:
                 vocabulary.profiles.clear()
+                vocabulary.groups.clear()
+                vocabulary.add_profile(user.profile, 'owner')
             elif 'kick-member' in request.POST:
-                profile_name = request.POST['kick-member']
-                profile = vocabulary.profiles.get(name=profile_name)
-                vocabulary.remove_profile(profile)
-
+                type = request.POST['type']
+                name_or_mail = request.POST['kick-member']
+                if type == 'Profile':
+                    user = User.objects.get(email=name_or_mail)
+                    profile = vocabulary.profiles.get(user=user)
+                    vocabulary.remove_profile(profile)
+                else:
+                    group = Group.objects.get(name=name_or_mail)
+                    group_profile = vocabulary.groups.get(group=group)
+                    vocabulary.remove_group(group_profile)
             # refresh page
             return redirect('vocabulary_members', vocabulary.name)
 
@@ -439,7 +446,7 @@ def members(request: HttpRequest, name: str):
     return render(request, 'vocabulary_members.html', context)
 
 
-def terms(request: HttpRequest, name: str) -> HttpResponse:
+def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     """
     View for displaying all terms of a vocabulary
     Args:
@@ -450,7 +457,7 @@ def terms(request: HttpRequest, name: str) -> HttpResponse:
         HttpResponse: response object
     """
 
-    vocabulary = Vocabulary.objects.get(name=name)
+    vocabulary = Vocabulary.objects.get(name=voc_name)
 
     # get letter from querystring or default a
     letter = request.GET.get('letter') or 'a'
@@ -489,11 +496,19 @@ def terms(request: HttpRequest, name: str) -> HttpResponse:
         sub = x['sub']['value']
         id = sub.split(vocabulary.urispace)[1]
         obj = x['obj']
-        terms.append({'name': obj['value'], 'name': id})
+        terms.append({'display_name': obj['value'], 'name': id})
 
     next_page_number = page_number + 1  # going over page limit does not matter
     previous_page_number = 1 if page_number - \
         1 == 0 else page_number-1  # dont go to page 0
+
+    if request.method == 'POST':
+        if 'create-term' in request.POST:
+            term_name = request.POST['term-name']
+            vocabulary.add_term(term_name)
+            term = Term.objects.get(name=term_name)
+
+
 
     context = {
         'vocabulary': vocabulary,
@@ -507,6 +522,33 @@ def terms(request: HttpRequest, name: str) -> HttpResponse:
 
 def base(request: HttpRequest):
     user = request.user
+    user_groups = user.groups.all()
+
+    vocabulary_list = []
+    for user_vocabulary in user.profile.vocabulary_set.all():
+        vocabulary = {}
+        vocabulary['vocabulary'] = user_vocabulary
+        vocabulary_list.append(vocabulary)
+
+    for review_voc in Vocabulary.objects.filter(state = 'Review'):
+        vocabulary_list.append({'vocabulary' : review_voc})
+
+    for group in user_groups:
+        for group_vocabulary in group.groupprofile.vocabulary_set.all():
+            vocabulary = {}
+            vocabulary['team'] = group
+            vocabulary['vocabulary'] = group_vocabulary 
+            vocabulary_list.append(vocabulary)
+
+    unique = []
+    for v in vocabulary_list:
+        x = False
+        for v2 in unique:
+            if v2['vocabulary'].name == v['vocabulary'].name:
+                x = True
+        if not x:
+            unique.append(v)
+
     if request.method == 'POST':
 
         if 'create-vocabulary' in request.POST:
@@ -520,7 +562,7 @@ def base(request: HttpRequest):
             if 'file-upload' in request.FILES:
                 import_voc = request.FILES['file-upload']
                 vocabulary.import_vocabulary(input=import_voc)
-
+            return redirect('base')
 
 
     search = request.GET.get('search')
@@ -528,7 +570,7 @@ def base(request: HttpRequest):
     if search != None:
         search_results = []
         # TODO: add filter for vocabulary
-        for vocabulary in Vocabulary.objects.all():
+        for vocabulary in vocabulary_list:
 
             # query all fields of the vocabulary
             query_result = fuseki_dev.query(vocabulary, """
@@ -551,6 +593,8 @@ def base(request: HttpRequest):
         'user': request.user,
         'search_results': search_results,
         'search_term': search,
+        'vocabulary_list' : unique,
+        'user_groups' : user_groups,
     }
 
     return render(request, 'base.html', context)

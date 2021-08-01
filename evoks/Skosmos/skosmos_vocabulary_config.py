@@ -2,10 +2,10 @@ from typing import List
 
 
 class SkosmosVocabularyConfig:
-    """This class stores all sokosmos config parameters
+    """This class stores all skosmos config parameters
     """
 
-    def __init__(self, subject: str, title: str, languages: List[str], sparql_endpoint: str, uri_space: str, default_language: str):
+    def __init__(self, subject: str, title: str, name: str, languages: List[str], sparql_endpoint: str, uri_space: str, default_language: str):
         """Constructor of SkosmosVocabularyConfig
 
         Args:
@@ -22,3 +22,4 @@ class SkosmosVocabularyConfig:
         self.sparql_endpoint = sparql_endpoint
         self.uri_space = uri_space
         self.default_language = default_language
+        self.name = name

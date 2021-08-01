@@ -26,7 +26,7 @@
 		<!-- Static sidebar for desktop -->
 		{% include "sidebars/desktop.html" %}
 
-		<div class="flex-1 max-w-4xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
+		<div class="flex-1 max-w-7xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
 			{% include "header/searchbar_globally.html" %}
 
 			<main class="flex-1 relative overflow-y-auto focus:outline-none">
@@ -66,38 +66,47 @@
 														</tr>
 													</thead>
 													<tbody class="bg-white divide-y divide-gray-200">
-														{% for voc in vocabularies_page %}
-														<tr>
-															<td class="px-6 py-4 whitespace-nowrap">
-																<div class="flex items-center">
-																	<div class="ml-4">
-																		<div class="text-sm text-gray-900">
-																			<a href="/vocabularies/{{voc.name}}">
-																				{{voc.name}}
-																			</a>
+														{% for voc in vocabulary_list %}
+															<tr>
+																<td class="px-6 py-4 whitespace-nowrap">
+																	<div class="flex items-center">
+																		<div class="ml-4">
+																			<div class="text-sm text-gray-900">
+																				<a href="{% url 'vocabulary_overview' voc_name=voc.vocabulary.name %}">
+																					{{voc.vocabulary.name}}
+																				</a>
+																			</div>
 																		</div>
 																	</div>
-																</div>
-															</td>
-															<td
-																class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
-																<div class="text-sm text-gray-900">Vokabular Fans KIT
-																</div>
-																<div class="text-sm text-gray-500">Vokabeln sind cool!
-																</div>
-															</td>
-															<td
-																class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
-																<span
-																	class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 hidden md:table-cell">
-																	Live
-																</span>
-															</td>
-															<td
-																class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-																Spectator
-															</td>
-														</tr>
+																</td>
+																<td
+																	class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+																	<div class="text-sm text-gray-900">
+																	{% if 'team' in voc%} {{voc.team.name}} {% endif %}
+																	</div>
+																	<div class="text-sm text-gray-500">
+																	{% if 'team' in voc%} {{voc.team.groupprofile.description}} {% endif %}
+																	</div>
+																</td>
+																<td
+																	class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+																	<span
+																		class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 hidden md:table-cell">
+																		{{voc.vocabulary.state}}
+																	</span>
+																</td>
+																<td
+																	class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">	
+																	{% load guardian_tags %}
+																	{% if 'team' in voc%} {% get_obj_perms voc.team for voc.vocabulary as "vocabulary_perms" %}
+                                                                	{% else %} {% get_obj_perms user for voc.vocabulary as "vocabulary_perms" %}
+																	{% endif %}
+                                                                	{% if "owner" in vocabulary_perms %} Owner
+																	{% elif "participant" in vocabulary_perms %} Member
+																	{% elif "spectator" in vocabulary_perms %} Spectator
+																	{% endif %}
+																</td>
+															</tr>
 														{% endfor %}
 													</tbody>
 												</table>
@@ -106,45 +115,6 @@
 									</div>
 								</div>
 								<!-- This example requires Tailwind CSS v2.0+ -->
-								<nav class="bg-white px-4 py-3 flex items-center justify-between sm:px-6 mt-5"
-									aria-label="Pagination">
-									<div class="hidden sm:block">
-										<p class="text-sm text-gray-700">
-											Showing
-											<span class="font-medium">{{vocabularies_page.start_index}}</span>
-											to
-											<span class="font-medium">{{vocabularies_page.end_index}}</span>
-											of
-											<span class="font-medium">{{vocabularies.count}}</span>
-											results
-										</p>
-									</div>
-									<div class="flex-1 flex justify-between sm:justify-end">
-										{% if vocabularies_page.has_previous %}
-										<button type="submit" name="page"
-											value="{{vocabularies_page.previous_page_number  }}"
-											class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-											Previous
-										</button>
-										{% else %}
-										<button type="submit" name="page" value="{{vocabularies_page  }}"
-											class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-											Previous
-										</button>
-										{%endif%}
-										{% if vocabularies_page.has_next %}
-										<button type="submit" name='page' value='{{vocabularies_page.next_page_number}}'
-											class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-											Next
-										</button>
-										{% else %}
-										<button type="submit" name='page' value='{{vocabularies_page}}'
-											class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-											Next
-										</button>
-										{%endif%}
-									</div>
-								</nav>
 
 							</form>
 						</div>

@@ -4,7 +4,7 @@ Das folgende Vorgehen zum Aufsetzen der Applikation ist unter Linux getestet:
 Installation von git, docker und docker-compose
 
 **Kommentar zu Windows**
-Wir empfehlen wsl zur Ausführung zu benutzen (windows subsystem für Linux)
+Wir empfehlen wsl zur Ausführung zu benutzen (windows subsystem für Linux) (Sonst wird Fuseki SEHR langsam und quasi nicht nutzbar, der vokabular import dauert ~20 minuten..)
 
 **Vorgehen:**
 1. Clone dieses Repository.

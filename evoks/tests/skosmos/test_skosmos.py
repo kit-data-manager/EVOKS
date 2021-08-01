@@ -10,8 +10,7 @@ class SkosmosTest(TestCase):
     config_path = settings.SKOSMOS_TEST_CONFIG
 
     def setUp(self) -> None:
-        self.skosmos = Skosmos(
-            'big oof', self.config_path)
+        self.skosmos = Skosmos(self.config_path)
 
         self.g = Graph()
         self.g.parse(self.skosmos.config_path, format='n3')
@@ -23,12 +22,14 @@ class SkosmosTest(TestCase):
 
     def test_add_vocabulary(self):
         try:
-            config = SkosmosVocabularyConfig('cat_general', 'evoks', [
+            config = SkosmosVocabularyConfig('cat_general', 'evoks', 'evoks', [
                 'en'], 'http://localhost:3030/evoks/sparql', 'http://evoks.com/evoks', 'en')
             self.skosmos.add_vocabulary(config)
 
             g = Graph()
             g.parse(self.skosmos.config_path, format='n3')
+            print(g.serialize(format="turtle").decode("utf-8"))
+
             added = False
             for s, p, o in g:
                 if s == URIRef(self.skosmos._Skosmos__build_vocabulary_uri('evoks')):
