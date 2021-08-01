@@ -14,7 +14,9 @@ import os
 env = environ.Env(
     FUSEKI_USER=(str, 'admin'),
     FUSEKI_PASSWORD=(str, 'fuseki_password'),
-    EVOKS_MAIL=(str, 'game111111@gmx.de')
+    EVOKS_MAIL=(str, 'game111111@gmx.de'),
+    EMAIL_HOST_USER=(str),
+    EMAIL_HOST_PASSWORD=(str)
 )
 environ.Env.read_env()
 
@@ -77,6 +79,20 @@ LOGIN_REDIRECT_URL = '/vocabularies'
 LOGIN_URL = '/login'
 
 
+#SMTP Configuration
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+
+
+
+
+print(EMAIL_HOST_USER)
+print(EMAIL_HOST_PASSWORD)
 # Application definition
 
 INSTALLED_APPS = [

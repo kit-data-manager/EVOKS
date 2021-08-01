@@ -1,11 +1,22 @@
 from django.contrib.auth import authenticate, login, logout
 from django.http.request import HttpRequest
 from django.shortcuts import render
-from .forms import LoginForm, SignupForm
+from .forms import LoginForm, SignupForm, SetPasswordForm
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
-from django.core.mail import EmailMessage, message, send_mass_mail
+
+import django.contrib.auth.views
+
+
+class PasswordResetView(django.contrib.auth.views.PasswordResetView):
+
+    email_template_name = 'password_reset_email/password_res_email.html'
+
+
+class PasswordResetConfirmView(django.contrib.auth.views.PasswordResetConfirmView):
+
+    form_class = SetPasswordForm
 
 
 def login_view(request: HttpRequest) -> HttpResponse:
@@ -25,11 +36,10 @@ def login_view(request: HttpRequest) -> HttpResponse:
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             user = authenticate(username=email, password=password)
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    # redirect to homepage/dashboard
-                    return redirect('base')
+            if user is not None and user.is_active:
+                login(request, user)
+                # redirect to homepage/dashboard
+                return redirect('base')
 
             return HttpResponse('Unauthorized', status=401)
 
@@ -49,7 +59,6 @@ def signup_view(request: HttpRequest) -> HttpResponse:
         A rendered page
     """
     if request.method == 'POST':
-        print(request.POST.get('remember-me'))
         # create a form instance and populate it with data from the request:
         form = SignupForm(request.POST)
         # check whether it's valid:
@@ -58,53 +67,22 @@ def signup_view(request: HttpRequest) -> HttpResponse:
             name = form.cleaned_data['name']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            print("dabadee dabadiee {0}".format(request.POST.get('remember-me')))
 
-            if request.POST.get('remember-me') == 'on':
-                user = User.objects.create_user(username=email,
+            user = User.objects.create_user(username=email,
                                             email=email)
-                user.set_password(password)
+            user.set_password(password)
 
-                # safe full name in corresponding profile
-                user.profile.name = name
-                user.save()
-                return HttpResponse('Your account will be usable as soon as an admin has verified it!')
-            else:
-                placeholder = 123
-                #how little pop-up ? 
-            
-            # email setup
-            #mail_subject = 'Verify User Account'
-            #current_site = get_current_site(request)
-            #uid = urlsafe_base64_encode(force_bytes(user.pk))
-            #token = account_verification_token.make_token(user)
-            #verification_link = '{0}/?uid={1}&token{2}'.format(current_site, uid, token)
-            # add admin name?
-            #message = 'Hello,\n A User with email {0} requests an account verification.\n click the following link to activate his account: {1}'.format(user.email, verification_link)
-            #admin_list = list(User.objects.filter(is_staff=True))
-            # missing from email
-            #to_email = ''
-            #email = EmailMessage(mail_subject, message, to_email)
-            # email.send()
-            #send_mass_mail(mail_subject, message, admin_list)
+            # safe full name in corresponding profile
+            user.profile.name = name
+            user.save()
+            return HttpResponse('Your account will be usable as soon as an admin verifies it!')
+
     else:
         form = SignupForm()
 
     return render(request, 'signup.html', {'form': form})
 
-# def VerificationView(View):
-    # def get(self, request, uidb64, token):
-    # try:
-    #uid = force_text(urlsafe_base64_decode(uidb64).decode())
-    #user = User.objects(pk=uid)
-    # except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-    #user = None
-    # if user is not None and account_verification_token.check_token(user, token):
-    # user.profile.verify()
-    # user.save()
-    # else:
-    # return HttpResponse('Invalid Verification Link!')
 
-def logout_view(request : HttpRequest):
+def logout_view(request: HttpRequest):
     logout(request)
     return redirect('login')
