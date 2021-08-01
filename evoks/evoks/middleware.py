@@ -13,7 +13,7 @@ class LoginRequiredMiddleware:
         return response
     
     def process_view(self, request, view_func, view_args, view_kwargs):
-        LOGIN_EXEMPT_URLS = ['logout', 'signup', 'login', 'reset']
+        LOGIN_EXEMPT_URLS = ['logout', 'signup', 'login', 'reset', 'ToS']
         assert hasattr(request, 'user')
         path = request.path_info.lstrip('/')
 

@@ -47,3 +47,13 @@
     skosmos:uiHoneypotTime 5 ;
     skosmos:uiLanguageDropdown true .
 
+
+<file:///code/skosmos-live/config.ttl#cooles_vokabular1> a skosmos:Vocabulary,
+        void:Dataset ;
+    dc:subject <file:///code/skosmos-live/config.ttl#cat_general> ;
+    dc:title "cooles_vokabular1-1" ;
+    skosmos:fullAlphabeticalIndex true ;
+    skosmos:language "en" ;
+    void:sparqlEndpoint <http://fuseki-live:3030/cooles_vokabular1/sparql> ;
+    void:uriSpace "http://www.yso.fi/onto/yso/" .
+

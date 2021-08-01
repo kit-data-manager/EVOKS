@@ -39,3 +39,13 @@ Um einen Admin zu erstellen müssen folgende Schritte durchgeführt werden:
 Um Unittests auszuführen:
 1. Führe Schritt 10. und 11. der Anleitung oben aus. 
 2. Führe innerhalb des Docker Containers `python manage.py test evoks/tests` aus.
+
+
+**Bugs die eventuell auftreten**
+1. Wenn Fuseki nicht starten will weil es keine Zugriffsrechte hat: `sudo chmod 777 -R fuseki-dev/ fuseki-live/`
+2. Wenn ganz viel output schnell erscheint: `docker-compose down` und `docker-compose up`
+3. Wenn tailwind docker container nicht starten will, tailwind.sh text rauskopieren und in eine neue datei mit gleichen namen einfügen und neustarten
+4. Wenn Vokabular import ganz lange dauert, Linux oder WSL benutzen. 
+5. Wenn Seiten langsam laden, Linux oder WSL benutzen.
+6. Docker neustarten
+
