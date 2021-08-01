@@ -15,8 +15,8 @@ env = environ.Env(
     FUSEKI_USER=(str, 'admin'),
     FUSEKI_PASSWORD=(str, 'fuseki_password'),
     EVOKS_MAIL=(str, 'game111111@gmx.de'),
-    EMAIL_HOST_USER=(str),
-    EMAIL_HOST_PASSWORD=(str)
+    EMAIL_HOST_USER=(str, ''),
+    EMAIL_HOST_PASSWORD=(str, '')
 )
 environ.Env.read_env()
 
