@@ -25,34 +25,40 @@
         <!-- Static sidebar for desktop -->
         {% include "sidebars/desktop.html" %}
 
-        <div class="flex-1 max-w-4xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
+        <div class="flex-1 max-w-7xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
             {% include "header/searchbar.html" %}
 
 
             <main class="flex-1 relative focus:outline-none">
                 <div class="py-6">
                     <div class="px-4 sm:px-6 md:px-0">
-                        <h1 class="text-xl font-semibold text-gray-900">YSO - General Finnish ontology
+                        <h1 class="text-xl font-semibold text-gray-900">{{vocabulary.name}}
                         </h1>
                     </div>
                     <div class="px-4 sm:px-6 md:px-0">
                         <!-- Replace with your content -->
                         <div class="py-4">
                             <!-- This example requires Tailwind CSS v2.0+ -->
-                            <button type="button"
+                            <a href='{% url 'vocabulary_overview' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Overview
-                            </button>
-                            <button type="button"
+                            </a>
+                            <a href='{% url 'vocabulary_terms' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Terms
-                            </button> <button type="button"
+                            </a> 
+                            <a href='{% url 'vocabulary_members' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Members
-                            </button> <button type="button"
+                            </a> 
+                            <a href='{% url 'vocabulary_prefixes' name=vocabulary.name %}'
+                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Prefixes
+                             </a>
+                            <a href='{% url 'vocabulary_settings' name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings
-                            </button>
+                            </a>
                             <main>
 
                                 <div class="py-6">
@@ -87,22 +93,23 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody class="bg-white divide-y divide-gray-200">
+                                                                    
                                                                     <tr>
-
+                                                                    {% for data in members %}
                                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                                             <div class="flex items-center">
                                                                                 <div class="flex-shrink-0 h-10 w-10">
                                                                                     <img class="h-10 w-10 rounded-full"
-                                                                                        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60"
+                                                                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Plato_Silanion_Musei_Capitolini_MC1377.jpg/440px-Plato_Silanion_Musei_Capitolini_MC1377.jpg"
                                                                                         alt="">
                                                                                 </div>
                                                                                 <div class="ml-4">
                                                                                     <div
                                                                                         class="text-sm font-medium text-gray-900">
-                                                                                        Jane Cooper
+                                                                                        {{data.profile.name}}<br/>
                                                                                     </div>
                                                                                     <div class="text-sm text-gray-500">
-                                                                                        jane.cooper@example.com
+                                                                                        {{data.email}}<br/>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -110,19 +117,28 @@
 
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 ">
-                                                                            Member
+                                                                            {% load guardian_tags %}
+                                                                            {% get_obj_perms data for vocabulary as "vocabulary_perms" %}
+
+                                                                            {% if "owner" in vocabulary_perms %} Owner
+                                                                            {% elif "participant" in vocabulary_perms %} Member
+                                                                            {% elif "spectator" in vocabulary_perms %} Spectator
+                                                                            {% endif %}
                                                                         </td>
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-
-                                                                            <button type="button"
-                                                                                class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm hidden md:table-cell">
-                                                                                Kick
-                                                                            </button>
+                                                                            <form action="#" method="post"> {% csrf_token %}
+                                                                                <button type="submit" name="kick-member" value="{{data.profile.name}}"
+                                                                                    class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm hidden md:table-cell">
+                                                                                    Kick
+                                                                                </button>
+                                                                            </form>
 
                                                                         </td>
 
                                                                     </tr>
+                                                                    <hr/>
+                                                                    {% endfor %}
                                                                     <!-- More people... -->
                                                                 </tbody>
                                                             </table>
@@ -137,23 +153,27 @@
                                                 <div class="hidden sm:block">
                                                     <p class="text-sm text-gray-700">
                                                         Showing
-                                                        <span class="font-medium">1</span>
+                                                        <span class="font-medium">{{members.start_index}}</span>
                                                         to
-                                                        <span class="font-medium">10</span>
+                                                        <span class="font-medium">{{members.end_index}}</span>
                                                         of
-                                                        <span class="font-medium">20</span>
+                                                        <span class="font-medium">{{members.paginator.count}}</span>
                                                         results
                                                     </p>
                                                 </div>
                                                 <div class="flex-1 flex justify-between sm:justify-end">
-                                                    <a href="#"
-                                                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                                        Previous
-                                                    </a>
-                                                    <a href="#"
-                                                        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                                        Next
-                                                    </a>
+                                                    {% if members.has_previous %}
+                                                        <a href="?page={{ members.previous_page_number }}"
+                                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                                            Previous
+                                                        </a>
+                                                    {% endif %}
+                                                    {% if members.has_next %}
+                                                        <a href="?page={{ members.next_page_number }}"
+                                                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                                            Next
+                                                        </a>
+                                                    {% endif %}
                                                 </div>
                                             </nav>
                                         </div>
@@ -170,22 +190,24 @@
                                         <!-- This example requires Tailwind CSS v2.0+ -->
                                         <div class="bg-white shadow sm:rounded-lg">
                                             <div class="px-4 py-5 sm:p-6">
-                                                <div>
-                                                    <label for="email"
-                                                        class="block text-sm font-medium text-gray-700">Invite a
-                                                        member or a group</label>
-                                                    <div class="mt-1">
-                                                        <input type="text" name="email" id="email"
-                                                            class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                                            placeholder="ontologyfan@student.kit.edu or KIT Ontologen 2">
+                                                <form action="#" method="post"> {% csrf_token %}
+                                                    <div>
+                                                        <label for="email"
+                                                            class="block text-sm font-medium text-gray-700">Invite a
+                                                            member or a group</label>
+                                                        <div class="mt-1">
+                                                            <input type="text" name="email" id="email"
+                                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                                                placeholder="ontologyfan@student.kit.edu or KIT Ontologen 2">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="mt-5">
-                                                    <button type="button"
-                                                        class="inline-flex items-center justify-center px-10 py-2 border border-transparent font-medium rounded-md text-white bg-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
-                                                        Invite
-                                                    </button>
-                                                </div>
+                                                    <div class="mt-5">
+                                                        <button type="submit" name="invite"
+                                                            class="inline-flex items-center justify-center px-10 py-2 border border-transparent font-medium rounded-md text-white bg-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
+                                                            Invite
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
@@ -203,10 +225,12 @@
                                                     </p>
                                                 </div>
                                                 <div class="mt-5">
-                                                    <button type="button"
-                                                        class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
-                                                        Kick all members
-                                                    </button>
+                                                    <form action="#" method="post"> {% csrf_token %}
+                                                        <button type="submit" name="kickall"
+                                                            class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
+                                                            Kick all members
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>

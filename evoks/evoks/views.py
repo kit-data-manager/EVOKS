@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.http.request import HttpRequest
 from django.shortcuts import render
 from .forms import LoginForm, SignupForm
@@ -29,7 +29,7 @@ def login_view(request: HttpRequest) -> HttpResponse:
                 if user.is_active:
                     login(request, user)
                     # redirect to homepage/dashboard
-                    return redirect('Dashboard')
+                    return redirect('dashboard')
 
             return HttpResponse('Unauthorized', status=401)
 
@@ -49,22 +49,30 @@ def signup_view(request: HttpRequest) -> HttpResponse:
         A rendered page
     """
     if request.method == 'POST':
+        print(request.POST.get('remember-me'))
         # create a form instance and populate it with data from the request:
         form = SignupForm(request.POST)
         # check whether it's valid:
         if form.is_valid():
+
             name = form.cleaned_data['name']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
+            print("dabadee dabadiee {0}".format(request.POST.get('remember-me')))
 
-            user = User.objects.create_user(username=email,
+            if request.POST.get('remember-me') == 'on':
+                user = User.objects.create_user(username=email,
                                             email=email)
-            user.set_password(password)
+                user.set_password(password)
 
-            # safe full name in corresponding profile
-            user.profile.fullname = name
-            user.save()
-
+                # safe full name in corresponding profile
+                user.profile.name = name
+                user.save()
+                return HttpResponse('Your account will be usable as soon as an admin has verified it!')
+            else:
+                placeholder = 123
+                #how little pop-up ? 
+            
             # email setup
             #mail_subject = 'Verify User Account'
             #current_site = get_current_site(request)
@@ -75,13 +83,10 @@ def signup_view(request: HttpRequest) -> HttpResponse:
             #message = 'Hello,\n A User with email {0} requests an account verification.\n click the following link to activate his account: {1}'.format(user.email, verification_link)
             #admin_list = list(User.objects.filter(is_staff=True))
             # missing from email
-            #to_email = 'bonzjojo0@gmail.com'
+            #to_email = ''
             #email = EmailMessage(mail_subject, message, to_email)
             # email.send()
             #send_mass_mail(mail_subject, message, admin_list)
-
-            return HttpResponse('Your account will be usable as soon as an admin has verified it!')
-
     else:
         form = SignupForm()
 
@@ -99,3 +104,7 @@ def signup_view(request: HttpRequest) -> HttpResponse:
     # user.save()
     # else:
     # return HttpResponse('Invalid Verification Link!')
+
+def logout_view(request : HttpRequest):
+    logout(request)
+    return redirect('login')

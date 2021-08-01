@@ -10,7 +10,8 @@
     </button>
     <div class="flex-1 flex justify-between px-4 md:px-0">
         <div class="flex-1 flex">
-            <form class="w-full flex md:ml-0" action="#" method="GET">
+            <form class="w-full flex md:ml-0" action='{% url 'base' %}'
+                method="GET">
                 <label for="search-field" class="sr-only">Search</label>
                 <div class="relative w-full text-gray-400 focus-within:text-gray-600">
                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center">
@@ -22,9 +23,20 @@
                                 clip-rule="evenodd" />
                         </svg>
                     </div>
-                    <input id="search-field"
+                    <input id="search-field" onchange="this.form.submit()"
                         class="block h-full w-full border-transparent py-2 pl-8 pr-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent sm:text-sm"
-                        placeholder="Search globally" type="search" name="search">
+                        placeholder="Search in all vocabularies" {% if search_term != None %} value="{{search_term}}" {% endif %} type="search" name="search">
+                    <div>
+                        {% if search_results != None %}
+                        <select id="location"
+                            onchange="window.location = this.value"
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md">
+                            {% for res in search_results %}
+                            <option value="{{res.0}}">{{res.1}}</option>
+                            {% endfor %}
+                        </select>
+                        {% endif %}
+                    </div>
                 </div>
             </form>
         </div>
@@ -58,14 +70,11 @@
                     id="profile-menu">
 
                     <!-- Active: "bg-gray-100", Not Active: "" -->
-                    <a href="#" class="block py-2 px-4 text-sm text-gray-700" role="menuitem" tabindex="-1"
-                        id="user-menu-item-0">Your Profile</a>
+                    <a href="{% url 'profile' %}" class="block py-2 px-4 text-sm text-gray-700" role="menuitem"
+                        tabindex="-1" id="user-menu-item-0">Your Profile</a>
 
-                    <a href="#" class="block py-2 px-4 text-sm text-gray-700" role="menuitem" tabindex="-1"
-                        id="user-menu-item-1">Settings</a>
-
-                    <a href="#" class="block py-2 px-4 text-sm text-gray-700" role="menuitem" tabindex="-1"
-                        id="user-menu-item-2">Sign out</a>
+                    <a href="{% url 'logout' %}" class="block py-2 px-4 text-sm text-gray-700" role="menuitem"
+                        tabindex="-1" id="user-menu-item-2">Log out</a>
                 </div>
             </div>
         </div>

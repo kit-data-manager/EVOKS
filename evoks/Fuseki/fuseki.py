@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from requests import auth
 from vocabularies.models import Vocabulary
-from SPARQLWrapper import SPARQLWrapper, XML, JSON
+from SPARQLWrapper import SPARQLWrapper, XML, JSON, N3
 import requests
 from .task import Task
 from .copy import Copy
@@ -207,7 +207,7 @@ class Fuseki:
                 return Copy(task, self.__build_backup_path(backup))
         raise ValueError('Backup could not be found')
 
-    def query(self, vocabulary: Vocabulary, query: str) -> dict:
+    def query(self, vocabulary: Vocabulary, query: str, return_format: str, endpoint='sparql'):
         """
         Sends SPARQL query to database and returns JSON dictionary
 
@@ -217,10 +217,11 @@ class Fuseki:
         Returns:
             dict: JSON dictionary of the response
         """
-        sparql = SPARQLWrapper('{base}{name}/sparql'.format(
-            base=self.url, name=vocabulary.get_name()))
+        sparql = SPARQLWrapper('{base}{name}/{endpoint}'.format(
+            base=self.url, name=vocabulary.get_name(), endpoint=endpoint))
 
         sparql.setQuery(query)
-        sparql.setReturnFormat(JSON)
+        sparql.setReturnFormat(return_format)
         results = sparql.query().convert()
+        # print(results)
         return results

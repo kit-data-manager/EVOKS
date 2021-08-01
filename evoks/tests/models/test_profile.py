@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from Profile.models import Profile
 from django.conf import settings
 
-
 class ProfileTest(TestCase):
     @classmethod
     def setUpTestData(cls):

@@ -1,4 +1,4 @@
-<form>
+<form action="#" method="post">
     {% csrf_token %}
     <div class="fixed z-50 inset-0 overflow-y-auto invisible" aria-labelledby="modal-title" role="dialog"
         id="delete-vocabulary-modal" aria-modal="true">
@@ -35,7 +35,7 @@
                     </div>
                 </div>
                 <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                    <button type="button" id="delete-vocabulary-button-form"
+                    <button type="submit" id="delete-vocabulary-button-form" name="delete"
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
                         Delete
                     </button>
@@ -59,7 +59,6 @@
             window.location.href = "http://localhost:8000/vocabularies";
         })
     });
-
     document.getElementById("delete-vocabulary-modal-cancel").addEventListener("click", function (e) {
         document.getElementById("delete-vocabulary-modal").classList.toggle("invisible");
     });

@@ -12,7 +12,7 @@ class CustomBackendTest(TestCase):
         TestCase: Subclasses django TestCase
     """
     @classmethod
-    def set_up_test_data(cls) -> None:
+    def setUpTestData(cls) -> None:
         # Set up non-modified objects used by all test methods
         user = User.objects.create(
             username='jhon@example.com', email='jhon@example.com')

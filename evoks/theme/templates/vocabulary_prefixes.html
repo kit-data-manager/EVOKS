@@ -1,0 +1,142 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Vocabulary settings</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% tailwind_css %}
+
+</head>
+
+<body>
+    <!-- Create Team Modal -->
+    {% include "modals/create_team.html" %}
+    <!-- Create Vocabulary Modal -->
+    {% include "modals/create_vocabulary.html" %}
+    <!-- Create Vocabulary Modal -->
+    {% include "modals/delete_vocabulary.html" %}
+
+
+    <div class="h-screen bg-white overflow-visible flex">
+
+        <!-- Static sidebar for mobile -->
+        {% include "sidebars/mobile.html" %}
+        <!-- Static sidebar for desktop -->
+        {% include "sidebars/desktop.html" %}
+
+        <div class="flex-1 max-w-7xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
+            {% include "header/searchbar.html" %}
+
+            <main class="flex-1 relative focus:outline-none">
+                <div class="py-6">
+                    <div class="px-4 sm:px-6 md:px-0">
+                        <h1 class="text-xl font-semibold text-gray-900">{{vocabulary.name}}
+                        </h1>
+                    </div>
+                    <div class="px-4 sm:px-6 md:px-0">
+                        <!-- Replace with your content -->
+                        <div class="py-4">
+                            <!-- This example requires Tailwind CSS v2.0+ -->
+                            <a href='{% url 'vocabulary_overview' name=vocabulary.name %}'
+                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Overview
+                            </a>
+                            <a href='{% url 'vocabulary_terms' name=vocabulary.name %}'
+                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Terms
+                            </a>
+                            <a href='{% url 'vocabulary_members' name=vocabulary.name %}'
+                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Members
+                            </a>
+                            <a href='{% url 'vocabulary_prefixes' name=vocabulary.name %}'
+                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Prefixes
+                            </a>
+                            <a href='{% url 'vocabulary_settings' name=vocabulary.name %}'
+                                class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Settings
+                            </a>
+                            <main>
+
+                                <div class="py-6">
+
+                                    <div class="px-4 sm:px-6 md:px-0">
+                                        <!-- Replace with your content -->
+                                        <div class="py-4">
+
+                                            <fieldset>
+                                                <legend class="sr-only">
+                                                    Vocabulary setting
+                                                </legend>
+                                                <div class="bg-white rounded-md -space-y-px">
+                                                    <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
+                                                    <form action="#" method="post"> {% csrf_token %}
+                                                        <div class="sm:col-span-6">
+                                                            <label for="about"
+                                                                class="block text-sm font-medium text-gray-700">
+                                                                Prefixes
+                                                            </label>
+                                                            <div class="mt-1">
+                                                                <textarea id="about" name="prefixes" rows="20"
+                                                                    class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border border-gray-300 rounded-md">{{prefixes}}</textarea>
+                                                            </div>
+                                                            <p class="mt-2 text-sm text-gray-500">Enter one prefix per
+                                                                line</p>
+                                                        </div>
+                                                        <div class="pt-5">
+                                                            <div class="flex justify-end">
+                                                                <button type="button"
+                                                                    class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                                    Cancel
+                                                                </button>
+                                                                <button type="submit"
+                                                                    class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                                    Save
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </fieldset>
+
+
+                                        </div>
+                                        <!-- /End replace -->
+                                    </div>
+                                </div>
+
+
+
+                                <div class="grid grid-cols-6 gap-6 mt-5">
+
+                                    <div class="col-span-6 sm:col-span-3">
+
+                                    </div>
+                                    <div class="col-span-6 sm:col-span-3">
+
+
+                                    </div>
+                                </div>
+                        </div>
+
+
+
+
+            </main>
+
+        </div>
+        <!-- /End replace -->
+    </div>
+    </div>
+    </main>
+    </div>
+    </div>
+
+</body>
+<script src="{% static 'js/settings.js' %}"></script>
+
+</html>
