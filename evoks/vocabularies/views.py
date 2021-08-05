@@ -215,7 +215,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                 Comment.create(
                     text=comment_text, author=user.profile, vocabulary=vocabulary, term=None)
                 # refresh page so created comment is visible
-                return redirect('vocabulary_overview', name=voc_name)
+                return redirect('vocabulary_overview', voc_name=vocabulary.name)
 
             # create tag
             elif 'tag' in request.POST:
@@ -227,13 +227,13 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                 # create new tag
                 Tag.create(
                     name=tag_name, author=user.profile, vocabulary=vocabulary, term=None)
-                return redirect('vocabulary_overview', name=voc_name)
+                return redirect('vocabulary_overview', voc_name=vocabulary.name)
 
             elif 'delete-tag' in request.POST:
                 tag_name = request.POST['delete-tag']
                 Tag.objects.filter(
                     name=tag_name, vocabulary=vocabulary).delete()
-                return redirect('vocabulary_overview', name=voc_name)
+                return redirect('vocabulary_overview', voc_name=vocabulary.name)
 
             elif 'create-property' in request.POST:
                 predicate = request.POST['predicate']
@@ -257,10 +257,10 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
 
         # query all fields of the vocabulary
         query_result = fuseki_dev.query(vocabulary, """
-            SELECT * WHERE {
-                <http://www.yso.fi/onto/yso/> ?pred ?obj .
-            }
-        """, 'json')
+            SELECT * WHERE {{
+                <{0}> ?pred ?obj .
+            }}
+        """.format(vocabulary.urispace), 'json')
 
         namespaces = vocabulary.get_namespaces()
 
@@ -570,8 +570,8 @@ def base(request: HttpRequest):
     if search != None:
         search_results = []
         # TODO: add filter for vocabulary
-        for vocabulary in vocabulary_list:
-
+        for v in unique:
+            vocabulary = v['vocabulary']
             # query all fields of the vocabulary
             query_result = fuseki_dev.query(vocabulary, """
                 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>

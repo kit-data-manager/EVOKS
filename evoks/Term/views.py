@@ -164,7 +164,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
             Comment.create(
                 text=comment_text, author=user.profile, vocabulary=None, term=term)
             # refresh page so created comment is visible
-            return redirect('term_detail', name=voc_name, term_name=term_name)
+            return redirect('term_detail', voc_name=vocabulary.name, term_name=term_name)
 
         # create tag
         elif 'tag' in request.POST:
@@ -176,13 +176,13 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
             # create new tag
             Tag.create(
                 name=tag_name, author=user.profile, vocabulary=None, term=term)
-            return redirect('term_detail', name=voc_name, term_name=term_name)
+            return redirect('term_detail', voc_name = vocabulary.name, term_name=term_name)
 
         elif 'delete-tag' in request.POST:
             tag_name = request.POST['delete-tag']
             Tag.objects.filter(
                 name=tag_name, term=term).delete()
-            return redirect('term_detail', name=voc_name, term_name=term_name)
+            return redirect('term_detail', voc_name=voc_name, term_name=term_name)
 
         elif 'create-property' in request.POST:
             predicate = request.POST['predicate']
