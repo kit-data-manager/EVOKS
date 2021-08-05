@@ -1,4 +1,4 @@
-<form action="{% url 'teams' 'error' %}" method="post">
+<form action="{% url 'team_list' %}" method="post">
     {% csrf_token %}
     <div class="fixed z-50 inset-0 invisible" aria-labelledby="modal-title" role="dialog" id="create-team-modal"
         aria-modal="true">

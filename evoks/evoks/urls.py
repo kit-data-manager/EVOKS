@@ -33,7 +33,6 @@ urlpatterns = [
     path('logout', views.logout_view, name='logout'),
     path('signup', views.signup_view, name='signup'),
     path('login', views.login_view, name='login'),
-    path('teams/<slug:name>', TemplateView.as_view(template_name='team_detail.html')),
 
     path('reset_password/',
          views.PasswordResetView.as_view(template_name='reset_password1.html'),
