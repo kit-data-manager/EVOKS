@@ -90,9 +90,6 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
 
 
-
-print(EMAIL_HOST_USER)
-print(EMAIL_HOST_PASSWORD)
 # Application definition
 
 INSTALLED_APPS = [

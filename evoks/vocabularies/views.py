@@ -152,7 +152,6 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                 new_obj = request.POST['new-obj']
                 type = request.POST['obj-type']
                 query = vocabulary.prefixes_to_str(namespaces)
-                print(query)
                 # convert prefixes to sparql format
 
                 # if we want to edit a field
@@ -160,7 +159,6 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                     if type == 'uri':
                         # if uri is not valid its using a prefix and does not need braces
                         if uri_validator(new_obj) != True:
-                            print('valid blyaaaaaaaaaaat')
                             new_object = new_obj
                         else:
                             new_object = '<{0}>'.format(new_obj)
@@ -338,7 +336,6 @@ def settings(request: HttpRequest, voc_name: str):
     """
     try:
         vocabulary = Vocabulary.objects.get(name=voc_name)
-        print(vocabulary.state)
     except ObjectDoesNotExist:
         return redirect('base')
 
