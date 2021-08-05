@@ -135,9 +135,7 @@ class Vocabulary(models.Model):
                 self.add_term(id)
             except Exception as e:
                 print(e)
-                print(x)
 
-        print(r)
 
     def get_namespaces(self) -> List[Tuple[str, str]]:
         """Returns list of namespaces from fuseki and the prefixes tab

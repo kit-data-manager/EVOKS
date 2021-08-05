@@ -248,7 +248,6 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
         # append object to list of objects with same predicate
         fields[pred]['objects'].append(obj)
 
-    print(activity_list)
     context = {
         'vocabulary': vocabulary,
         'fields': fields,

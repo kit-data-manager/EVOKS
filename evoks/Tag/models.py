@@ -38,7 +38,6 @@ class Tag(models.Model):
         tag = cls(name=name, author=author, vocabulary=vocabulary, term=term)
         tag.color = random.choice(list(Color))
         tag.save()
-        print('This that Tag post date type beat {0}'.format(tag.post_date))
 
         return tag
 

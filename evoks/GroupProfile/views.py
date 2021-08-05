@@ -6,7 +6,6 @@ from django.http import HttpResponse
 
 
 def teams_view(request):
-    print('yaas')
     if request.user.is_authenticated:
         user = request.user
 

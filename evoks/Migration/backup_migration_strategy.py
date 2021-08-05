@@ -10,7 +10,6 @@ class BackupMigrationStrategy(MigrationStrategy):
     def start(self, vocabulary: Vocabulary):
 
         task_id = fuseki_dev.start_vocabulary_copy(vocabulary)
-        print(task_id)
 
         tasks = fuseki_dev.get_copy_tasks()
         task = None

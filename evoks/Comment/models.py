@@ -30,5 +30,4 @@ class Comment(models.Model):
         """
         comment = cls(text=text, author=author, vocabulary=vocabulary, term=term)
         comment.save()
-        print(comment.post_date)
         return comment

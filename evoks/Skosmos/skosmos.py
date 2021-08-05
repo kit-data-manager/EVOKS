@@ -39,8 +39,6 @@ class Skosmos:
 
         vocabulary_uri = URIRef(
             self.__build_vocabulary_uri(vocabulary_name))
-        print('lets go')
-        print(vocabulary_uri)
         g.parse(self.config_path, format='n3')
         g.remove((vocabulary_uri, None, None))
 
