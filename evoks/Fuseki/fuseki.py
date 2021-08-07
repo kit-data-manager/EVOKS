@@ -36,11 +36,12 @@ class Fuseki:
         self.backup_path = os.path.join(settings.DOCKER_BASE_DIR, backup_path)
 
         valid = self.ping()
+        # we only print the error here because the docker build process will fail if we raise an erro
+        # in a perfect world we would check if we are trying to build and raise an error if not
         if not valid:
             print('Invalid Fuseki configuration. Failed to ping server')
-                
 
-    def build_sparql_endpoint(self, vocabulary: Vocabulary, skosmos = True) -> str:
+    def build_sparql_endpoint(self, vocabulary: Vocabulary, skosmos=True) -> str:
         """
             builds the SPARQL endpoint for a given vocabulary
         Args:
@@ -154,12 +155,9 @@ class Fuseki:
         response = requests.post('{base}backup/{name}'.format(
             base=self.api_url, name=vocabulary.get_name()), auth=(user, password))
 
-        if response.status_code == HTTPStatus.NOT_FOUND:
-            raise ValueError('Vocabulary does not exist')
         if not response.ok:
             raise Exception('Backing up vocabulary failed',
                             response.status_code)
-
         data = response.json()
         return data['taskId']
 
@@ -234,5 +232,4 @@ class Fuseki:
         sparql.setQuery(query)
         sparql.setReturnFormat(return_format)
         results = sparql.query().convert()
-        # print(results)
         return results

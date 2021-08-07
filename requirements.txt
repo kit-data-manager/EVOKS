@@ -7,3 +7,4 @@ mypy
 django-stubs
 rdflib>=6.0.0
 django-environ
+coverage
