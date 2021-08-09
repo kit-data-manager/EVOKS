@@ -243,9 +243,9 @@ class Vocabulary(models.Model):
             if self.state == State.REVIEW:
                 skosmos_dev.delete_vocabulary(self.name)
 
-            if self.version > 1:
-                skosmos_live.delete_vocabulary(self.name)
-                fuseki_live.delete_vocabulary(self)
+            #if self.version > 1:
+            #    skosmos_live.delete_vocabulary(self.name)
+            #    fuseki_live.delete_vocabulary(self)
 
             context = MigrationContext(BackupMigrationStrategy())
             context.start(self)
