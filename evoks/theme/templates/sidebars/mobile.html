@@ -1,3 +1,5 @@
+{% load static %}
+
 <div class="fixed inset-0 z-40 flex md:hidden invisible" role="dialog" aria-modal="true" id="mobile-menu">
 
     <div class="fixed inset-0 bg-gray-600 bg-opacity-75" aria-hidden="true"></div>
@@ -16,7 +18,7 @@
         </div>
 
         <div class="flex-shrink-0 px-4 flex items-center">
-            <img class="h-8 w-auto" src="http://localhost:8000/static/assets/logo.png" alt="Workflow">
+            <img class="h-8 w-auto" src="{% static 'assets/logo.png' %}" alt="Evoks">
             <p class="ml-2 font-medium text-3xl">evoks</p>
 
         </div>

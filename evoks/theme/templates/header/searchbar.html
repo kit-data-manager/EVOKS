@@ -31,7 +31,7 @@
                         <select id="location" onchange="window.location = this.value"
                             class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md">
                             {% for res in search_results %}
-                            <option value='{% url 'term_detail' voc_name=vocabulary.name term_name=res.0 %}'>{{res.1}}
+                            <option value='{{res.0}}'>{{res.1}}
                             </option>
                             {% endfor %}
                         </select>

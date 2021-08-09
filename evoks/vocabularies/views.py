@@ -307,8 +307,15 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
             for x in query_result['results']['bindings']:
                 s = x['s']['value']
                 value = x['o']['value']
-                id = s.split(vocabulary.urispace)[1]
-                search_results.append((id, value))
+
+
+                split = s.split(vocabulary.urispace)
+                if len(split) > 1:
+                    id = s.split(vocabulary.urispace)[1]
+                    path = vocabulary.name + '/terms/' + id
+                    search_results.append(
+                        (path, '{0}: {1}'.format(vocabulary.name, value)))
+
 
         template = loader.get_template('vocabulary.html')
         skosmos_url = SKOSMOS_DEV_URI if vocabulary.state == State.REVIEW else SKOSMOS_LIVE_URI
@@ -510,8 +517,13 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     if request.method == 'POST':
         if 'create-term' in request.POST:
             term_name = request.POST['term-name']
+            term_label = request.POST['term-label']
             vocabulary.add_term(term_name)
-            term = Term.objects.get(name=term_name)
+            object = '\'\'\'{0}\'\'\''.format(term_label)
+            urispace = '<{0}{1}>'.format(vocabulary.urispace, term_name.rstrip())
+            predicate = '<http://www.w3.org/2004/02/skos/core#prefLabel>'
+            vocabulary.create_field(urispace, predicate, object)
+            # term = Term.objects.get(name=term_name)
 
     context = {
         'user':user,
