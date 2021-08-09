@@ -162,7 +162,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                         else:
                             new_object = '<{0}>'.format(new_obj)
                     else:
-                        new_object = '\'{0}\''.format(new_obj)
+                        new_object = '\'\'\'{0}\'\'\''.format(new_obj)
                         if lang != '':  # add lang tag if it exists
                             new_object += '@{0}'.format(lang)
                 # format the old object correctly
@@ -173,7 +173,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                     else:
                         new_object = '<{0}>'.format(new_obj)
                 else:
-                    new_object = '\'{0}\''.format(new_obj)
+                    new_object = '\'\'\'{0}\'\'\''.format(new_obj)
                     if lang != '':  # add lang tag if it exists
                         new_object += '@{0}'.format(lang)
 
@@ -184,7 +184,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                     else:
                         object = '<{0}>'.format(obj)
                 else:
-                    object = '\'{0}\''.format(obj)
+                    object = '\'\'\'{0}\'\'\''.format(obj)
                     if lang != '':
                         object += '@{0}'.format(lang)
 
@@ -243,7 +243,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                     else:
                         object = '<{0}>'.format(object_string)
                 else:
-                    object = '\'{0}\''.format(object_string)
+                    object = '\'\'\'{0}\'\'\''.format(object_string)
                 urispace = '<{0}>'.format(vocabulary.urispace)
                 vocabulary.create_field(urispace, predicate, object)
 
