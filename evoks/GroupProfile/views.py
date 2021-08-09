@@ -112,7 +112,7 @@ def team_detail_view(request, group_name):
 
             return render(request=request,
                           template_name="team_detail.html",
-                          context={'team': team, 'owner': team.groupprofile.group_owner, 'member': member, 'member_page': posts})
+                          context={'team': team, 'owner': team.groupprofile.group_owner,'session_user':user, 'member': member, 'member_page': posts})
 
         return HttpResponse('insufficient permission')
         # user not in group

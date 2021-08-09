@@ -85,10 +85,14 @@
                                                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                             Role
                                                                         </th>
+                                                                        {% load guardian_tags %}
+                                                                        {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                                                        {% if "owner" in vocabulary_perms %}
                                                                         <th scope="col"
                                                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                                                                             Action
                                                                         </th>
+                                                                        {%endif%}
 
                                                                     </tr>
                                                                 </thead>
@@ -124,6 +128,9 @@
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 ">
                                                                             {{ data.role }}
                                                                         </td>
+                                                                        
+                                                                        {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                                                        {% if "owner" in vocabulary_perms %}
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                                             <form action="#" method="post"> {% csrf_token %}
@@ -136,7 +143,7 @@
                                                                             </form>
 
                                                                         </td>
-
+                                                                        {%endif%}
                                                                     </tr>
                                                                     <hr/>
                                                                     {% endfor %}
@@ -155,7 +162,8 @@
 
 
                                 <div class="grid grid-cols-6 gap-6 mt-5">
-
+                                    {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                    {% if "owner" in vocabulary_perms %}
                                     <div class="col-span-6 sm:col-span-3">
 
                                         <!-- This example requires Tailwind CSS v2.0+ -->
@@ -182,6 +190,9 @@
                                             </div>
                                         </div>
                                     </div>
+                                    {%endif%}
+                                    {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                    {% if "owner" in vocabulary_perms %}
                                     <div class="col-span-6 sm:col-span-3">
 
                                         <!-- This example requires Tailwind CSS v2.0+ -->
@@ -206,6 +217,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    {%endif%}
                                 </div>
 
 

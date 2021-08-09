@@ -342,6 +342,7 @@ def settings(request: HttpRequest, voc_name: str):
     user_is_owner = 'owner' in get_perms(user, vocabulary)
 
     context = {
+        'user':user,
         'vocabulary': vocabulary
     }
 
@@ -401,6 +402,7 @@ def members(request: HttpRequest, voc_name: str):
         member_list.append(g)
 
     context = {
+        'user':user,
         'vocabulary': vocabulary,
         'members': member_list
     }
@@ -507,6 +509,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
             term = Term.objects.get(name=term_name)
 
     context = {
+        'user':user,
         'vocabulary': vocabulary,
         'terms': {'data': terms, 'next_page_number': next_page_number, 'previous_page_number': previous_page_number, 'start_index': offset, 'end_index': offset+len(terms)},
         'initial_letter': form,
