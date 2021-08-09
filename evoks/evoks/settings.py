@@ -14,7 +14,7 @@ import os
 env = environ.Env(
     FUSEKI_USER=(str, 'admin'),
     FUSEKI_PASSWORD=(str, 'fuseki_password'),
-    EVOKS_MAIL=(str, 'game111111@gmx.de'),
+    EVOKS_MAIL=(str, 'example@example.de'),
     EMAIL_HOST_USER=(str, ''),
     EMAIL_HOST_PASSWORD=(str, '')
 )

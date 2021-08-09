@@ -3,36 +3,34 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from Profile.models import Profile
 from django.conf import settings
+from unittest import skip
 
 
 class ProfileTest(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUp(self):
         # Set up non-modified objects used by all test methods
-        User.objects.create(username='jhon', password='ok',
-                            email='game111111@gmx.de')
-
-    def test_verified_false(self):
-        user = User.objects.get(username='jhon')
-        self.assertFalse(user.profile.verified)
+        self.user=User.objects.create(username='jhon', password='ok',
+                            email='example@example.de')
+    @classmethod
+    def tearDown(self):
+        self.user.delete()
 
     def test_name(self):
-        user = User.objects.get(username='jhon')
-        user.profile.name = 'tom'
-        self.assertEquals(user.profile.name, 'tom')
+        self.user.profile.name = 'tom'
+        self.assertEquals(self.user.profile.name, 'tom')
+
+    def test_verified_false(self):
+        self.assertFalse(self.user.profile.verified)
 
     def test_verified_true(self):
-        user = User.objects.get(username='jhon')
-        user.profile.verify()
-        self.assertTrue(user.profile.verified)
+        self.user.profile.verify()
+        self.assertTrue(self.user.profile.verified)
+        
+    def test_description(self):
+        self.user.profile.description = 'hi'
+        self.user.save()
+        self.assertEquals(self.user.profile.description, 'hi')
 
-    def test_verified_true(self):
-        user = User.objects.get(username='jhon')
-        user.profile.description = 'hi'
-        self.assertAlmostEquals(user.profile.description, 'hi')
 
-    def test_mail(self):
-        user = User.objects.get(username='jhon')
-        user.profile.export_userdata()
-        print('mailed from: '+settings.EVOKS_MAIL + ' to '+user.email)
-        self.assertTrue(True)
+    
