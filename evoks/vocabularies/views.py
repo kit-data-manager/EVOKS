@@ -40,8 +40,12 @@ def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
             '\r\n')  # could lead to problems with \r\n
         # remove all empty lines
         non_empty_prefixes = [line for line in prefixes if line.strip() != ""]
-        vocabulary.prefixes = non_empty_prefixes  # save prefixes in vocabulary
-        vocabulary.save()
+        if vocabulary.validate_prefixes(non_empty_prefixes):
+            vocabulary.prefixes = non_empty_prefixes  # save prefixes in vocabulary
+            vocabulary.save()
+        else:
+            #TODO error message
+            placeholder = 123
 
     template = loader.get_template('vocabulary_prefixes.html')
     context = {
