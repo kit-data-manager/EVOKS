@@ -47,6 +47,24 @@
     skosmos:uiHoneypotTime 5 ;
     skosmos:uiLanguageDropdown true .
 
+<file:///code/skosmos-live/config.ttl#ab-1> a skosmos:Vocabulary,
+        void:Dataset ;
+    dc:subject <file:///code/skosmos-live/config.ttl#cat_general> ;
+    dc:title "ab-1" ;
+    skosmos:fullAlphabeticalIndex true ;
+    skosmos:language "en" ;
+    void:sparqlEndpoint <http://fuseki-live:3030/ab-1/sparql> ;
+    void:uriSpace "" .
+
+<file:///code/skosmos-live/config.ttl#ab-2> a skosmos:Vocabulary,
+        void:Dataset ;
+    dc:subject <file:///code/skosmos-live/config.ttl#cat_general> ;
+    dc:title "ab-2" ;
+    skosmos:fullAlphabeticalIndex true ;
+    skosmos:language "en" ;
+    void:sparqlEndpoint <http://fuseki-live:3030/ab-2/sparql> ;
+    void:uriSpace "" .
+
 <file:///code/skosmos-live/config.ttl#asdasda> a skosmos:Vocabulary,
         void:Dataset ;
     dc:subject <file:///code/skosmos-live/config.ttl#cat_general> ;
@@ -102,6 +120,15 @@
     skosmos:fullAlphabeticalIndex true ;
     skosmos:language "en" ;
     void:sparqlEndpoint <http://fuseki-live:3030/t-12/sparql> ;
+    void:uriSpace "" .
+
+<file:///code/skosmos-live/config.ttl#t-13> a skosmos:Vocabulary,
+        void:Dataset ;
+    dc:subject <file:///code/skosmos-live/config.ttl#cat_general> ;
+    dc:title "t-13" ;
+    skosmos:fullAlphabeticalIndex true ;
+    skosmos:language "en" ;
+    void:sparqlEndpoint <http://fuseki-live:3030/t-13/sparql> ;
     void:uriSpace "" .
 
 <file:///code/skosmos-live/config.ttl#t-3> a skosmos:Vocabulary,
