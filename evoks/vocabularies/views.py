@@ -461,7 +461,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     Returns:
         HttpResponse: response object
     """
-
+    user=request.user
     vocabulary = Vocabulary.objects.get(name=voc_name)
 
     # get letter from querystring or default a
