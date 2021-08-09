@@ -109,7 +109,6 @@ def uri_validator(uri: str) -> bool:
         return False
 
 
-
 def index(request: HttpRequest, voc_name: str) -> HttpResponse:
     """View for vocabulary overview
 
@@ -392,11 +391,13 @@ def members(request: HttpRequest, voc_name: str):
     member_list = []
 
     for group in group_profile_list:
-        g = {'name': group.group.name, 'description': group.description, 'type': group.__class__.__name__, 'role': 'Member'}
+        g = {'name': group.group.name, 'description': group.description,
+             'type': group.__class__.__name__, 'role': 'Member'}
         member_list.append(g)
 
     for profile in profiles_list:
-        g = {'name': profile.name, 'email': profile.user.email, 'type': profile.__class__.__name__, 'role': 'Owner' if profile.user.email == user.email else 'Member'}
+        g = {'name': profile.name, 'email': profile.user.email, 'type': profile.__class__.__name__,
+             'role': 'Owner' if profile.user.email == user.email else 'Member'}
         member_list.append(g)
 
     context = {
@@ -505,8 +506,6 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
             vocabulary.add_term(term_name)
             term = Term.objects.get(name=term_name)
 
-
-
     context = {
         'vocabulary': vocabulary,
         'terms': {'data': terms, 'next_page_number': next_page_number, 'previous_page_number': previous_page_number, 'start_index': offset, 'end_index': offset+len(terms)},
@@ -527,14 +526,14 @@ def base(request: HttpRequest):
         vocabulary['vocabulary'] = user_vocabulary
         vocabulary_list.append(vocabulary)
 
-    for review_voc in Vocabulary.objects.filter(state = 'Review'):
-        vocabulary_list.append({'vocabulary' : review_voc})
+    for review_voc in Vocabulary.objects.filter(state='Review'):
+        vocabulary_list.append({'vocabulary': review_voc})
 
     for group in user_groups:
         for group_vocabulary in group.groupprofile.vocabulary_set.all():
             vocabulary = {}
             vocabulary['team'] = group
-            vocabulary['vocabulary'] = group_vocabulary 
+            vocabulary['vocabulary'] = group_vocabulary
             vocabulary_list.append(vocabulary)
 
     unique = []
@@ -561,7 +560,6 @@ def base(request: HttpRequest):
                 vocabulary.import_vocabulary(input=import_voc)
             return redirect('base')
 
-
     search = request.GET.get('search')
     search_results = None
     if search != None:
@@ -583,15 +581,19 @@ def base(request: HttpRequest):
             for x in query_result['results']['bindings']:
                 s = x['s']['value']
                 value = x['o']['value']
-                id = s.split(vocabulary.urispace)[1]
-                search_results.append((id, value))
+                split = s.split(vocabulary.urispace)
+                if len(split) > 1:
+                    id = s.split(vocabulary.urispace)[1]
+                    path = vocabulary.name + '/terms/' + id
+                    search_results.append(
+                        (path, '{0}: {1}'.format(vocabulary.name, value)))
 
     context = {
         'user': request.user,
         'search_results': search_results,
         'search_term': search,
-        'vocabulary_list' : unique,
-        'user_groups' : user_groups,
+        'vocabulary_list': unique,
+        'user_groups': user_groups,
     }
 
     return render(request, 'base.html', context)
