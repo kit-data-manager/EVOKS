@@ -61,11 +61,12 @@
                                                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                         Role
                                                                     </th>
+                                                                    {%if session_user == owner %}
                                                                     <th scope="col"
                                                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                                                                         Action
                                                                     </th>
-
+                                                                    {%endif%}
                                                                 </tr>
                                                             </thead>
                                                             <tbody class="bg-white divide-y divide-gray-200">
@@ -97,6 +98,7 @@
                                                                         {% else %} Member
                                                                         {% endif %}
                                                                     </td>
+                                                                    {%if session_user == owner %}
                                                                     <td
                                                                         class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
 
@@ -107,6 +109,7 @@
                                                                         </button>
 
                                                                     </td>
+                                                                    {%endif%}
                                                                     {% endfor %}
                                                                 </tr>
                                                                 <!-- More people... -->
@@ -162,7 +165,7 @@
                                         </nav>
                                     </form>
                                     <div class="grid grid-cols-6 gap-6 mt-5">
-
+                                        {%if session_user == owner %}
                                         <div class="col-span-6 sm:col-span-3">
                                             <form method='POST' action="">{% csrf_token %}
                                                 <!-- This example requires Tailwind CSS v2.0+ -->
@@ -179,7 +182,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="mt-5">
-                                                            <button type="submit" name='invite'
+                                                            <button type="submit" name='invite' 
                                                                 class="inline-flex items-center justify-center px-10 py-2 border border-transparent font-medium rounded-md text-white bg-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
                                                                 Invite
                                                             </button>
@@ -188,6 +191,7 @@
                                                 </div>
                                             </form>
                                         </div>
+                                        {%endif%}
                                         <div class="col-span-6 sm:col-span-3">
 
                                             <!-- This example requires Tailwind CSS v2.0+ -->
@@ -222,7 +226,7 @@
 
 
 
-
+                                {%if session_user == owner %}
                                 <form method='POST' action="">{% csrf_token %}
                                     <div class="grid grid-cols-6 gap-6 mt-5">
 
@@ -274,6 +278,7 @@
                                         </div>
                                     </div>
                                     <form method='POST' action="">{% csrf_token %}
+                                    {%endif%}
                             </div>
                             </form>
                         </div>
