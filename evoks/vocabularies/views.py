@@ -312,6 +312,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
 
         template = loader.get_template('vocabulary.html')
         skosmos_url = SKOSMOS_DEV_URI if vocabulary.state == State.REVIEW else SKOSMOS_LIVE_URI
+        vocabularyVer = vocabulary.version - 1
         context = {
             'user': request.user,
             'vocabulary': vocabulary,
@@ -319,7 +320,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
             'activities': activity_list,
             'search_results': search_results,
             'search_term': search,
-            'skosmos_url': skosmos_url + vocabulary.name,
+            'skosmos_url': skosmos_url + vocabulary.name + '-' + str(vocabularyVer),
         }
         return HttpResponse(template.render(context, request))
 
