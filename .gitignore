@@ -37,7 +37,6 @@ evoks/theme/static_src/core
 # Distribution / packaging 
 .Python build/ 
 develop-eggs/ 
-dist/ 
 downloads/ 
 eggs/ 
 .eggs/ 
