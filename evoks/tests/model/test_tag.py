@@ -8,7 +8,7 @@ from evoks.fuseki import fuseki_dev
 
 class TagTest(TestCase):
     """
-    Test class for Comment.
+    Test class for Tag.
     """
 
     @classmethod
