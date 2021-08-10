@@ -443,8 +443,9 @@ def members(request: HttpRequest, voc_name: str):
                 name_or_mail = request.POST['kick-member']
                 if type == 'Profile':
                     user = User.objects.get(email=name_or_mail)
-                    profile = vocabulary.profiles.get(user=user)
-                    vocabulary.remove_profile(profile)
+                    if 'owner' not in get_perms(user, vocabulary):
+                        profile = vocabulary.profiles.get(user=user)
+                        vocabulary.remove_profile(profile)
                 else:
                     group = Group.objects.get(name=name_or_mail)
                     group_profile = vocabulary.groups.get(group=group)
