@@ -5,8 +5,12 @@ from .forms import LoginForm, SignupForm, SetPasswordForm
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
-
+from django.core.mail import send_mail
+from evoks.settings import EMAIL_HOST_USER
 import django.contrib.auth.views
+from django.contrib.auth.models import User
+from django.contrib import admin
+from django.urls import reverse
 
 
 class PasswordResetView(django.contrib.auth.views.PasswordResetView):
@@ -75,6 +79,29 @@ def signup_view(request: HttpRequest) -> HttpResponse:
             # safe full name in corresponding profile
             user.profile.name = name
             user.save()
+
+            # get all emails from superusers
+            superusers = User.objects.filter(
+                is_superuser=True).values_list('email')
+            emails = []
+
+            for su in superusers:
+                if su[0] != '':
+                    emails.append(su[0])
+
+            # build url to profile in admin panel
+            url = request.build_absolute_uri(reverse("admin:%s_%s_change" % (
+                user.profile._meta.app_label, user.profile._meta.model_name), args=(user.profile.id,)))
+
+            send_mail(
+                'Verify a new Evoks account',
+                'Please visit the evoks admin panel {0} and verify the new user'.format(
+                    url),
+                EMAIL_HOST_USER,
+                emails,
+                fail_silently=False,
+            )
+
             return HttpResponse('Your account will be usable as soon as an admin verifies it!')
 
     else:
