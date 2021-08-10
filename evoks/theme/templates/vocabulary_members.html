@@ -129,10 +129,11 @@
                                                                             {{ data.role }}
                                                                         </td>
                                                                         
-                                                                        {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
-                                                                        {% if "owner" in vocabulary_perms %}
+
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                            {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                                                            {% if "owner" in vocabulary_perms and data.role != 'Owner' %}
                                                                             <form action="#" method="post"> {% csrf_token %}
                                                                                 <input type="hidden" name="type" value="{{data.type}}">
 
@@ -141,9 +142,8 @@
                                                                                     Kick
                                                                                 </button>
                                                                             </form>
-
+                                                                            {%endif%}
                                                                         </td>
-                                                                        {%endif%}
                                                                     </tr>
                                                                     <hr/>
                                                                     {% endfor %}
