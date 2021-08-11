@@ -16,8 +16,8 @@ class SkosmosTest(TestCase):
         self.g.parse(self.skosmos.config_path, format='n3')
 
     def tearDown(self) -> None:
-        config_file = open(self.skosmos.config_path, 'w')
-        config_file.write(self.g.serialize(format='turtle').decode('utf-8'))
+        config_file = open(self.skosmos.config_path, 'w', encoding='utf-8')
+        config_file.write(self.g.serialize(format='turtle'))
         config_file.close()
 
     def test_add_vocabulary(self):
@@ -27,8 +27,9 @@ class SkosmosTest(TestCase):
             self.skosmos.add_vocabulary(config)
 
             g = Graph()
-            g.parse(self.skosmos.config_path, format='n3')
-            print(g.serialize(format="turtle").decode("utf-8"))
+            g.parse(self.skosmos.config_path, format='n3', encoding='utf-8')
+            #To print the graph g use: 
+            #print(g.serialize(format="turtle"))
 
             added = False
             for s, p, o in g:
@@ -39,6 +40,12 @@ class SkosmosTest(TestCase):
         except:
             self.fail('Adding vocabulary failed')
 
+    def test_add_vocabulary_incorrect_config(self):
+        config = SkosmosVocabularyConfig('cat_general', 'evoks', 'evoks', [
+                'en'], 1111, 2222, 3333)
+        self.assertRaises(TypeError, self.skosmos.add_vocabulary, config)
+
+   
     def test_delete_vocabulary(self):
         try:
             self.skosmos.delete_vocabulary('unesco')
@@ -49,3 +56,18 @@ class SkosmosTest(TestCase):
                     self.fail('Triple still in config')
         except:
             self.fail('Deleting vocabulary failed')
+
+    def test_delete_vocabulary_wrong_name(self):
+        try:
+            self.skosmos.delete_vocabulary('ontologe')
+            g = Graph()
+            g.parse(self.skosmos.config_path, format='n3')
+            for s, p, o in g:
+                if s == URIRef(self.skosmos._Skosmos__build_vocabulary_uri('ontologe')):
+                    self.fail('Triple in config')
+        except:
+            self.fail('Something went wrongs')
+
+  
+
+                
