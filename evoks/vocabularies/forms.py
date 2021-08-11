@@ -31,3 +31,12 @@ class Vocabulary_Terms_Form(forms.Form):
         ('z', 'Z'),
     )
     initial_letter = forms.ChoiceField(required=False, choices=OPTIONS)
+
+class CreateVocabularyForm(forms.Form):
+    """Represents the input necessary to create a vocabulary
+
+    Args:
+        forms: Subclasses the Django Form class
+    """
+    name = forms.SlugField(max_length=50)
+    urispace = forms.CharField(max_length=100)
