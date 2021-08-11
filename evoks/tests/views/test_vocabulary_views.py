@@ -4,6 +4,7 @@ from unittest import skip
 
 from django.contrib.auth.models import User
 from vocabularies.models import Vocabulary
+from evoks.fuseki import fuseki_dev
 
 
 class Vocabulary_views_test(TestCase):
@@ -13,14 +14,19 @@ class Vocabulary_views_test(TestCase):
         cls.user = User.objects.create(
             username='jhon@example.com', email='jhon@example.com')
         cls.user.set_password('ok')
+        cls.user.profile.verified = True
         cls.user.save()
-        cls.vocabulary = Vocabulary.objects.create(name='genel')
-        cls.vocabulary.save()
+        cls.vocabulary = Vocabulary.create(name='genell', urispace='http://www.testurispace.de', creator=cls.user.profile)
+        cls.c = Client()
+        cls.c.login(username='jhon@example.com', password='ok')
+
+    @classmethod
+    def tearDownClass(cls):
+        fuseki_dev.delete_vocabulary(cls.vocabulary)
     
     def test_settings_view(self):
-        c = Client()
-        response = c.post(
-            '/vocabularies/genel/settings'.format(self.vocabulary.name),
+        response = self.c.get(
+            '/vocabularies/{0}/settings'.format(self.vocabulary.name),
         )
         #c.post.__setattr__('vocabulary-setting1')
         self.assertTemplateUsed(response, "vocabulary_setting.html")
