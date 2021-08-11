@@ -72,6 +72,12 @@ def signup_view(request: HttpRequest) -> HttpResponse:
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
 
+            if User.objects.filter(username=email).exists():
+                return HttpResponse('An account with the given email already exists', status=401)
+
+            if not "remember-me" in request.POST:
+                return HttpResponse('You have to accept the ToS if you want to create an account', status=401)
+
             user = User.objects.create_user(username=email,
                                             email=email)
             user.set_password(password)
