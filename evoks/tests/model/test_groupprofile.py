@@ -47,7 +47,7 @@ class GroupProfileTest(TestCase):
         self.assertEqual(group.groupprofile.size, 0)
 
     def test_remove_counter_zero(self):
-        """Checks if group exists after 
+        """Checks if group exists after removing last user
         """
         group = Group.objects.get(name='hey')
         user = User.objects.get(username='tom')

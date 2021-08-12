@@ -12,7 +12,7 @@ def profile_view(request):
 
         if request.method == 'POST':
 
-            if 'save' in request.POST:
+            if 'save' in request.POST: 
                 #changes content of name and description
                 name = request.POST.get('name')
                 description = request.POST.get('about')
