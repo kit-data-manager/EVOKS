@@ -1,25 +1,34 @@
-from typing import Type
 from django.test import TestCase
 from django.contrib.auth.models import User
 from Notification.models import Notification
-from Profile.models import Profile
 from Notification.models import Type
 
 
-class test_notification(TestCase):
+class NotificationTest(TestCase):
     """
     Test class for Notification.
     """
 
-    def test_init_(self):
+    @classmethod
+    def setUpTestData(cls):
+        cls.receiver = User.objects.create(username='jhon', password='ok',
+                            email='someone@example.com')
+        cls.notification = Notification.create(receiver=cls.receiver.profile, message='error test', type=Type.ERROR)
+
+
+    @classmethod
+    def tearDown(cls):
+        cls.receiver.delete()
+
+    
+    def test_create(self):
         """
         Test method for constructor. Checks if given parameters have been set correctly.
         """
+        receiver = self.receiver
+        notification = self.notification
+        self.assertEquals(notification.receiver, receiver.profile)
+        self.assertEquals(notification.message, 'error test')
+        self.assertEquals(notification.type, Type.ERROR)
 
-        sender = User.objects.create(
-            username='ali', password='veli', email='aliveli@aliveli.com')
-        profile = Profile(sender, sender.profile, True)
-        obj = Notification(profile, 'error test', 'ERROR')
-        self.assertEquals(obj.receiver, profile)
-        self.assertEquals(obj.message, 'error test')
-        self.assertEquals(obj.type, 'ERROR')
+    
