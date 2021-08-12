@@ -40,8 +40,12 @@ def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
             '\r\n')  # could lead to problems with \r\n
         # remove all empty lines
         non_empty_prefixes = [line for line in prefixes if line.strip() != ""]
-        vocabulary.prefixes = non_empty_prefixes  # save prefixes in vocabulary
-        vocabulary.save()
+        if vocabulary.validate_prefixes(non_empty_prefixes):
+            vocabulary.prefixes = non_empty_prefixes  # save prefixes in vocabulary
+            vocabulary.save()
+        else:
+            #TODO error message
+            placeholder = 123
 
     template = loader.get_template('vocabulary_prefixes.html')
     context = {
@@ -109,7 +113,6 @@ def uri_validator(uri: str) -> bool:
         return False
 
 
-
 def index(request: HttpRequest, voc_name: str) -> HttpResponse:
     """View for vocabulary overview
 
@@ -163,7 +166,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                         else:
                             new_object = '<{0}>'.format(new_obj)
                     else:
-                        new_object = '\'{0}\''.format(new_obj)
+                        new_object = '\'\'\'{0}\'\'\''.format(new_obj)
                         if lang != '':  # add lang tag if it exists
                             new_object += '@{0}'.format(lang)
                 # format the old object correctly
@@ -174,7 +177,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                     else:
                         new_object = '<{0}>'.format(new_obj)
                 else:
-                    new_object = '\'{0}\''.format(new_obj)
+                    new_object = '\'\'\'{0}\'\'\''.format(new_obj)
                     if lang != '':  # add lang tag if it exists
                         new_object += '@{0}'.format(lang)
 
@@ -185,7 +188,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                     else:
                         object = '<{0}>'.format(obj)
                 else:
-                    object = '\'{0}\''.format(obj)
+                    object = '\'\'\'{0}\'\'\''.format(obj)
                     if lang != '':
                         object += '@{0}'.format(lang)
 
@@ -244,7 +247,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                     else:
                         object = '<{0}>'.format(object_string)
                 else:
-                    object = '\'{0}\''.format(object_string)
+                    object = '\'\'\'{0}\'\'\''.format(object_string)
                 urispace = '<{0}>'.format(vocabulary.urispace)
                 vocabulary.create_field(urispace, predicate, object)
 
@@ -304,8 +307,15 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
             for x in query_result['results']['bindings']:
                 s = x['s']['value']
                 value = x['o']['value']
-                id = s.split(vocabulary.urispace)[1]
-                search_results.append((id, value))
+
+
+                split = s.split(vocabulary.urispace)
+                if len(split) > 1:
+                    id = s.split(vocabulary.urispace)[1]
+                    path = vocabulary.name + '/terms/' + id
+                    search_results.append(
+                        (path, '{0}: {1}'.format(vocabulary.name, value)))
+
 
         template = loader.get_template('vocabulary.html')
         skosmos_url = SKOSMOS_DEV_URI if vocabulary.state == State.REVIEW else SKOSMOS_LIVE_URI
@@ -344,6 +354,7 @@ def settings(request: HttpRequest, voc_name: str):
     user_is_owner = 'owner' in get_perms(user, vocabulary)
 
     context = {
+        'user':user,
         'vocabulary': vocabulary
     }
 
@@ -393,14 +404,17 @@ def members(request: HttpRequest, voc_name: str):
     member_list = []
 
     for group in group_profile_list:
-        g = {'name': group.group.name, 'description': group.description, 'type': group.__class__.__name__, 'role': 'Member'}
+        g = {'name': group.group.name, 'description': group.description,
+             'type': group.__class__.__name__, 'role': 'Member'}
         member_list.append(g)
 
     for profile in profiles_list:
-        g = {'name': profile.name, 'email': profile.user.email, 'type': profile.__class__.__name__, 'role': 'Owner' if profile.user.email == user.email else 'Member'}
+        g = {'name': profile.name, 'email': profile.user.email, 'type': profile.__class__.__name__,
+             'role': 'Owner' if profile.user.email == user.email else 'Member'}
         member_list.append(g)
 
     context = {
+        'user':user,
         'vocabulary': vocabulary,
         'members': member_list
     }
@@ -429,8 +443,9 @@ def members(request: HttpRequest, voc_name: str):
                 name_or_mail = request.POST['kick-member']
                 if type == 'Profile':
                     user = User.objects.get(email=name_or_mail)
-                    profile = vocabulary.profiles.get(user=user)
-                    vocabulary.remove_profile(profile)
+                    if 'owner' not in get_perms(user, vocabulary):
+                        profile = vocabulary.profiles.get(user=user)
+                        vocabulary.remove_profile(profile)
                 else:
                     group = Group.objects.get(name=name_or_mail)
                     group_profile = vocabulary.groups.get(group=group)
@@ -454,7 +469,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     Returns:
         HttpResponse: response object
     """
-
+    user=request.user
     vocabulary = Vocabulary.objects.get(name=voc_name)
 
     # get letter from querystring or default a
@@ -503,12 +518,16 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     if request.method == 'POST':
         if 'create-term' in request.POST:
             term_name = request.POST['term-name']
+            term_label = request.POST['term-label']
             vocabulary.add_term(term_name)
-            term = Term.objects.get(name=term_name)
-
-
+            object = '\'\'\'{0}\'\'\''.format(term_label)
+            urispace = '<{0}{1}>'.format(vocabulary.urispace, term_name.rstrip())
+            predicate = '<http://www.w3.org/2004/02/skos/core#prefLabel>'
+            vocabulary.create_field(urispace, predicate, object)
+            # term = Term.objects.get(name=term_name)
 
     context = {
+        'user':user,
         'vocabulary': vocabulary,
         'terms': {'data': terms, 'next_page_number': next_page_number, 'previous_page_number': previous_page_number, 'start_index': offset, 'end_index': offset+len(terms)},
         'initial_letter': form,
@@ -528,14 +547,14 @@ def base(request: HttpRequest):
         vocabulary['vocabulary'] = user_vocabulary
         vocabulary_list.append(vocabulary)
 
-    for review_voc in Vocabulary.objects.filter(state = 'Review'):
-        vocabulary_list.append({'vocabulary' : review_voc})
+    for review_voc in Vocabulary.objects.filter(state='Review'):
+        vocabulary_list.append({'vocabulary': review_voc})
 
     for group in user_groups:
         for group_vocabulary in group.groupprofile.vocabulary_set.all():
             vocabulary = {}
             vocabulary['team'] = group
-            vocabulary['vocabulary'] = group_vocabulary 
+            vocabulary['vocabulary'] = group_vocabulary
             vocabulary_list.append(vocabulary)
 
     unique = []
@@ -562,7 +581,6 @@ def base(request: HttpRequest):
                 vocabulary.import_vocabulary(input=import_voc)
             return redirect('base')
 
-
     search = request.GET.get('search')
     search_results = None
     if search != None:
@@ -584,15 +602,19 @@ def base(request: HttpRequest):
             for x in query_result['results']['bindings']:
                 s = x['s']['value']
                 value = x['o']['value']
-                id = s.split(vocabulary.urispace)[1]
-                search_results.append((id, value))
+                split = s.split(vocabulary.urispace)
+                if len(split) > 1:
+                    id = s.split(vocabulary.urispace)[1]
+                    path = vocabulary.name + '/terms/' + id
+                    search_results.append(
+                        (path, '{0}: {1}'.format(vocabulary.name, value)))
 
     context = {
         'user': request.user,
         'search_results': search_results,
         'search_term': search,
-        'vocabulary_list' : unique,
-        'user_groups' : user_groups,
+        'vocabulary_list': unique,
+        'user_groups': user_groups,
     }
 
     return render(request, 'base.html', context)

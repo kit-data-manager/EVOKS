@@ -6,7 +6,8 @@ from django.conf import settings
 
 
 class Profile(models.Model):
-    """Profile model with one-to-one relation to user model
+    """
+    Profile model with one-to-one relation to user model
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     description = models.TextField(max_length=500, blank=True)
@@ -24,7 +25,7 @@ class Profile(models.Model):
     @receiver(post_save, sender=User)
     def save_user_profile(sender, instance, **kwargs):
         """
-        save_user_profile automatically saves profile if User is saved. use user.save
+        save_user_profile automatically saves profile if User is saved. use user.save()
         """
         instance.profile.save()
 
@@ -35,6 +36,9 @@ class Profile(models.Model):
         self.verified = True
         self.user.save()
 
-    def export_data(self):
-        self.user.email_user(subject='userdata from evoks',message='name: ',from_email=settings.EVOKS_MAIL)
+    def export_data(self) -> None:
+        """
+        sends a mail with the userdata to the user
+        """
+        self.user.email_user(subject='userdata from evoks',message='data',from_email=settings.EVOKS_MAIL)
         return

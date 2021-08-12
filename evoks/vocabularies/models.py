@@ -16,10 +16,10 @@ from evoks.skosmos import skosmos_dev, skosmos_live
 
 
 class State(models.TextChoices):
-    """State enum that represents the state of the Vocabulary
+    """State TextChoices that represent the state of the Vocabulary
 
     Args:
-        enum: Python Enum
+        models (TextChoices): possible states of a vocabulary
     """
     DEV = 'Development'
     REVIEW = 'Review'
@@ -36,7 +36,6 @@ class Dataformat(enum.Enum):
     JSONLD = 2
     TURTLE = 3
 
-# missing triple and searchable Interface TODO
 
 
 class Vocabulary(models.Model):
@@ -47,7 +46,6 @@ class Vocabulary(models.Model):
     groups = models.ManyToManyField(GroupProfile, blank=True)
     prefixes = ArrayField(models.CharField(max_length=100), default=list)
     version = models.IntegerField(default=1)
-    # many-to-one-fields belong in the 'one' models
     state = models.CharField(
         choices=State.choices,
         default=State.DEV,
@@ -137,6 +135,15 @@ class Vocabulary(models.Model):
                 print(e)
 
 
+    def validate_prefixes(self, prefixes : List):
+        for key in prefixes:
+            split = key.split()
+            if not len(split) == 3:
+                return False
+            elif not (split[0] == "PREFIX" and split[1].endswith(":") and  split[1].endswith(":") and split[2].startswith("<") and split[2].endswith(">")):
+                return False     
+        return True
+
     def get_namespaces(self) -> List[Tuple[str, str]]:
         """Returns list of namespaces from fuseki and the prefixes tab
 
@@ -161,6 +168,7 @@ class Vocabulary(models.Model):
 
         return namespaces
 
+
     def prefixes_to_str(self, namespaces: List[Tuple[str, str]]) -> str:
         prefix_list: List[str] = []
         for k, value in namespaces:
@@ -169,12 +177,14 @@ class Vocabulary(models.Model):
         query = '\n'.join(prefix_list)
         return query
 
+
     def split_prefixes(self, prefixes: List[str]):
         splitted: List[Tuple[str, str]] = []
         for prefix in prefixes:
             parts = prefix.split()
             splitted.append((parts[1], parts[2][1:-1]))
         return splitted
+
 
     def convert_prefixes(self, prefixes: List[str]):
         """Turns a list of prefixes from this format: @prefix allars:   <http://www.yso.fi/onto/allars/> . to PREFIX allars <http://www.yso.fi/onto/allars/>
@@ -193,6 +203,7 @@ class Vocabulary(models.Model):
 
         return converted
 
+
     def export_vocabulary(self, dataformat: str) -> None:
         """Sends the Vocabulary in the provided dataformat to the users email
 
@@ -208,15 +219,18 @@ class Vocabulary(models.Model):
             <{0}> ?predicate ?object
             }}""".format(urispace)
         if dataformat == 'json':
-            thing = fuseki_dev.query(self, query, 'json')
-            file_content = json.dumps(thing, indent=4, sort_keys=True)
+            #thing = fuseki_dev.query(self, query, 'json')
+            #file_content = json.dumps(thing, indent=4, sort_keys=True)
+            thing = fuseki_dev.query(self, """
+            DESCRIBE <{0}> """.format(urispace), 'text/turtle')
+            file_content = thing.serialize(format='json-ld')
             response = HttpResponse(
-                file_content, content_type='application/json')
-            response['Content-Disposition'] = 'attachment; filename={0}.json'.format(self.name)
+                file_content, content_type='application/json-ld')
+            response['Content-Disposition'] = 'attachment; filename={0}.jsonld'.format(self.name)
             return response
         elif dataformat == 'N3':
             thing = fuseki_dev.query(self, """
-            DESCRIBE {0} """.format(urispace), 'N3')
+            DESCRIBE <{0}> """.format(urispace), 'text/turtle')
             file_content = thing.serialize(format='n3')
             response = HttpResponse(
                 file_content, content_type='application/ttl')
@@ -226,9 +240,10 @@ class Vocabulary(models.Model):
             thing = fuseki_dev.query(self, query, 'xml')
             file_content = thing.toprettyxml()
             response = HttpResponse(
-                file_content, content_type='application/xml')
-            response['Content-Disposition'] = 'attachment; filename={0}.xml'.format(self.name)
+                file_content, content_type='application/rdf+xml')
+            response['Content-Disposition'] = 'attachment; filename={0}.rdf'.format(self.name)
             return response
+
 
     def set_live(self) -> None:
         """Sets the state to live and starts the migration process
@@ -252,11 +267,6 @@ class Vocabulary(models.Model):
             self.state = State.LIVE
             self.version += 1
             self.save()
-         # thread?
-            # fuseki.startvocabularycopy...
-            # versionsnummer?
-            # migration
-            # skosmos
 
     def set_review(self) -> None:
         """Sets the state to review
@@ -294,7 +304,8 @@ class Vocabulary(models.Model):
         """
         term = self.term_set.get(name=name)
         self.term_set.remove(term)
-        self.set_dev_if_live()
+        if self.state == State.LIVE:
+            self.set_dev()
         term.delete()
         self.term_count -= 1
 
@@ -315,7 +326,7 @@ class Vocabulary(models.Model):
 
         Args:
             profile (Profile): User to be added
-            permission (Permission): Permission the User will have on the Vocabulary
+            permission (str): Permission the User will have on the Vocabulary
         """
         self.profiles.add(profile)
         assign_perm(permission, profile.user, self)
@@ -375,19 +386,15 @@ class Vocabulary(models.Model):
         """Creates a Triple Field on the Fuseki-Dev Instance
 
         Args:
-            url (str): Url of the Triple
-            type (str): Type of the Triple
-            content (str): Content of the Triple
-
-        Returns:
-            str: [description]
+            urispace (str): urispace of the vocabulary and subject of the triple
+            predicate (str): predicate of the triple
+            object (str): object of the triple
         """
         from evoks.fuseki import fuseki_dev
 
         namespaces = self.get_namespaces()
         query = self.prefixes_to_str(namespaces)
 
-        # normalerweise ist {0} urispace aber ist noch nicht richtig initialisiert...
         query += 'INSERT DATA {{ {0} {1} {2} }}'.format(
             urispace, predicate, object)
         fuseki_dev.query(vocabulary=self, query=str(

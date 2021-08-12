@@ -1,10 +1,7 @@
 @prefix : <file:///code/evoks/tests/skosmos/config.ttl#> .
-@prefix dc: <http://purl.org/dc/terms/> .
-@prefix isothes: <http://purl.org/iso25964/skos-thes#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skosmos: <http://purl.org/net/skosmos#> .
-@prefix void: <http://rdfs.org/ns/void#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 :config a skosmos:Configuration ;
@@ -14,7 +11,7 @@
     skosmos:feedbackSender "" ;
     skosmos:globalPlugins () ;
     skosmos:httpTimeout 5 ;
-    skosmos:languages ( [ rdfs:label "ar" ;
+    skosmos:languages ( [ rdfs:label "en" ;
                 rdf:value "ar_AE.utf8" ] [ rdfs:label "da" ;
                 rdf:value "da_DK.utf8" ] [ rdfs:label "de" ;
                 rdf:value "de_DE.utf8" ] [ rdfs:label "en" ;
@@ -34,46 +31,17 @@
                 rdf:value "ru_RU.utf8" ] [ rdfs:label "sv" ;
                 rdf:value "sv_SE.utf8" ] [ rdfs:label "zh" ;
                 rdf:value "zh_CN.utf8" ] ) ;
-    skosmos:logBrowserConsole false ;
-    skosmos:logCaughtExceptions false ;
+    skosmos:logBrowserConsole true ;
+    skosmos:logCaughtExceptions true ;
     skosmos:searchResultsSize 20 ;
     skosmos:serviceName "Skosmos" ;
     skosmos:sparqlCollationEnabled false ;
     skosmos:sparqlDialect "JenaText" ;
-    skosmos:sparqlEndpoint <http://localhost:3030/skosmos/sparql> ;
+    skosmos:sparqlEndpoint <http://fuseki-dev:3030/> ;
     skosmos:sparqlTimeout 20 ;
     skosmos:templateCache "/tmp/skosmos-template-cache" ;
     skosmos:transitiveLimit 1000 ;
     skosmos:uiHoneypotEnabled true ;
     skosmos:uiHoneypotTime 5 ;
     skosmos:uiLanguageDropdown true .
-
-:stw a skosmos:Vocabulary,
-        void:Dataset ;
-    dc:subject :cat_general ;
-    dc:title "STW Thesaurus for Economics"@en ;
-    skosmos:defaultLanguage "de" ;
-    skosmos:language "de",
-        "en" ;
-    skosmos:shortName "STW" ;
-    skosmos:sparqlGraph <http://zbw.eu/stw/> ;
-    void:sparqlEndpoint <http://localhost:3030/skosmos/sparql> ;
-    void:uriSpace "http://zbw.eu/stw/" .
-
-:unesco a skosmos:Vocabulary,
-        void:Dataset ;
-    dc:subject :cat_general ;
-    dc:title "UNESCO Thesaurus"@en ;
-    skosmos:defaultLanguage "en" ;
-    skosmos:fullAlphabeticalIndex true ;
-    skosmos:groupClass isothes:ConceptGroup ;
-    skosmos:language "en",
-        "es",
-        "fr",
-        "ru" ;
-    skosmos:shortName "UNESCO" ;
-    skosmos:showTopConcepts true ;
-    skosmos:sparqlGraph <http://skos.um.es/unescothes/> ;
-    void:sparqlEndpoint <http://localhost:3030/skosmos/sparql> ;
-    void:uriSpace "http://skos.um.es/unescothes/" .
 

@@ -1,20 +1,16 @@
-
 from pathlib import Path
 import socket
-
 from pathlib import Path
 from typing import List, Set, Dict, Tuple, Optional
-
 import os
 import socket
-
 import environ
 import os
 
 env = environ.Env(
     FUSEKI_USER=(str, 'admin'),
     FUSEKI_PASSWORD=(str, 'fuseki_password'),
-    EVOKS_MAIL=(str, 'aliveli789ali@outlook.com'),
+    EVOKS_MAIL=(str, 'example@example.com'),
     EMAIL_HOST_USER=(str, ''),
     EMAIL_HOST_PASSWORD=(str, '')
 )

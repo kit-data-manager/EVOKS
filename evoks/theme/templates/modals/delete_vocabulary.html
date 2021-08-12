@@ -49,16 +49,6 @@
     </div>
 </form>
 <script type="text/javascript">
-    document.getElementById("delete-vocabulary-button-form").addEventListener("click", function (e) {
-        const url = window.location.href.split('/')
-        url.pop()
-        fetch(url.join('/'), {
-            method: 'delete',
-            headers: { 'Content-Type': 'application/json' },
-        }).then((response) => {
-            window.location.href = "http://localhost:8000/vocabularies";
-        })
-    });
     document.getElementById("delete-vocabulary-modal-cancel").addEventListener("click", function (e) {
         document.getElementById("delete-vocabulary-modal").classList.toggle("invisible");
     });
