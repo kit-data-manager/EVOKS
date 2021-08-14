@@ -14,6 +14,8 @@ def teams_view(request):
             new_name = request.POST.get('team-name')
             if Group.objects.filter(name=new_name).exists():
                 return HttpResponse('already exists')
+            elif str(new_name).endswith(' '):
+                return HttpResponse('error')
             else:
                 group = Group.objects.create(name=new_name)
                 group.groupprofile.group_owner = user
