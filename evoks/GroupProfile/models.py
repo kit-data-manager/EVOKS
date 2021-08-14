@@ -1,13 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
-from django.db.models.fields import SlugField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
 class GroupProfile(models.Model):
-    Group.name = models.SlugField(max_length=1, unique=True)
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
     description = models.TextField(max_length=500, blank=True)
     group_owner = models.ForeignKey(User, on_delete=models.PROTECT,null=True)
