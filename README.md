@@ -49,3 +49,7 @@ Um Unittests auszuführen:
 6. Wenn Seiten langsam laden, Linux oder WSL benutzen.
 7. Docker neustarten
 
+**Mail Server konfigurieren**
+1. Erstelle .env Datei unter evoks/evoks/ 
+2. Schreibe `EMAIL_HOST_USER=deineemail`, `EMAIL_HOST_PASSWORD=deinpassword` in diese Datei rein. 
+3. Dann in Settings.py unter evoks/evoks/ muss die SMTP konfiguriert werden. Also Zeile 85 - 88 in Setting.py `EMAIL_HOST = 'smtp.gmail.com', EMAIL_PORT = 587, EMAIL_USE_TLS = TRUE(Beispiel für Gmail)`. Das kann man finden wenn man in einer Suchmaschiene "SMTP confiriguation gmail" schreibt. Die meisten Emails akzeptieren als default keine Less Secure Apps deshalb muss in den Einstellungen der verwendete Email Less Secure Apps akzeptiert werden.
