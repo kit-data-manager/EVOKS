@@ -48,3 +48,4 @@
     skosmos:uiHoneypotEnabled true ;
     skosmos:uiHoneypotTime 5 ;
     skosmos:uiLanguageDropdown true .
+

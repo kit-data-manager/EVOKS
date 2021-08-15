@@ -1,3 +1,4 @@
+from typing import OrderedDict
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
@@ -14,6 +15,8 @@ def teams_view(request):
             new_name = request.POST.get('team-name')
             if Group.objects.filter(name=new_name).exists():
                 return HttpResponse('already exists')
+            elif str(new_name).endswith(' ') or str(new_name).startswith(' '):
+                return HttpResponse('no leading or ending space chracters')
             else:
                 group = Group.objects.create(name=new_name)
                 group.groupprofile.group_owner = user

@@ -1,6 +1,6 @@
 <form action="{% url 'base' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-<!-- Create Vocabulary Modal -->
+    <!-- Create Vocabulary Modal -->
     <div class="fixed z-50 inset-0 overflow-y-auto invisible" aria-labelledby="modal-title" role="dialog"
         id="create-vocabulary-modal" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -18,7 +18,9 @@
                         </h3>
                         <div class="mt-2">
                             <p class="text-sm text-gray-500">
-                                Enter a vocabulary name and create one from scratch or import an existing vocabulary! Importing a big vocabulary can take some time.
+                                Enter a vocabulary name and create one from scratch or import an existing vocabulary!
+                                Importing a big vocabulary can take some time. Maximum length of name is 50 characters
+                                and of urispace is 100 characters.
                             </p>
                         </div>
 
@@ -27,18 +29,22 @@
                                 <div>
                                     <div class="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
                                         <div>
-                                            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                                            <label for="name"
+                                                class="block text-sm font-medium text-gray-700">Name</label>
                                             <div class="mt-1">
-                                                <input type="text" name="name" id="text"
+                                                <input type="text" name="name" id="text" maxlength="50"
+                                                    pattern="[A-Za-z0-9_-]+"
+                                                    title="Error, non supported characters" required
                                                     class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                                     placeholder="">
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label for="urispace" class="block text-sm font-medium text-gray-700">URISpace</label>
+                                            <label for="urispace"
+                                                class="block text-sm font-medium text-gray-700">URISpace</label>
                                             <div class="mt-1">
-                                                <input type="text" name="urispace" id="text"
+                                                <input type="text" name="urispace" id="text" maxlength="100" required
                                                     class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                                     placeholder="">
                                             </div>
@@ -51,24 +57,25 @@
                                                 <div
                                                     class="max-w-lg flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                                                     <div class="space-y-1 text-center">
-                                                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor"
-                                                            fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                        <svg class="mx-auto h-12 w-12 text-gray-400"
+                                                            stroke="currentColor" fill="none" viewBox="0 0 48 48"
+                                                            aria-hidden="true">
                                                             <path
                                                                 d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
                                                                 stroke-width="2" stroke-linecap="round"
                                                                 stroke-linejoin="round" />
                                                         </svg>
                                                         <div class="flex text-sm text-gray-600">
-                                                            <label for="file-upload"
-                                                                class="relative cursor-pointer bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
-                                                                <span>Upload a file</span>
-                                                                <input id="file-upload" name="file-upload" type="file"
-                                                                    class="sr-only">
-                                                            </label>
-                                                            <p class="pl-1">or drag and drop</p>
+                                                                <label for="file-upload"
+                                                                    class="md:text-center relative cursor-pointer bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                                                                    <span>Upload a file</span>
+                                                                    <input id="file-upload" name="file-upload"
+                                                                        type="file" class="sr-only">
+                                                                </label>
+                                                            <p class="pl-1"></p>
                                                         </div>
                                                         <p class="text-xs text-gray-500">
-                                                            Supported file formats: JSON-LD,  RDF/XML or TTL up to 100MB
+                                                            Supported file formats: JSON-LD, RDF/XML or TTL up to 100MB
                                                         </p>
                                                     </div>
                                                 </div>
@@ -88,11 +95,11 @@
                             Cancel
                         </button>
                     </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+</form>
+</div>
+</div>
+</div>
+</div>
 </form>
 
 <script type="text/javascript">

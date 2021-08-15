@@ -2360,6 +2360,10 @@ select {
     padding-left: 0px;
     padding-right: 0px;
   }
+
+  .md\:text-center {
+    text-align: center;
+  }
 }
 
 @media (min-width: 1024px) {
