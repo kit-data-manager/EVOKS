@@ -20,7 +20,7 @@
                             <p class="text-sm text-gray-500">
                                 Enter a vocabulary name and create one from scratch or import an existing vocabulary!
                                 Importing a big vocabulary can take some time. Maximum length of name is 50 characters
-                                and of urispace is 100 characters.
+                                and of urispace is 100 characters. Only letters and numbers acceptable for name.
                             </p>
                         </div>
 
@@ -34,7 +34,7 @@
                                             <div class="mt-1">
                                                 <input type="text" name="name" id="text" maxlength="50"
                                                     pattern="[A-Za-z0-9_-]+"
-                                                    title="Error, non supported characters" required
+                                                    title="Error, non supported characters"
                                                     class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                                     placeholder="">
                                             </div>
@@ -44,7 +44,7 @@
                                             <label for="urispace"
                                                 class="block text-sm font-medium text-gray-700">URISpace</label>
                                             <div class="mt-1">
-                                                <input type="text" name="urispace" id="text" maxlength="100" required
+                                                <input type="text" name="urispace" id="text" maxlength="100"
                                                     class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                                     placeholder="">
                                             </div>
