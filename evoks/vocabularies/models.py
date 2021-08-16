@@ -114,6 +114,8 @@ class Vocabulary(models.Model):
         headers = {'Content-Type': 'text/turtle;charset=utf-8'}
         r = requests.put('http://fuseki-dev:3030/{0}/data'.format(
             self.name), data=data, auth=(user, password), headers=headers)
+        if not r.ok:
+            raise ValueError()
 
         query = """        
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
