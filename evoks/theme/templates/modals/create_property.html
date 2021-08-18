@@ -21,10 +21,21 @@
                             <div>
                                 <div class="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
                                     <div>
-                                        <label for="predicate" class="block text-sm font-medium text-gray-700">Predicate</label>
+                                        <label for="prefix" class="block text-sm font-medium text-gray-700">Predicate</label>
                                         <div class="mt-1">
-                                            <select id="letter" name="predicate"
+                                            <select id="prefix" name="prefix"
                                                 class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                <option disabled selected value> -- select an option -- </option>
+                                                {{% for a in form.prefix.field.choices%}
+                                                <option value="{{a.0}}">{{a.1}}</option>
+                                                {% endfor %}}
+                                            </select>
+                                        </div>
+                                        <label for="subprefix" class="block text-sm font-medium text-gray-700">Predicate</label>
+                                        <div class="mt-1">
+                                            <select id="subprefix" name="predicate"
+                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                <option disabled selected value> -- select an option -- </option>
                                                 {{% for a in form.predicate.field.choices%}
                                                 <option value="{{a.0}}">{{a.1}}</option>
                                                 {% endfor %}}
@@ -72,5 +83,13 @@
 <script type="text/javascript">
     document.getElementById("create-property-modal-cancel").addEventListener("click", function (e) {
         document.getElementById("create-property-modal").classList.toggle("invisible");
+    });
+
+    document.getElementById("prefix").addEventListener("change", function (e) {
+        document.getElementById('subprefix').value = ''
+        const options = document.getElementById('subprefix').options
+        Array.from(options).filter(option => !option.disabled).forEach((option) => {
+            option.hidden = !option.value.startsWith(`${event.target.value}:`)
+        })
     });
 </script>

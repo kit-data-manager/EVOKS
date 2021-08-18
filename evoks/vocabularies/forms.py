@@ -133,7 +133,14 @@ class Property_Predicate_Form(forms.Form):
         ('dc:title', 'dc:title'),
         ('dc:type', 'dc:type'), 
     )
+    PREFIXES = (
+        ('skos', 'skos'),
+        ('dct', 'dct'),
+        ('dc', 'dc'),
+    )
+    
     predicate = forms.ChoiceField(required=False, choices=OPTIONS)
+    prefix = forms.ChoiceField(required=False, choices=PREFIXES)
 
 class CreateVocabularyForm(forms.Form):
     """Represents the input necessary to create a vocabulary
