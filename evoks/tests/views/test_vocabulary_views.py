@@ -9,28 +9,118 @@ from evoks.fuseki import fuseki_dev
 
 class Vocabulary_views_test(TestCase):
     @classmethod
-    def setUpTestData(cls) -> None:
+    def setUp(self) -> None:
         # Set up non-modified objects used by all test methods
-        cls.user = User.objects.create(
+        self.user = User.objects.create(
             username='jhon@example.com', email='jhon@example.com')
-        cls.user.set_password('ok')
-        cls.user.profile.verified = True
-        cls.user.save()
-        cls.vocabulary = Vocabulary.create(name='genell', urispace='http://www.testurispace.de', creator=cls.user.profile)
-        cls.c = Client()
-        cls.c.login(username='jhon@example.com', password='ok')
+        self.user.set_password('ok')
+        self.user.profile.verified = True
+        self.user.save()
+        self.vocabulary = Vocabulary.create(name='genel', urispace='http://www.testurispace.de', creator=self.user.profile)
+        self.c = Client()
+        self.c.login(username='jhon@example.com', password='ok')
 
     @classmethod
-    def tearDownClass(cls):
-        fuseki_dev.delete_vocabulary(cls.vocabulary)
-    
+    def tearDown(self):
+        try:
+            fuseki_dev.delete_vocabulary(self.vocabulary)
+        except:  # will fail when running the test_settings_delete testcase
+            pass
+
+    def test_prefix_view(self):
+        get = self.c.get(
+            '/vocabularies/{0}/prefixes'.format(self.vocabulary.name),
+        )
+        self.assertTemplateUsed(get, "vocabulary_prefixes.html")
+        response = self.c.post(
+            '/vocabularies/{0}/prefixes'.format(self.vocabulary.name),
+            {'prefixes': 'PREFIX xls: <http://xmlns.com/foaf/0.1/>'}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        error_response = self.c.post(
+            '/vocabularies/{0}/prefixes'.format(self.vocabulary.name),
+            {'prefixes': 'error'}
+        )
+        self.assertEqual(error_response.status_code, 400)
+
     def test_settings_view(self):
-        response = self.c.get(
+        get = self.c.get(
             '/vocabularies/{0}/settings'.format(self.vocabulary.name),
         )
-        #c.post.__setattr__('vocabulary-setting1')
-        self.assertTemplateUsed(response, "vocabulary_setting.html")
+        self.assertTemplateUsed(get, "vocabulary_setting.html")
+
+        set_dev = self.c.post(
+            '/vocabularies/{0}/settings'.format(self.vocabulary.name),
+            {'vocabulary-setting': 'Development'}
+        )
+        self.assertEqual(self.vocabulary.state, 'Development')
+        self.assertEqual(set_dev.status_code, 200)
+
+        set_review = self.c.post(
+            '/vocabularies/{0}/settings'.format(self.vocabulary.name),
+            {'vocabulary-setting': 'Review'}
+        )
+        voc = Vocabulary.objects.get(name=self.vocabulary.name)
+        self.assertEqual(voc.state, 'Review')
+        self.assertEqual(set_review.status_code, 200)
+
+    def test_settings_delete(self):
+        set_dev = self.c.post(
+            '/vocabularies/{0}/settings'.format(self.vocabulary.name),
+            {'delete': ''}
+        )
+        self.assertEqual(set_dev.status_code, 302)
+
+
+
         #self.assertContains(
             #response,
             #'<input type="radio" name="vocabulary-setting2" value="Development" {% ifequal vocabulary.state "REVIEW" %} checked {% endifequal %} class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue" aria-labelledby="privacy-setting-1-label" aria-describedby="privacy-setting-1-description">',
         #)
+
+        #vocabulary_nonexistent = self.c.get(
+            #'/vocabularies/error/settings',
+            #follow=True
+        #)
+        #print(vocabulary_nonexistent.content)
+        #self.assertRedirects(vocabulary_nonexistent, '/vocabularies')
+
+
+
+    def test_members_view(self):
+        test_user = User.objects.create(
+            username='member@example.com', email='member@example.com')
+        test_user.profile.name = 'member'
+        get = self.c.get(
+            '/vocabularies/{0}/members'.format(self.vocabulary.name),
+        )
+        self.assertTemplateUsed(get, "vocabulary_members.html")
+
+        invite = self.c.post(
+            '/vocabularies/{0}/members'.format(self.vocabulary.name),
+            {'invite': '', 'email': 'member@example.com'},
+            follow=True
+        )
+        #print("context {0}".format(invite.content))
+        #self.assertEqual(self.vocabulary.state, 'Review')
+        self.assertContains(invite, 'member@example.com')
+        self.assertRedirects(invite, '/vocabularies/{0}/members'.format(self.vocabulary.name))
+
+    def test_base_view(self):
+        get = self.c.get(
+            '/vocabularies/'.format(self.vocabulary.name),
+        )
+        self.assertTemplateUsed(get, "base.html")
+
+    def test_overview_view(self):
+        get = self.c.get(
+            '/vocabularies/{0}'.format(self.vocabulary.name),
+        )
+        self.assertTemplateUsed(get, "vocabulary.html")
+
+    def test_terms_view(self):
+        get = self.c.get(
+            '/vocabularies/{0}/terms'.format(self.vocabulary.name),
+        )
+        self.assertTemplateUsed(get, "vocabulary_terms.html")

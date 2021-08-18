@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 
 from evoks.settings import SKOSMOS_LIVE_URI, SKOSMOS_DEV_URI
 from django.core.exceptions import PermissionDenied
-from .forms import Vocabulary_Terms_Form, CreateVocabularyForm
+from .forms import Property_Predicate_Form, Vocabulary_Terms_Form, CreateVocabularyForm
 from Tag.models import Tag
 from evoks.fuseki import fuseki_dev
 from Comment.models import Comment
@@ -129,6 +129,8 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
     user_is_participant = 'participant' in get_perms(user, vocabulary)
     user_is_spectator = 'spectator' in get_perms(user, vocabulary)
 
+    form = Property_Predicate_Form(initial={'predicate': 'skos:Concept'})
+
     # check if user is allowed to view vocabulary
     if user_is_owner or user_is_participant or user_is_spectator or vocabulary.state == 'Review':
 
@@ -223,6 +225,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
 
             elif 'create-property' in request.POST:
                 predicate = request.POST['predicate']
+                print(predicate)
                 type = request.POST['type']
                 object_string = request.POST['object']
                 if type == 'uri':
@@ -316,6 +319,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
             'search_results': search_results,
             'search_term': search,
             'skosmos_url': skosmos_url + vocabulary.name + '-' + str(vocabularyVer),
+            'form' : form,
         }
         return HttpResponse(template.render(context, request))
 
@@ -360,6 +364,7 @@ def settings(request: HttpRequest, voc_name: str):
             elif(request.POST['vocabulary-setting'] == 'Live'):
                 vocabulary.set_live()
             elif(request.POST['vocabulary-setting'] == 'Review'):
+                print('diesdasananas')
                 vocabulary.set_review()
             elif(request.POST['vocabulary-setting'] == 'Development'):
                 vocabulary.set_dev()

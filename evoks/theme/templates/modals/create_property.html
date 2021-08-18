@@ -23,9 +23,12 @@
                                     <div>
                                         <label for="predicate" class="block text-sm font-medium text-gray-700">Predicate</label>
                                         <div class="mt-1">
-                                            <input type="text" name="predicate" id="text"
-                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                                placeholder="skosmos:language">
+                                            <select id="letter" name="predicate"
+                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                {{% for a in form.predicate.field.choices%}
+                                                <option value="{{a.0}}">{{a.1}}</option>
+                                                {% endfor %}}
+                                            </select>
                                         </div>
                                     </div>
                                     <div>
