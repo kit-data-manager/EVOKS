@@ -11,15 +11,14 @@ Wir empfehlen wsl zur Ausführung zu benutzen (windows subsystem für Linux) (So
 2. Öffne ein neues Konsolenfenster und gehe in das geclonte Projekt auf die oberste Ordnerebene mit `cd implementierung`
 Hier muss such die Datei `docker-compose.yml` befinden.
 3. Docker muss eventuell erst gestartet werden, hierzu führe `sudo systemctl start docker.service` aus.
-4. Führe `docker-compose up` aus. Docker wird dann die Python Umgebung einrichten und Bibliotheken herunterladen, dieser Schritt.
-kann ein wenig Zeit in Anspruch nehmen. Der Prozess läuft dann im Hintergrund. Er kann über `strg+C` oder in einem neuen Konsolenfenster über das Kommando `docker-compose down` innerhalb des gleichen Verzeichnisses beendet werden. Für die nächsten Schritte muss der Prozess aber im Hintergrund laufen.
+4. Führe `docker-compose -f docker-compose.prod.yml build --no-cache` aus. Docker wird dann die Python Umgebung einrichten und Bibliotheken herunterladen, dieser Schritt kann ein wenig Zeit in Anspruch nehmen. Führe dann `docker-compose -f docker-compose.prod.yml up` aus. Der Prozess läuft dann im Hintergrund. Er kann über `strg+C` oder in einem neuen Konsolenfenster über das Kommando `docker-compose down` innerhalb des gleichen Verzeichnisses beendet werden. Für die nächsten Schritte muss der Prozess aber im Hintergrund laufen.
 5. Öffne einen Browser.
 6. Gehe auf die Seite `localhost:5050`.
 7. Melde dich mit dem Passwort 'postgres' an.
 8. Hier muss die Django Datenbank eingerichtet werden. Erstelle einen neuen Server durch Rechtsklick auf 'Servers'
-in der linken Seitenleiste, wähle 'Server' aus. Im Pop Up Fenster fülle auf der Seite 'General' das Feld name=evoks und auf der Seite 'Connection' Host=postgres aus und wähle 'changeme' als Passwort. Drücke speichern.
-9. In der Seitenleiste erscheint nun ein neuer Server mit Namen evoks. Klappe die Unterpunkte unterhalb des Icons aus. Dort befindet sich ein Punkt 'Database'. Mache Rechtsklick auf 'Database' wähle 'Create' dann wähle 'Database' aus. Setze im Pop Up Fenster name=dev. Drücke speichern.
-10. Die Django Database ist aufgesetzt, sie muss jetzt in das Projekt migriert werden. Öffne hierzu ein neues Konsolenfenster und gehe wieder in die oberste Ordnerebene des Projektes, also der Ordner in der sich die Datei `docker-compose.yml` befindet.
+in der linken Seitenleiste, wähle 'create', dann 'Server' aus. Im Pop Up Fenster fülle auf der Seite 'General' das Feld 'Name' aus mit dem Wert 'evoks' und auf der Seite 'Connection' das Feld 'Host' mit dem Wert 'postgres' aus und fülle als Passwort 'changeme' aus. Drücke speichern.
+9. In der Seitenleiste erscheint nun ein neuer Server mit Namen evoks. Klappe die Unterpunkte unterhalb des Icons aus. Dort befindet sich ein Punkt 'Database'. Mache Rechtsklick auf 'Database' wähle 'Create' dann 'Database' aus. Setze im Pop Up Fenster für das Feld 'Database' den Wert 'dev'. Drücke speichern.
+10. Die Django Database ist aufgesetzt, sie muss jetzt in das Projekt migriert werden. Öffne hierzu ein neues Konsolenfenster und gehe wieder in die oberste Ordnerebene des Projektes. (Der Ordner in der sich die Datei `docker-compose.yml` befindet)
 11. Führe das Kommando `docker ps` aus. Es erscheint eine Liste aller Docker Container. In der ersten Spalte ist die id des Docker Containers gelistet. Kopiere die id des Kontainers mit namen: `implementierung_web`.
 12. Führe als nächstes folgendes Kommando aus, ersetze im folgenden Kommando container_id durch die zuvor kopierte Id: `docker exec -t -i container_id bash`. Nun befindest du dich innerhalb des Docker Kontainers.
 13. Wechsele in das Verzeichnis evoks mit `cd evoks`.
