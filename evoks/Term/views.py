@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 from Comment.models import Comment
 from Tag.models import Tag
 from django.shortcuts import redirect
+from django.http import HttpResponse
 
 
 def convert_predicate(namespaces: List[Tuple[str, str]], predicate: str) -> str:
@@ -201,8 +202,11 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
         
         elif 'download' in request.POST:
                 dataformat = request.POST['download']
-                result = term.export_term(dataformat)
-                return result
+                export = term.export_term(dataformat)
+                response = HttpResponse(
+                    export['file_content'], export['content_type'])
+                response['Content-Disposition'] = export['content_disposition']
+                return response
 
     # put comments and tags on vocabulary into a list sorted from newest to oldest
     # TODO term

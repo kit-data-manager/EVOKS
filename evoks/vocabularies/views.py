@@ -146,15 +146,11 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
         if request.method == 'POST':
 
             if 'obj' in request.POST:
-                namespaces = vocabulary.get_namespaces()
-
                 key = request.POST['key']
                 obj = request.POST['obj']
                 lang = request.POST['lang']
                 new_obj = request.POST['new-obj']
                 type = request.POST['obj-type']
-                query = vocabulary.prefixes_to_str(namespaces)
-                # convert prefixes to sparql format
 
                 # if we want to edit a field
                 if new_obj != '':
@@ -193,22 +189,12 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
 
                 # delete field
                 if new_obj == '':
-                    query += """
-                    DELETE DATA
-                    {{ <{urispace}> <{predicate}> {object} }}
-                    """.format(urispace=vocabulary.urispace, predicate=key, object=object)
-                    fuseki_dev.query(
-                        vocabulary, query, 'xml', 'update')
+                    vocabulary.delete_field(key, object)
+
                 # edit field
                 else:
-                    query += """
-                    DELETE {{ <{urispace}> <{predicate}> {object} }}
-                    INSERT {{ <{urispace}> <{predicate}> {new_object} }}
-                    WHERE
-                    {{ <{urispace}> <{predicate}> {object} }}
-                    """.format(new_object=new_object, urispace=vocabulary.urispace, predicate=key, object=object)
-                    fuseki_dev.query(
-                        vocabulary, query, 'xml', 'update')
+                    vocabulary.edit_field(predicate=key, old_object=object, new_object=new_object)
+
             # create comment
             elif 'comment' in request.POST:
                 comment_text = request.POST['comment-text']
@@ -252,8 +238,11 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
 
             elif 'download' in request.POST:
                 dataformat = request.POST['download']
-                result = vocabulary.export_vocabulary(dataformat)
-                return result
+                export = vocabulary.export_vocabulary(dataformat)
+                response = HttpResponse(
+                    export['file_content'], export['content_type'])
+                response['Content-Disposition'] = export['content_disposition']
+                return response
 
         # query all fields of the vocabulary
         query_result = fuseki_dev.query(vocabulary, """

@@ -98,6 +98,7 @@ class Vocabulary(models.Model):
         # TODO mögliche dateiformate: ?
         from evoks.fuseki import fuseki_dev
 
+
         user = settings.FUSEKI_USER
         password = settings.FUSEKI_PASSWORD
 
@@ -218,31 +219,30 @@ class Vocabulary(models.Model):
             WHERE {{
             <{0}> ?predicate ?object
             }}""".format(urispace)
-        if dataformat == 'json':
-            #thing = fuseki_dev.query(self, query, 'json')
-            #file_content = json.dumps(thing, indent=4, sort_keys=True)
+        if dataformat == 'json-ld':
             thing = fuseki_dev.query(self, """
-            DESCRIBE <{0}> """.format(urispace), 'text/turtle')
+            DESCRIBE <{0}> """.format(urispace), 'xml')
             file_content = thing.serialize(format='json-ld')
-            response = HttpResponse(
-                file_content, content_type='application/json-ld')
-            response['Content-Disposition'] = 'attachment; filename={0}.jsonld'.format(self.name)
-            return response
-        elif dataformat == 'N3':
+            content_type='application/json-ld'
+            content_disposition = 'attachment; filename={0}.jsonld'.format(self.name)
+        elif dataformat == 'turtle':
             thing = fuseki_dev.query(self, """
-            DESCRIBE <{0}> """.format(urispace), 'text/turtle')
+            DESCRIBE <{0}> """.format(urispace), 'xml')
             file_content = thing.serialize(format='n3')
-            response = HttpResponse(
-                file_content, content_type='application/ttl')
-            response['Content-Disposition'] = 'attachment; filename={0}.ttl'.format(self.name)
-            return response
-        elif dataformat == 'rdf/xml':
+            content_type='application/ttl'
+            content_disposition = 'attachment; filename={0}.ttl'.format(self.name)
+        elif dataformat == 'rdf+xml':
             thing = fuseki_dev.query(self, query, 'xml')
             file_content = thing.toprettyxml()
-            response = HttpResponse(
-                file_content, content_type='application/rdf+xml')
-            response['Content-Disposition'] = 'attachment; filename={0}.rdf'.format(self.name)
-            return response
+            content_type='application/rdf+xml'
+            content_disposition = 'attachment; filename={0}.rdf'.format(self.name)
+
+        export = {
+            'file_content' : file_content,
+            'content_type' : content_type,
+            'content_disposition' : content_disposition
+        }
+        return export
 
 
     def set_live(self) -> None:
@@ -295,7 +295,6 @@ class Vocabulary(models.Model):
             self.state = State.DEV
             self.save()
 
-    # permission required participant or owner
     def remove_term(self, name: str) -> None:
         """Removes a Term from the Vocabulary and deletes it
 
@@ -309,7 +308,6 @@ class Vocabulary(models.Model):
         term.delete()
         self.term_count -= 1
 
-    # permission required participant or owner
     def add_term(self, name: str) -> None:
         """Adds a Term to the Vocabulary
 
@@ -320,7 +318,6 @@ class Vocabulary(models.Model):
         self.term_count += 1
         # record user who added Term as contributor if not already done
 
-    # permission required owner
     def add_profile(self, profile: Profile, permission: str) -> None:
         """Adds a User to the Vocabulary
 
@@ -331,7 +328,6 @@ class Vocabulary(models.Model):
         self.profiles.add(profile)
         assign_perm(permission, profile.user, self)
 
-    # permission required owner
     def add_group(self, group_profile: GroupProfile, permission: str) -> None:
         """Adds a group to the Vocabulary
 
@@ -342,7 +338,6 @@ class Vocabulary(models.Model):
         self.groups.add(group_profile)
         assign_perm(permission, group_profile.group, self)
 
-    # permission required owner
     def remove_profile(self, profile: Profile) -> None:
         """Removes a User from the Vocabulary
 
@@ -350,12 +345,9 @@ class Vocabulary(models.Model):
             profile (Profile): User that gets removed
         """
         self.profiles.remove(profile)
-        # currently removes all permissions user has :(
-        # does this remove permissions given by groups?
         for key in get_perms(profile.user, self):
             remove_perm(key, profile.user, self)
 
-    # permission required owner
     def remove_group(self, group_profile: GroupProfile) -> None:
         """Removes a group from the Vocabulary
 
@@ -366,21 +358,26 @@ class Vocabulary(models.Model):
         for key in get_perms(group_profile.group, self):
             remove_perm(key, group_profile.group, self)
 
-    def edit_field(url: str, type: str, content: str) -> None:
-        """Edits a Triple field by using SPARQL Queries and the Fuseki-Dev Instance
+    def edit_field(self, predicate: str, old_object: str, new_object: str) -> None:
+        """Replaces the object of a triple field with a new object, by using SPARQL Queries and the Fuseki-Dev Instance
 
         Args:
-            url (str): Url of the Triple
-            type (str): Typ of the Triple
-            content (str): Content of the Triple
+            predicate (str): Predicate of the triple
+            old_object (str): Old object of the triple
+            new_object (str): New object of the triple
         """
-        # fusek_dev.query(self,
-        #   'DELETE { {0} {1} {2} }
-        #   INSERT { {0} {1} {2} }
-        #   WHERE
-        #       { {0} {1} {2}
-        #       }'.format(url, type, content)
-        placeholder = 123
+        from evoks.fuseki import fuseki_dev
+
+        namespaces = self.get_namespaces()
+        query = self.prefixes_to_str(namespaces)
+        query += """
+        DELETE {{ <{urispace}> <{predicate}> {old_object} }}
+        INSERT {{ <{urispace}> <{predicate}> {new_object} }}
+        WHERE
+        {{ <{urispace}> <{predicate}> {old_object} }}
+        """.format(new_object=new_object, urispace=self.urispace, predicate=predicate, old_object=old_object)
+        fuseki_dev.query(
+            self, query, 'xml', 'update')
 
     def create_field(self, urispace: str, predicate: str, object: str) -> None:
         """Creates a Triple Field on the Fuseki-Dev Instance
@@ -400,18 +397,23 @@ class Vocabulary(models.Model):
         fuseki_dev.query(vocabulary=self, query=str(
             query), return_format='json', endpoint='update')
 
-    def delete_field(url: str) -> None:
-        """Deletes a Triple Field on the Fuseki-Dev Instance
+    def delete_field(self, predicate : str, object : str) -> None:
+        """Deletes a Triple Field of the vocabulary on the Fuseki-Dev Instance
 
         Args:
-            url (str): Url of the Triple
+            predicate (str): Predicate of the triple
+            object (str): Object of the triple
         """
-        # fuseki_dev.query(self,
-        #   'DELETE DATA
-        #   {
-        #       {0} {1} {2}  ;
-        #   }'.format(url, type, content)
-        placeholder = 123
+        from evoks.fuseki import fuseki_dev
+
+        namespaces = self.get_namespaces()
+        query = self.prefixes_to_str(namespaces)
+        query += """
+        DELETE DATA
+        {{ <{urispace}> <{predicate}> {object} }}
+        """.format(urispace=self.urispace, predicate=predicate, object=object)
+        fuseki_dev.query(
+            self, query, 'xml', 'update')
 
     def search(input: str):
         """Searches all Vocabularies for input. Vocabularies that contain input get put into a list and the list gets returned
