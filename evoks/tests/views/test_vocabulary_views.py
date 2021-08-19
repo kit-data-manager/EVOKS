@@ -191,10 +191,20 @@ class Vocabulary_views_test(TestCase):
         #TODO test
 
     @skip('doesnt work yet')
-    def test_create_property(self):
+    def test_create_literal_property(self):
         response = self.c.post(
             '/vocabularies/{0}'.format(self.vocabulary.name),
             {'create-property': '', 'predicate': 'skos:note', 'type': 'literal', 'object': 'example label'},
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        #TODO test
+
+    @skip('doesnt work yet')
+    def test_create_uri_property(self):
+        response = self.c.post(
+            '/vocabularies/{0}'.format(self.vocabulary.name),
+            {'create-property': '', 'predicate': 'skos:note', 'type': 'uri', 'object': 'https://test.de/'},
             follow=True
         )
         self.assertEqual(response.status_code, 200)
