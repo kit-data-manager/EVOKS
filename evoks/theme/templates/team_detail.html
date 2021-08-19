@@ -61,11 +61,12 @@
                                                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                         Role
                                                                     </th>
+                                                                    {%if session_user == owner %}
                                                                     <th scope="col"
                                                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                                                                         Action
                                                                     </th>
-
+                                                                    {%endif%}
                                                                 </tr>
                                                             </thead>
                                                             <tbody class="bg-white divide-y divide-gray-200">
@@ -97,6 +98,7 @@
                                                                         {% else %} Member
                                                                         {% endif %}
                                                                     </td>
+                                                                    {%if session_user == owner %}
                                                                     <td
                                                                         class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
 
@@ -107,6 +109,7 @@
                                                                         </button>
 
                                                                     </td>
+                                                                    {%endif%}
                                                                     {% endfor %}
                                                                 </tr>
                                                                 <!-- More people... -->
@@ -162,7 +165,7 @@
                                         </nav>
                                     </form>
                                     <div class="grid grid-cols-6 gap-6 mt-5">
-
+                                        {%if session_user == owner %}
                                         <div class="col-span-6 sm:col-span-3">
                                             <form method='POST' action="">{% csrf_token %}
                                                 <!-- This example requires Tailwind CSS v2.0+ -->
@@ -173,7 +176,7 @@
                                                                 class="block text-sm font-medium text-gray-700">Invite a
                                                                 member</label>
                                                             <div class="mt-1">
-                                                                <input type="text" name="email" id="email"
+                                                                <input type="email" name="email" id="email" maxlength="254"
                                                                     class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                                                     placeholder="ontologyfan@student.kit.edu">
                                                             </div>
@@ -188,6 +191,7 @@
                                                 </div>
                                             </form>
                                         </div>
+                                        {%endif%}
                                         <div class="col-span-6 sm:col-span-3">
 
                                             <!-- This example requires Tailwind CSS v2.0+ -->
@@ -199,9 +203,9 @@
                                                             <label for="description"
                                                                 class="block text-sm font-medium text-gray-700">Change
                                                                 team
-                                                                description </label>
+                                                                description (up to 70 characters) </label>
                                                             <div class="mt-1">
-                                                                <input type="text" name="description" id="description"
+                                                                <input type="text" name="description" id="description" maxlength="70"
                                                                     class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                                                     placeholder="{{team.groupprofile.description}}">
                                                             </div>
@@ -222,7 +226,7 @@
 
 
 
-
+                                {%if session_user == owner %}
                                 <form method='POST' action="">{% csrf_token %}
                                     <div class="grid grid-cols-6 gap-6 mt-5">
 
@@ -274,6 +278,7 @@
                                         </div>
                                     </div>
                                     <form method='POST' action="">{% csrf_token %}
+                                    {%endif%}
                             </div>
                             </form>
                         </div>

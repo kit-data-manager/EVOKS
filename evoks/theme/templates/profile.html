@@ -44,7 +44,7 @@
                                     <div>
 
                                         <p class="mt-1 text-sm text-gray-500">
-                                            This information will be public!
+                                            This information will be public! Maximum length of name is 50 characters and of description is 500 characters.
                                         </p>
                                     </div>
                                     <form method="POST" action="">{% csrf_token %}
@@ -55,7 +55,7 @@
                                                 </label>
 
                                                 <div class="mt-1">
-                                                    <input id="name" name="name" type="text" autocomplete="given-name"
+                                                    <input id="name" name="name" type="text" autocomplete="given-name" maxlength="50"
                                                         value="{{profile.name}}"
                                                         class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
                                                     <!--{{form.name}} !-->
@@ -72,7 +72,7 @@
                                                 About
                                             </label>
                                             <div class="mt-1">
-                                                <textarea id="about" name="about" type="text" rows="3"
+                                                <textarea id="about" name="about" type="text" rows="3" maxlength="500"
                                                     value="{{profile.description}}"
                                                     class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border border-gray-300 rounded-md">{{profile.description}}
                                                 </textarea>
@@ -170,12 +170,6 @@
                         </div>
                     </div>
                 </div>
-
-
-
-
-
-
         </div>
     </div>
     <!-- /End replace -->

@@ -115,6 +115,8 @@ class Vocabulary(models.Model):
         headers = {'Content-Type': 'text/turtle;charset=utf-8'}
         r = requests.put('http://fuseki-dev:3030/{0}/data'.format(
             self.name), data=data, auth=(user, password), headers=headers)
+        if not r.ok:
+            raise ValueError()
 
         query = """        
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -258,9 +260,9 @@ class Vocabulary(models.Model):
             if self.state == State.REVIEW:
                 skosmos_dev.delete_vocabulary(self.name)
 
-            if self.version > 1:
-                skosmos_live.delete_vocabulary(self.name)
-                fuseki_live.delete_vocabulary(self)
+            #if self.version > 1:
+            #    skosmos_live.delete_vocabulary(self.name)
+            #    fuseki_live.delete_vocabulary(self)
 
             context = MigrationContext(BackupMigrationStrategy())
             context.start(self)

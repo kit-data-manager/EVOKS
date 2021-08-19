@@ -418,11 +418,16 @@ def members(request: HttpRequest, voc_name: str):
                 # check if User/Group exists
                 if User.objects.filter(email=invite_str).exists():
                     invite_user = User.objects.get(email=invite_str)
-                    vocabulary.add_profile(invite_user.profile, 'participant')
+                    if invite_user.profile in vocabulary.profiles.all():
+                        return HttpResponse('already in Vocabulary')
+                    else:
+                        vocabulary.add_profile(invite_user.profile, 'participant')
                 elif Group.objects.filter(name=invite_str).exists():
                     invite_group = Group.objects.get(name=invite_str)
-                    vocabulary.add_group(
-                        invite_group.groupprofile, 'participant')
+                    if invite_group.groupprofile in vocabulary.groups.all():
+                        return HttpResponse('already in Vocabulary')
+                    else:
+                        vocabulary.add_group(invite_group.groupprofile, 'participant')
                 else:
                     return HttpResponse('User/Group does not exist', status=404)
             elif 'kickall' in request.POST:
@@ -509,6 +514,8 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     if request.method == 'POST':
         if 'create-term' in request.POST:
             term_name = request.POST['term-name']
+            if Term.objects.filter(name=term_name).exists():
+                return HttpResponse("Term mit diesem Name existiert bereits")
             term_label = request.POST['term-label']
             vocabulary.add_term(term_name)
             object = '\'\'\'{0}\'\'\''.format(term_label)
@@ -572,8 +579,17 @@ def base(request: HttpRequest):
             except IntegrityError:
                 return HttpResponse('vocabulary already exists')
             if 'file-upload' in request.FILES:
-                import_voc = request.FILES['file-upload']
-                vocabulary.import_vocabulary(input=import_voc)
+                try:
+                    import_voc = request.FILES['file-upload']
+                    vocabulary.import_vocabulary(input=import_voc)
+                except:
+                    try:
+                        fuseki_dev.delete_vocabulary(vocabulary)
+                    except:
+                        pass
+                    skosmos_dev.delete_vocabulary(voc_name)
+                    vocabulary.delete()
+                    return HttpResponse('import failed. May be a wrong import file.')
             return redirect('base')
 
     search = request.GET.get('search')

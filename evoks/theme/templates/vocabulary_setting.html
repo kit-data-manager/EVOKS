@@ -77,7 +77,10 @@
                                                     <form action="#" method="post"> {% csrf_token %}
                                                         <label
                                                             class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">
-                                                            <input type="radio" name="vocabulary-setting" value="Live" id='1' onclick="this.form.submit();"
+                                                            <input type="radio" name="vocabulary-setting" value="Live" id='1'onclick="this.form.submit();"
+                                                            {% load guardian_tags %}
+                                                            {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                                                {% if not "owner" in vocabulary_perms %} disabled=True {% endif%}
                                                             {% ifequal vocabulary.state "Live" %} checked {% endifequal %}
                                                                 class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
                                                                 aria-labelledby="privacy-setting-0-label"
@@ -100,7 +103,9 @@
                                                         <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
                                                         <label
                                                             class="border-gray-200 relative border p-4 flex cursor-pointer">
-                                                            <input type="radio" name="vocabulary-setting" id='2' onclick="this.form.submit();"
+                                                            <input type="radio" name="vocabulary-setting" id='2' onclick="this.form.submit();" 
+                                                                {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                                                {% if not "owner" in vocabulary_perms %} disabled=True {% endif%}
                                                                 value="Review" {% ifequal vocabulary.state "Review" %} checked {% endifequal %}
                                                                 class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
                                                                 aria-labelledby="privacy-setting-1-label"
@@ -121,7 +126,10 @@
                                                         <!-- Checked: "bg-indigo-50 border-indigo-200 z-10", Not Checked: "border-gray-200" -->
                                                         <label
                                                             class="border-gray-200 rounded-bl-md rounded-br-md relative border p-4 flex cursor-pointer">
-                                                            <input type="radio" name="vocabulary-setting" id='3' {% ifequal vocabulary.state "Development" %} checked {% endifequal %}
+                                                            <input type="radio" name="vocabulary-setting" id='3' 
+                                                            {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                                                {% if not "owner" in vocabulary_perms %} disabled=True {% endif%}
+                                                            {% ifequal vocabulary.state "Development" %} checked {% endifequal %}
                                                                 value="Development" onclick="this.form.submit();"
                                                                 class="h-4 w-4 mt-0.5 cursor-pointer text-regal-blue border-gray-300 focus:ring-regal-blue"
                                                                 aria-labelledby="privacy-setting-2-label"
@@ -150,8 +158,9 @@
                                     </div>
                                 </div>
 
-
-
+                                
+                                {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                {% if "owner" in vocabulary_perms %}
                                 <div class="grid grid-cols-6 gap-6 mt-5">
 
                                     <div class="col-span-6 sm:col-span-3">
@@ -183,6 +192,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                {%endif%}
 
 
 

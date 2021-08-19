@@ -20,14 +20,14 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 
 urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
 
     # path('vocabularies', TemplateView.as_view(template_name='base.html')),
-
+    path('', RedirectView.as_view(pattern_name='base')),
     path('vocabularies', include('vocabularies.urls')),
 
     path('logout', views.logout_view, name='logout'),

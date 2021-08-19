@@ -1,3 +1,4 @@
+from typing import OrderedDict
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
@@ -14,6 +15,8 @@ def teams_view(request):
             new_name = request.POST.get('team-name')
             if Group.objects.filter(name=new_name).exists():
                 return HttpResponse('already exists')
+            elif str(new_name).endswith(' ') or str(new_name).startswith(' '):
+                return HttpResponse('no leading or ending space chracters')
             else:
                 group = Group.objects.create(name=new_name)
                 group.groupprofile.group_owner = user
@@ -70,10 +73,12 @@ def team_detail_view(request, group_name):
                     # invites the user with given email. can only be accessed from the owner and gives error if user not exists
                     if team.groupprofile.group_owner == user:
                         if User.objects.filter(email=request.POST.get('email')).exists():
-                            new_member = User.objects.get(
-                                email=request.POST.get('email'))
-                            team.groupprofile.add_user(new_member)
-                            return redirect('/teams/'+group_name)
+                            new_member = User.objects.get(email=request.POST.get('email'))
+                            if new_member in team.user_set.all():
+                                return HttpResponse('already in group')
+                            else:         
+                                team.groupprofile.add_user(new_member)
+                                return redirect('/teams/'+group_name)
                         else:
                             return HttpResponse('error: does not exist')
                     else:
@@ -112,7 +117,7 @@ def team_detail_view(request, group_name):
 
             return render(request=request,
                           template_name="team_detail.html",
-                          context={'team': team, 'owner': team.groupprofile.group_owner, 'member': member, 'member_page': posts})
+                          context={'team': team, 'owner': team.groupprofile.group_owner,'session_user':user, 'member': member, 'member_page': posts})
 
         return HttpResponse('insufficient permission')
         # user not in group

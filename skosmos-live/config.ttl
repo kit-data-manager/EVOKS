@@ -56,4 +56,3 @@
     skosmos:language "en" ;
     void:sparqlEndpoint <http://fuseki-live:3030/cooles_vokabular1/sparql> ;
     void:uriSpace "http://www.yso.fi/onto/yso/" .
-

@@ -85,10 +85,14 @@
                                                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                             Role
                                                                         </th>
+                                                                        {% load guardian_tags %}
+                                                                        {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                                                        {% if "owner" in vocabulary_perms %}
                                                                         <th scope="col"
                                                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                                                                             Action
                                                                         </th>
+                                                                        {%endif%}
 
                                                                     </tr>
                                                                 </thead>
@@ -124,8 +128,12 @@
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 ">
                                                                             {{ data.role }}
                                                                         </td>
+                                                                        
+
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                            {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                                                            {% if "owner" in vocabulary_perms and data.role != 'Owner' %}
                                                                             <form action="#" method="post"> {% csrf_token %}
                                                                                 <input type="hidden" name="type" value="{{data.type}}">
 
@@ -134,9 +142,8 @@
                                                                                     Kick
                                                                                 </button>
                                                                             </form>
-
+                                                                            {%endif%}
                                                                         </td>
-
                                                                     </tr>
                                                                     <hr/>
                                                                     {% endfor %}
@@ -155,7 +162,8 @@
 
 
                                 <div class="grid grid-cols-6 gap-6 mt-5">
-
+                                    {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                    {% if "owner" in vocabulary_perms %}
                                     <div class="col-span-6 sm:col-span-3">
 
                                         <!-- This example requires Tailwind CSS v2.0+ -->
@@ -163,11 +171,10 @@
                                             <div class="px-4 py-5 sm:p-6">
                                                 <form action="#" method="post"> {% csrf_token %}
                                                     <div>
-                                                        <label for="email"
-                                                            class="block text-sm font-medium text-gray-700">Invite a
-                                                            member or a group</label>
+                                                        <h3 class="text-lg leading-6 font-medium text-gray-900">Invite a
+                                                            new member or a group</h3>
                                                         <div class="mt-1">
-                                                            <input type="text" name="email" id="email"
+                                                            <input type="text" name="email" id="email" maxlength="254"
                                                                 class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                                                 placeholder="ontologyfan@student.kit.edu or KIT Ontologen 2">
                                                         </div>
@@ -182,6 +189,9 @@
                                             </div>
                                         </div>
                                     </div>
+                                    {%endif%}
+                                    {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                    {% if "owner" in vocabulary_perms %}
                                     <div class="col-span-6 sm:col-span-3">
 
                                         <!-- This example requires Tailwind CSS v2.0+ -->
@@ -206,6 +216,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    {%endif%}
                                 </div>
 
 
