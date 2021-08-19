@@ -225,7 +225,6 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
 
             elif 'create-property' in request.POST:
                 predicate = request.POST['predicate']
-                print(predicate)
                 type = request.POST['type']
                 object_string = request.POST['object']
                 if type == 'uri':
@@ -364,7 +363,6 @@ def settings(request: HttpRequest, voc_name: str):
             elif(request.POST['vocabulary-setting'] == 'Live'):
                 vocabulary.set_live()
             elif(request.POST['vocabulary-setting'] == 'Review'):
-                print('diesdasananas')
                 vocabulary.set_review()
             elif(request.POST['vocabulary-setting'] == 'Development'):
                 vocabulary.set_dev()
