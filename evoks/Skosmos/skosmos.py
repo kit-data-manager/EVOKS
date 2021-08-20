@@ -49,7 +49,7 @@ class Skosmos:
     def add_vocabulary(self, config: SkosmosVocabularyConfig) -> None:
 
         g = Graph()
-        
+
         DC = Namespace('http://purl.org/dc/terms/')
         g.bind('void', VOID)
         g.bind('dc', DC)
@@ -58,7 +58,6 @@ class Skosmos:
         g.parse(self.config_path, format="n3")
 
         vocabulary_uri = self.__build_vocabulary_uri(config.name)
-
 
         g.add((URIRef(vocabulary_uri),
               URIRef('http://purl.org/net/skosmos#fullAlphabeticalIndex'), Literal(True)))
@@ -72,7 +71,15 @@ class Skosmos:
         g.add((URIRef(vocabulary_uri), DC.title, Literal(config.title)))
 
         g.add((URIRef(vocabulary_uri),
-              URIRef('http://purl.org/net/skosmos#language'), Literal(config.default_language)))
+              URIRef('http://purl.org/net/skosmos#defaultLanguage'), Literal(config.default_language)))
+
+        for language in config.languages:
+            g.add((URIRef(vocabulary_uri),
+              URIRef('http://purl.org/net/skosmos#language'), Literal(language)))
+
+
+        g.add((URIRef(vocabulary_uri),
+              URIRef('http://purl.org/net/skosmos#mainConceptScheme'), URIRef(config.uri_space)))
 
         g.add((URIRef(vocabulary_uri),
               DC.subject, URIRef(self.__build_vocabulary_uri(config.subject))))

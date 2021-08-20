@@ -21,21 +21,66 @@
                             <div>
                                 <div class="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
                                     <div>
-                                        <label for="predicate" class="block text-sm font-medium text-gray-700">Predicate</label>
+                                        <label for="prefix" class="block text-sm font-medium text-gray-700">Namespace</label>
                                         <div class="mt-1">
-                                            <input type="text" name="predicate" id="text" required
-                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                                placeholder="skosmos:language">
+                                            <select id="prefix" name="prefix"
+                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                <option disabled selected value> -- select an option -- </option>
+                                                {{% for a in form.prefix.field.choices%}
+                                                <option value="{{a.0}}">{{a.1}}</option>
+                                                {% endfor %}}
+                                            </select>
+                                        </div>
+                                        <label for="subprefix" class="block text-sm font-medium text-gray-700">Predicate</label>
+                                        <div class="mt-1">
+                                            <select id="subprefix" name="predicate"
+                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                <option disabled selected value> -- select an option -- </option>
+                                                {{% for a in form.predicate.field.choices%}
+                                                <option value="{{a.0}}">{{a.1}}</option>
+                                                {% endfor %}}
+                                            </select>
                                         </div>
                                     </div>
                                     <div>
                                         <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
                                         <div class="mt-1">
-                                            <select id="letter" name="type"
+                                            <select id="type" name="type"
                                                     class="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md">
+                                                    <option disabled selected value> -- select an option -- </option>
                                                     <option value="uri"> uri </option>
                                                     <option value="literal"> literal </option>
                                             </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="datatype-prefix" class="block text-sm font-medium text-gray-700">Datatype Namespace [optional]</label>
+                                        <div class="mt-1">
+                                            <select id="datatype-prefix" name="datatype-prefix"
+                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                <option selected value="None">None</option>
+                                                {{% for a in form.datatype_prefix.field.choices%}
+                                                <option value="{{a.0}}">{{a.1}}</option>
+                                                {% endfor %}}
+                                            </select>
+                                        </div>
+                                        <label for="datatype" class="block text-sm font-medium text-gray-700">Datatype [optional]</label>
+                                        <div class="mt-1">
+                                            <select id="datatype" name="datatype"
+                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                <option selected value="None"> None </option>
+                                                {{% for a in form.datatype.field.choices%}
+                                                <option hidden value="{{a.0}}">{{a.1}}</option>
+                                                {% endfor %}}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="language" class="block text-sm font-medium text-gray-700">Language (en, fi, en-GB according to BCP47) [optional]</label>
+                                        <div class="mt-1">
+                                            <input type="text" name="language" id="language"
+                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-1/2 sm:text-sm border-gray-300 rounded-md"
+                                            >
                                         </div>
                                     </div>
                                     <div>
@@ -43,7 +88,7 @@
                                         <div class="mt-1">
                                             <input type="text" name="object" id="text" required
                                                 class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                                placeholder="en">
+                                                placeholder="some value or url">
                                         </div>
                                     </div>
 
@@ -70,4 +115,31 @@
     document.getElementById("create-property-modal-cancel").addEventListener("click", function (e) {
         document.getElementById("create-property-modal").classList.toggle("invisible");
     });
+
+    document.getElementById("prefix").addEventListener("change", function (e) {
+        document.getElementById('subprefix').value = ''
+        const options = document.getElementById('subprefix').options
+        Array.from(options).filter(option => !option.disabled).forEach((option) => {
+            option.hidden = !option.value.startsWith(`${event.target.value}:`)
+        })
+    });
+
+    document.getElementById("datatype-prefix").addEventListener("change", function (e) {
+        document.getElementById('datatype').value = 'None'
+        const options = document.getElementById('datatype').options
+        Array.from(options).filter(option => option.value !== 'None').forEach((option) => {
+            option.hidden = !option.value.startsWith(`${event.target.value}:`)
+        })
+    });
+
+    document.getElementById("type").addEventListener("change", function (e) {
+        document.getElementById('language').disabled = event.target.value === 'uri'
+        document.getElementById('datatype-prefix').disabled = event.target.value === 'uri'
+        document.getElementById('datatype').disabled = event.target.value === 'uri'
+    });
+
+    document.getElementById("datatype").addEventListener("change", function (e) {
+        document.getElementById('language').disabled = document.getElementById("datatype").value !== 'None'
+    });
+
 </script>

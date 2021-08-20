@@ -19,20 +19,13 @@ class BackupMigrationStrategy(MigrationStrategy):
             sleep(0.25)
 
         copy = fuseki_dev.get_copy(task, vocabulary)
-        tempVocabularyName = vocabulary.name
-        vocabulary.name += '-' + '{}'.format(vocabulary.version)
-
-        #try:
-        #    fuseki_live.delete_vocabulary(vocabulary)
-        #except ValueError as e:  # vocabulary does not exist, its the first migration
-        #    pass
 
         fuseki_live.restore_copy(vocabulary, copy)
-        config = SkosmosVocabularyConfig('cat_general', vocabulary.name, vocabulary.name, [
-            'en'], fuseki_live.build_sparql_endpoint(vocabulary), vocabulary.urispace, 'en')
+        top_lang = vocabulary.get_top_language()
+        languages = vocabulary.get_languages()
+        config = SkosmosVocabularyConfig('cat_general', vocabulary.name_with_version(), vocabulary.name_with_version(), languages,
+                                         fuseki_live.build_sparql_endpoint(vocabulary, True), vocabulary.urispace, top_lang)
 
-        #skosmos_live.delete_vocabulary(vocabulary.name)
         skosmos_live.add_vocabulary(config)
-        vocabulary.name = tempVocabularyName
 
         copy.delete()

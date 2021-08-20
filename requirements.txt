@@ -5,5 +5,9 @@ django-tailwind
 sparqlwrapper
 mypy
 django-stubs
-rdflib>=6.0.0
 django-environ
+skosify
+rdflib @ git+git://github.com/RDFLib/rdflib.git@26dba21d0562fdc8141cf758c61e14dd9edfa972
+rdflib-jsonld
+language_data
+langcodes

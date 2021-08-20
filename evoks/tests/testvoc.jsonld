@@ -1,0 +1,160 @@
+[
+  {
+    "@id": "http://www.yso.fi/onto/yso/",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+    ],
+    "http://purl.org/dc/elements/1.1/creator": [
+      {
+        "@language": "fi",
+        "@value": "Semanttisen laskennan tutkimusryhmä (SeCo)"
+      },
+      {
+        "@language": "fi",
+        "@value": "Sanastokeskus TSK"
+      },
+      {
+        "@language": "sv",
+        "@value": "Nationalbiblioteket i Finland"
+      },
+      {
+        "@language": "sv",
+        "@value": "Terminologicentralen TSK"
+      },
+      {
+        "@language": "en",
+        "@value": "The Finnish Terminology Centre TSK"
+      },
+      {
+        "@language": "fi",
+        "@value": "Kansalliskirjasto"
+      },
+      {
+        "@language": "en",
+        "@value": "Semantic Computing Research Group (SeCo)"
+      },
+      {
+        "@language": "en",
+        "@value": "National Library of Finland"
+      },
+      {
+        "@language": "sv",
+        "@value": "Forskningsgruppen för semantisk beräkning (SeCo)"
+      }
+    ],
+    "http://purl.org/dc/elements/1.1/description": [
+      {
+        "@language": "en",
+        "@value": "General Finnish Ontology YSO is a trilingual ontology consisting mainly of general concepts. YSO has been founded on the basis of concepts in Finnish cultural sphere. As an indexing tool it is best applicable when indexed material is interdiscliplinary and its themes vary to a great extent.\r\n\r\nYSO's hierarchical construction is founded on parent-child relationships. In addition to this, some concepts are supplemented with associative and part-whole relations.\r\n\r\nEach concept in YSO is issued to at least one thematic group and some concepts have also been grouped with a non-hierarchical collection label (such as \"clothes by materials\").\r\n\r\nFollowing the international standards for thesauri, the terms for concepts are usually plural nouns.  Terms in singular are usually mass nouns or terms referring to actions or abstract concepts. Some terms carry a different meaning when used in plural and in singular. For example, ballet refers to an art form and ballets to individual works of art.\r\n\r\nPlace names are contained in a separate ontology, <a href=\"http://finto.fi/yso-paikat/en/\">YSO places.</a>\r\n\r\nYSO is based on General Finnish Thesaurus (YSA) and General Finnish Thesaurus in Swedish (Allärs). Concepts in YSO and concepts in YSA and Allärs have been linked to each other with equivalence relationships. YSO has also been linked to Library of Congress Subject Headings (LCSH)."
+      },
+      {
+        "@language": "fi",
+        "@value": "Yleinen suomalainen ontologia YSO on kolmikielinen, etupäässä yleiskäsitteistä koostuva ontologia. YSO on rakennettu suomalaisen kulttuuripiirin sisällönkuvailutarpeiden ja käsitteistön pohjalta, ja se on tarkoitettu käytettäväksi kuvailuun erityisesti silloin, kun kuvailtavien aineistojen aihealueet ovat monipuolisia. \r\n \r\nYSO on rakenteeltaan hierarkkinen kokonaisuus, joka perustuu käsitteiden välisille yläkäsite-alakäsite-suhteille. Hierarkiasuhteiden lisäksi YSOssa on assosiatiivisia ja osa-kokonaisuussuhteita. \r\n \r\nJokainen YSOn käsite kuuluu yhteen tai useampaan temaattiseen ryhmään. Osa käsitteistä kuuluu lisäksi omaan ryhmittelevään käsitekokonaisuuteensa (esim. ”vaatteet materiaalin mukaan”). \r\n \r\nYSOn käsitteiden termit ovat tesaurusstandardien mukaisesti useimmiten monikkomuotoisia substantiiveja. Yksikössä esitetään esim. ainesanat sekä abstrakteja käsitteitä ja toimintaa kuvaavat termit. Joillain termeillä on yksikkö- ja monikkomuodossa eri merkitys, esim. termi baletti viittaa taidemuotoon ja baletit yksittäisiin taideteoksiin.\r\n\r\nPaikannimet sisältyvät erilliseen <a href=\"http://finto.fi/yso-paikat/fi/\">YSO-paikat-sanastoon.</a>\r\n \r\nYSO pohjautuu yleiseen suomalaiseen asiasanastoon (YSA) sekä yleiseen ruotsinkieliseen tesaurukseen (Allärs). YSOn käsitteille on määritelty vastaavuussuhteet YSAn ja Allärsin käsitteisiin. YSO on lisäksi linkitetty Yhdysvaltain Kongressin kirjaston asiasanastoon (Library of Congress Subject Headings, LCSH). \r\n<a href=\"https://www.kiwi.fi/display/Finto/YSOn+tietomalli\">YSOn tietomalli</a>\r\n\r\nVoit ehdottaa uusia käsitteitä YSOon sivun alalaidasta löytyvällä lomakkeella. Jos haluat ehdottaa muutosta YSOn käsitteeseen, muutosehdotuslomake löytyy käsitteen tietojen yhteydestä. Käsittelyssä olevia käsite-ehdotuksia voit selata <a href=\"../yse/fi\">myös Fintossa</a>."
+      },
+      {
+        "@language": "sv",
+        "@value": "Allmän finländsk ontologi - ALLFO (på finska Yleinen suomalainen ontologia - YSO) är en trespråkig ontologi som innehåller främst allmänbegrepp. ALLFO är uppbyggd utifrån de innehållsbeskrivningens behov och begreppsapparater som finns inom den finländska kulturkretsen. Ontologin är avsedd att användas särskilt när ämnesområdena för materialet som ska beskrivas är mångsidiga. \r\n \r\nALLFO är till sin struktur en hierarkisk helhet, som grundar sig på över- och underordnade relationer mellan begrepp. Utöver de hierarkiska relationerna finns också associativa och del- helhetsrelationer.\r\n \r\nVarje begrepp i ALLFO hör till en eller flera tematiska grupper. En del av begreppen hör dessutom till en egen grupperande begreppshelhet (t.ex. kläder enligt material).\r\n \r\nBegreppen i ALLFO är, i enlighet med tesaurusstandarderna, oftast substantiv i pluralform. I singularform står t.ex. ämnesord, abstrakta begrepp och termer som beskriver aktivitet. En del termer har olika betydelser i singular- och pluralform, t.ex. ordet balett hänvisar till en konstform och baletter till enskilda konstverk. \r\n\r\nGeografiska namn finns i en separat vokabulär, <a href=\"http://finto.fi/yso-paikat/sv/?clang=sv\">ALLFO-orter.</a>\r\n \r\nALLFO baserar sig på Allärs - Allmän tesaurus på svenska och YSA - Yleinen suomalainen asiasanasto. I anslutning till begreppen i ALLFO anges länkar till motsvarande termer i Allärs och YSA. Därtill är ontologin länkad till Kongressbibliotekets tesaurus  (Library of Congress Subject Headings, LCSH).\r\n <a href=\"https://www.kiwi.fi/display/Asiasanastotjaontologiat/YSOn+tietomalli\">Datamodell för ALLFO</a>\r\n \r\nDu kan föreslå nya begrepp till ALLFO med förslagsblanketten längst ner på den här sidan. Du kan också föreslå ändringar till ALLFO-begrepp via den ändringsblankett som finns på varje ALLFO-begreppssida. Begreppsförslag som är under behandling finns också <a href=\"../yse/sv\">i Finto</a>."
+      }
+    ],
+    "http://purl.org/dc/elements/1.1/publisher": [
+      {
+        "@language": "fi",
+        "@value": "Kansalliskirjasto"
+      },
+      {
+        "@language": "en",
+        "@value": "National Library of Finland"
+      },
+      {
+        "@language": "sv",
+        "@value": "Nationalbiblioteket i Finland"
+      }
+    ],
+    "http://purl.org/dc/elements/1.1/source": [
+      {
+        "@language": "fi",
+        "@value": "YSO pohjautuu yleiseen suomalaiseen asiasanastoon (YSA) sekä yleiseen ruotsinkieliseen tesaurukseen (Allärs)."
+      }
+    ],
+    "http://purl.org/dc/elements/1.1/title": [
+      {
+        "@language": "sv",
+        "@value": "ALLFO - Allmän finländsk ontologi ALLFO"
+      },
+      {
+        "@language": "fi",
+        "@value": "YSO - Yleinen suomalainen ontologia"
+      },
+      {
+        "@language": "en",
+        "@value": "YSO - General Finnish ontology"
+      }
+    ],
+    "http://purl.org/dc/terms/language": [
+      {
+        "@id": "http://lexvo.org/id/iso639-3/swe"
+      },
+      {
+        "@id": "http://lexvo.org/id/iso639-3/fin"
+      },
+      {
+        "@id": "http://lexvo.org/id/iso639-3/eng"
+      }
+    ],
+    "http://purl.org/dc/terms/license": [
+      {
+        "@id": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2021-07-24T00:04:26+00:01"
+      }
+    ],
+    "http://purl.org/dc/terms/relation": [
+      {
+        "@id": "http://www.yso.fi/onto/allars/"
+      },
+      {
+        "@id": "http://www.yso.fi/onto/ysa/"
+      },
+      {
+        "@id": "http://id.loc.gov/authorities/subjects"
+      }
+    ],
+    "http://purl.org/dc/terms/subject": [
+      {
+        "@id": "http://www.yso.fi/onto/yso/p19469"
+      },
+      {
+        "@id": "http://server/unset-base/www.kit.edu/test"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "fi",
+        "@value": "YSO - Yleinen suomalainen ontologia"
+      },
+      {
+        "@language": "en",
+        "@value": "YSO - General Finnish ontology"
+      },
+      {
+        "@language": "sv",
+        "@value": "ALLFO - Allmän finländsk ontologi"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#hasTopConcept": [
+      {
+        "@id": "http://www.yso.fi/onto/yso/p4762"
+      },
+      {
+        "@id": "http://www.yso.fi/onto/yso/p15238"
+      },
+      {
+        "@id": "http://www.yso.fi/onto/yso/p86919"
+      }
+    ]
+  }
+]
