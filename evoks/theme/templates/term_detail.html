@@ -47,6 +47,24 @@
 
                             <div class="mt-5 border-t border-gray-200">
                                 <dl class="divide-y divide-gray-200">
+                                    <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
+                                        <dt class="text-sm font-medium text-gray-700">
+                                            <div>Predicate</div>
+                                        </dt>
+                                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">                                        
+                                            <div class="grid grid-cols-5 justify-between">
+                                                <span
+                                                    class="flex-grow mt-2 col-span-2 font-medium text-gray-700">
+                                                    Value</span>
+                                    
+                                                <span class="flex-grow mt-2 col-span-1 text-center font-medium text-gray-700">
+                                                    Language
+                                                </span>
+                                                <span class="ml-4">
+                                                </span>
+                                            </div>
+                                        </dd>
+                                    </div>
                                     {% for key, value in fields.items %}
                                     <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
                                         <dt class="text-sm font-medium text-gray-500">
@@ -56,13 +74,14 @@
                                             {% for obj in value.objects %}
 
                                             <form action="" method="POST"> {% csrf_token %}
-                                                <div class="grid grid-cols-3 justify-between">
+                                                <div class="grid grid-cols-5 justify-between">
 
                                                     <input type="hidden" name="key" value="{{key}}">
                                                     <input type="hidden" name="pred" value="{{value.type}}">
                                                     <input type="hidden" name="lang" value="{{obj.lang|default:''}}">
                                                     <input type="hidden" name="obj-type" value="{{obj.type}}">
                                                     <input type="hidden" name="obj" value="{{obj.value}}">
+                                                    <input type="hidden" name="obj-datatype" value="{{obj.datatype|default:''}}">
                                                     <input type="hidden" name="shortcut" value="{{obj.shortcut}}">
                                                     {% if obj.shortcut != None %}
 
@@ -76,10 +95,14 @@
                                                     <span
                                                         id="title-value-{{forloop.parentloop.counter}}-{{forloop.counter}}"
                                                         class="flex-grow mt-2 col-span-2">
-                                                        {{ obj.value }} </span>
-
-
+                                                        {{ obj.value }}</span>
+                                     
                                                     {% endif %}
+                                                    <span class="flex-grow mt-2 col-span-1 text-center">
+                                                        {% if obj.lang != '' %}
+                                                        {{ obj.lang_display }}
+                                                        {% endif %}
+                                                    </span>
                                                     <span class="ml-4">
                                                         <button type="button"
                                                             id="update-button-{{forloop.parentloop.counter}}-{{forloop.counter}}"
@@ -121,7 +144,7 @@
                                                         </span>
                                                     </div>
                                                     <div class="ml-4 flex-shrink-0 flex space-x-4">
-                                                        <button type="submit" name="download" value="rdf/xml"
+                                                        <button type="submit" name="download" value="rdf+xml"
                                                             class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                                             Download
                                                         </button>
@@ -142,7 +165,7 @@
                                                         </span>
                                                     </div>
                                                     <div class="ml-4 flex-shrink-0 flex space-x-4">
-                                                        <button type="submit" name="download" value="json"
+                                                        <button type="submit" name="download" value="json-ld"
                                                             class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                                             Download
                                                         </button>
@@ -163,7 +186,7 @@
                                                         </span>
                                                     </div>
                                                     <div class="ml-4 flex-shrink-0 flex space-x-4">
-                                                        <button type="submit" name="download" value="N3"
+                                                        <button type="submit" name="download" value="turtle"
                                                             class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                                             Download
                                                         </button>

@@ -38,9 +38,8 @@ class Fuseki:
         valid = self.ping()
         if not valid:
             print('Invalid Fuseki configuration. Failed to ping server')
-                
 
-    def build_sparql_endpoint(self, vocabulary: Vocabulary, skosmos = True) -> str:
+    def build_sparql_endpoint(self, vocabulary: Vocabulary, live=False) -> str:
         """
             builds the SPARQL endpoint for a given vocabulary
         Args:
@@ -49,7 +48,10 @@ class Fuseki:
         Returns:
             str: the endpoint
         """
-        return '{base}{name}/sparql'.format(base=self.url, name=vocabulary.get_name())
+        if live:
+            return '{base}{name}/sparql'.format(base=self.url, name=vocabulary.name_with_version())
+        else:
+            return '{base}{name}/sparql'.format(base=self.url, name=vocabulary.get_name())
 
     def ping(self) -> bool:
         """
@@ -116,7 +118,7 @@ class Fuseki:
             Exception: Unexpected error. Status code is in args
         """
         response = requests.post('{base}datasets?dbName={name}&dbType={type}'.format(
-            base=self.api_url, name=vocabulary.get_name(), type='TDB2'), auth=(user, password))
+            base=self.api_url, name=vocabulary.name_with_version(), type='TDB2'), auth=(user, password))
 
         if response.status_code == HTTPStatus.CONFLICT:
             raise ValueError('This vocabulary name is already used')
@@ -133,7 +135,7 @@ class Fuseki:
         filename = copy.path.split(os.sep)[-1]
 
         file_upload_response = requests.post('{base}{name}'.format(
-            base=self.url, name=vocabulary.name), auth=(user, password), data={}, files=[('files', (filename, backup, 'application/octet-stream'))])
+            base=self.url, name=vocabulary.name_with_version()), auth=(user, password), data={}, files=[('files', (filename, backup, 'application/octet-stream'))])
         # graph=name
         print(file_upload_response.status_code)
 

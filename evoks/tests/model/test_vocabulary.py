@@ -16,7 +16,7 @@ class VocabularyTest(TestCase):
         cls.user = User.objects.create(username='jhon', password='ok',
                             email='someone@example.com')
         cls.vocabulary = Vocabulary.create(name='genell', urispace='genelurispace.com', creator=cls.user.profile)
-        #cls.vocabulary.prefixes = ['http://xmlns.com/foaf/0.1/']
+        cls.vocabulary.prefixes = ['PREFIX xls: <http://xmlns.com/foaf/0.1/>', 'PREFIX pls: <http://plmns.com/foaf/0.1/>']
 
     @classmethod
     def tearDownClass(cls):
@@ -45,6 +45,12 @@ class VocabularyTest(TestCase):
         vocabulary = self.vocabulary
         self.assertEquals(vocabulary.get_name(), 'genell')
 
+    def test_validate_prefixes(self):
+        vocabulary = self.vocabulary
+        prefixes = vocabulary.prefixes
+        self.assertFalse(vocabulary.validate_prefixes(['test']))
+        self.assertFalse(vocabulary.validate_prefixes(['test test test']))
+        self.assertTrue(vocabulary.validate_prefixes(prefixes))
 
     def test_import_vocabulary(self):
         vocabulary = self.vocabulary
@@ -61,7 +67,9 @@ class VocabularyTest(TestCase):
         vocabulary = self.vocabulary
         namespaces = vocabulary.get_namespaces()
         self.assertEqual(namespaces, 
-            [('xml', 'http://www.w3.org/XML/1998/namespace'), 
+            [('xls', 'http://xmlns.com/foaf/0.1/'), 
+            ('pls', 'http://plmns.com/foaf/0.1/'),
+            ('xml', 'http://www.w3.org/XML/1998/namespace'), 
             ('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'), 
             ('rdfs', 'http://www.w3.org/2000/01/rdf-schema#'), ('xsd', 'http://www.w3.org/2001/XMLSchema#')])
 
@@ -70,7 +78,9 @@ class VocabularyTest(TestCase):
         vocabulary = self.vocabulary
         namespaces = vocabulary.get_namespaces()
         prefixes = vocabulary.prefixes_to_str(namespaces)
-        self.assertEqual(prefixes, """prefix xml: <http://www.w3.org/XML/1998/namespace>
+        self.assertEqual(prefixes, """prefix xls: <http://xmlns.com/foaf/0.1/>
+prefix pls: <http://plmns.com/foaf/0.1/>
+prefix xml: <http://www.w3.org/XML/1998/namespace>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>""")
@@ -78,14 +88,14 @@ prefix xsd: <http://www.w3.org/2001/XMLSchema#>""")
     
     def test_split_prefixes(self):
         vocabulary = self.vocabulary
-        print(vocabulary.prefixes)
-        #idk
+        split_prefixes = vocabulary.split_prefixes(vocabulary.convert_prefixes(vocabulary.prefixes))
+        self.assertEqual(split_prefixes, [('xls', 'http://xmlns.com/foaf/0.1/'), ('pls', 'http://plmns.com/foaf/0.1/')])
 
 
     def test_convert_prefixes(self):
         vocabulary = self.vocabulary
-        #converted = vocabulary.convert_prefixes()
-        #print(converted)
+        converted = vocabulary.convert_prefixes(vocabulary.prefixes)
+        self.assertEqual(converted, ['PREFIX xls <http://xmlns.com/foaf/0.1/>', 'PREFIX pls <http://plmns.com/foaf/0.1/>'])
 
 
     def test_export_vocabulary_json(self):

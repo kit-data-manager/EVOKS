@@ -13,6 +13,14 @@ import requests
 from django.conf import settings
 from typing import List, Tuple
 from evoks.skosmos import skosmos_dev, skosmos_live
+from skosify import skosify
+import logging
+from django.core.files.storage import FileSystemStorage
+from rdflib import Graph
+import os
+from django.utils.crypto import get_random_string
+from tempfile import NamedTemporaryFile
+from time import sleep
 
 
 class State(models.TextChoices):
@@ -35,7 +43,6 @@ class Dataformat(enum.Enum):
     RDFXML = 1
     JSONLD = 2
     TURTLE = 3
-
 
 
 class Vocabulary(models.Model):
@@ -98,52 +105,83 @@ class Vocabulary(models.Model):
         # TODO mögliche dateiformate: ?
         from evoks.fuseki import fuseki_dev
 
+
         user = settings.FUSEKI_USER
         password = settings.FUSEKI_PASSWORD
 
-        data = input.open().read()
+        file = input.open()
+        data = file.read()
+        extension = file.name.split(".")[-1]
+        if not any(ext == extension for ext in ['rdf', 'jsonld', 'ttl']):
+            raise ValueError(
+                'invalid file ending. allowed files: rdf, jsonld, ttl')
+        root = logging.getLogger()
+        root.setLevel(logging.DEBUG)
 
-        # if not turtle different thing needed
-        #n3: text/n3; charset=utf-8
-        #nt: text/plain
-        #rdf: application/rdf+xml
-        #owl: application/rdf+xml
-        #nq: application/n-quads
-        #trig: application/trig
-        #jsonld: application/ld+json
-        headers = {'Content-Type': 'text/turtle;charset=utf-8'}
-        r = requests.put('http://fuseki-dev:3030/{0}/data'.format(
-            self.name), data=data, auth=(user, password), headers=headers)
-        if not r.ok:
-            raise ValueError()
+        # if its jsonld we just convert it to turtle and continue as if nothing happend
+        if extension == 'jsonld':
+            data = bytes(Graph().parse(
+                data=data, format='json-ld').serialize(format='turtle'), encoding='raw_unicode_escape')
+            extension = 'ttl'
 
-        query = """        
-            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        with NamedTemporaryFile(suffix='.'+extension) as tmp:
 
-            SELECT DISTINCT ?s
-            WHERE {{
-                ?s skos:prefLabel ?o .
-            FILTER (strstarts(str(?s), '{0}'))
-            }}
-        """.format(self.urispace)
-        result = fuseki_dev.query(self, query, 'json')
-
-        for x in result['results']['bindings']:
+            tmp.write(data)
+            tmp.seek(0)
             try:
-                uri = x['s']['value']
-                id = uri.split(self.urispace)[1]
-                self.add_term(id)
-            except Exception as e:
-                print(e)
+                voc = skosify(tmp.name, label='iptc')
+                voc.serialize(destination=tmp.name, format='xml')
+            except:
+                raise ValueError('invalid format. skosify failed')
 
+            if extension == 'rdf':
+                content_type = 'application/rdf+xml'
+            elif extension == 'ttl':
+                content_type = 'text/turtle'
+            elif extension == 'jsonld':
+                content_type = 'application/ld+json'
 
-    def validate_prefixes(self, prefixes : List):
+            headers = {'Content-Type': content_type}
+            r = requests.put('http://fuseki-dev:3030/{0}/data'.format(
+                self.name), data=tmp.read(), auth=(user, password), headers=headers)
+            if not r.ok:
+                raise ValueError('import failed', r.status_code)
+
+            query = """       
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+                SELECT DISTINCT ?s
+                WHERE {{
+                    ?s skos:prefLabel ?o .
+                FILTER (strstarts(str(?s), '{0}'))
+                }}
+            """.format(self.urispace)
+            result = fuseki_dev.query(self, query, 'json')
+
+            for x in result['results']['bindings']:
+                try:
+                    uri = x['s']['value']
+                    id = uri.split(self.urispace)[1]
+                    base = id.replace('/', '_')
+                    name = base
+
+                    i = 1
+                    while Term.objects.filter(name=name).exists():
+                        name = '{0}_{1}'.format(base, i)
+                        i += 1
+
+                    self.add_term(name, id)
+
+                except Exception as e:
+                    print(e)
+
+    def validate_prefixes(self, prefixes: List):
         for key in prefixes:
             split = key.split()
             if not len(split) == 3:
                 return False
-            elif not (split[0] == "PREFIX" and split[1].endswith(":") and  split[1].endswith(":") and split[2].startswith("<") and split[2].endswith(">")):
-                return False     
+            elif not (split[0] == "PREFIX" and split[1].endswith(":") and split[1].endswith(":") and split[2].startswith("<") and split[2].endswith(">")):
+                return False
         return True
 
     def get_namespaces(self) -> List[Tuple[str, str]]:
@@ -159,7 +197,10 @@ class Vocabulary(models.Model):
         p = fuseki_dev.query(
             self, """DESCRIBE <{0}>""".format(self.urispace), 'xml')
 
-        namespaces = []
+        namespaces = [('skos', 'http://www.w3.org/2004/02/skos/core#'),
+            ('dc', 'http://purl.org/dc/elements/1.1/'),
+            ('dct', 'http://purl.org/dc/terms/')
+        ]
 
         v_prefixes = self.split_prefixes(self.convert_prefixes(self.prefixes))
         for prefix in v_prefixes:
@@ -170,6 +211,31 @@ class Vocabulary(models.Model):
 
         return namespaces
 
+    def convert_prefix(self, object_string: str) -> Tuple[bool, str]:
+        """Converts a string like skos:prefLabel to https://www.w3.org/2009/08/skos-reference/skos.html#prefLabel
+
+        Args:
+            object_string (str): string to be converted
+
+        Returns:
+            Tuple[bool, str]: True if valid, str is complete uri
+        """
+        from vocabularies.views import uri_validator
+
+        valid = False
+        namespaces = self.get_namespaces()
+        for p, u in namespaces:
+            prefix = '{0}:'.format(p)
+            if object_string.startswith(prefix):
+                relative_uri = object_string.split(prefix)[1]
+                if not uri_validator(u + relative_uri):
+                    return (False, '')
+                else:
+                    object_string = u + relative_uri
+                    valid = True
+            break
+        return (valid, object_string)
+
 
     def prefixes_to_str(self, namespaces: List[Tuple[str, str]]) -> str:
         prefix_list: List[str] = []
@@ -179,14 +245,12 @@ class Vocabulary(models.Model):
         query = '\n'.join(prefix_list)
         return query
 
-
     def split_prefixes(self, prefixes: List[str]):
         splitted: List[Tuple[str, str]] = []
         for prefix in prefixes:
             parts = prefix.split()
             splitted.append((parts[1], parts[2][1:-1]))
         return splitted
-
 
     def convert_prefixes(self, prefixes: List[str]):
         """Turns a list of prefixes from this format: @prefix allars:   <http://www.yso.fi/onto/allars/> . to PREFIX allars <http://www.yso.fi/onto/allars/>
@@ -205,7 +269,6 @@ class Vocabulary(models.Model):
 
         return converted
 
-
     def export_vocabulary(self, dataformat: str) -> None:
         """Sends the Vocabulary in the provided dataformat to the users email
 
@@ -220,32 +283,77 @@ class Vocabulary(models.Model):
             WHERE {{
             <{0}> ?predicate ?object
             }}""".format(urispace)
-        if dataformat == 'json':
-            #thing = fuseki_dev.query(self, query, 'json')
-            #file_content = json.dumps(thing, indent=4, sort_keys=True)
+        if dataformat == 'json-ld':
             thing = fuseki_dev.query(self, """
-            DESCRIBE <{0}> """.format(urispace), 'text/turtle')
+            DESCRIBE <{0}> """.format(urispace), 'xml')
             file_content = thing.serialize(format='json-ld')
-            response = HttpResponse(
-                file_content, content_type='application/json-ld')
-            response['Content-Disposition'] = 'attachment; filename={0}.jsonld'.format(self.name)
-            return response
-        elif dataformat == 'N3':
+            content_type='application/json-ld'
+            content_disposition = 'attachment; filename={0}.jsonld'.format(self.name)
+        elif dataformat == 'turtle':
             thing = fuseki_dev.query(self, """
-            DESCRIBE <{0}> """.format(urispace), 'text/turtle')
+            DESCRIBE <{0}> """.format(urispace), 'xml')
             file_content = thing.serialize(format='n3')
-            response = HttpResponse(
-                file_content, content_type='application/ttl')
-            response['Content-Disposition'] = 'attachment; filename={0}.ttl'.format(self.name)
-            return response
-        elif dataformat == 'rdf/xml':
+            content_type='application/ttl'
+            content_disposition = 'attachment; filename={0}.ttl'.format(self.name)
+        elif dataformat == 'rdf+xml':
             thing = fuseki_dev.query(self, query, 'xml')
             file_content = thing.toprettyxml()
-            response = HttpResponse(
-                file_content, content_type='application/rdf+xml')
-            response['Content-Disposition'] = 'attachment; filename={0}.rdf'.format(self.name)
-            return response
+            content_type='application/rdf+xml'
+            content_disposition = 'attachment; filename={0}.rdf'.format(self.name)
 
+        export = {
+            'file_content' : file_content,
+            'content_type' : content_type,
+            'content_disposition' : content_disposition
+        }
+        return export
+
+    def get_languages(self) -> List[str]:
+        """Returns the languages of the vocabulary"""
+        from evoks.fuseki import fuseki_dev
+        query = """
+            SELECT DISTINCT (lang(?obj) as ?lang) WHERE {
+            ?sub ?pred ?obj
+            }"""
+        res = fuseki_dev.query(self, query, 'json')
+        languages: List[str] = []
+        for x in res['results']['bindings']:
+            if 'lang' in x and x['lang']['value'] != '':
+                languages.append(x['lang']['value'])
+
+        return languages
+
+    def get_top_language(self) -> str:
+        """Returns the most used language"""
+        from evoks.fuseki import fuseki_dev
+
+        languages = self.get_languages()
+        languages_str = ', '.join(f'"{w}"' for w in languages)
+        query = """
+            PREFIX  skos: <http://www.w3.org/2004/02/skos/core#>
+
+            SELECT  ?lang ?prop (COUNT(?label) AS ?count)
+            WHERE
+            {{ {{ VALUES ?type {{ skos:Concept }}
+                VALUES ?prop {{ skos:prefLabel }}
+                ?conc  a      ?type ;
+                        ?prop  ?label
+                BIND(lang(?label) AS ?lang)
+                    FILTER ( ?lang IN ({0}) )
+                }}
+            }}
+            GROUP BY ?lang ?prop ?type
+            """.format(languages_str)
+        res = fuseki_dev.query(self, query, 'json')
+        max = 0
+        max_lang = ''
+        for x in res['results']['bindings']:
+            lang = x['lang']['value']
+            count = int(x['count']['value'])
+            if count > max:
+                max = count
+                max_lang = lang
+        return max_lang
 
     def set_live(self) -> None:
         """Sets the state to live and starts the migration process
@@ -254,35 +362,32 @@ class Vocabulary(models.Model):
         from Migration.backup_migration_strategy import BackupMigrationStrategy
         from evoks.fuseki import fuseki_live
 
-   
         if self.state != State.LIVE:
 
             if self.state == State.REVIEW:
                 skosmos_dev.delete_vocabulary(self.name)
 
-            #if self.version > 1:
-            #    skosmos_live.delete_vocabulary(self.name)
-            #    fuseki_live.delete_vocabulary(self)
 
             context = MigrationContext(BackupMigrationStrategy())
             context.start(self)
-            self.state = State.LIVE
+
             self.version += 1
+
+            self.state = State.LIVE
             self.save()
 
     def set_review(self) -> None:
         """Sets the state to review
         """
         from evoks.fuseki import fuseki_dev, fuseki_live
-
-        
+        top_lang = self.get_top_language()
+        languages = self.get_languages()
         if self.state != State.REVIEW:
-            config = SkosmosVocabularyConfig('cat_general', self.name_with_version(), self.name, [
-                                             'en'], fuseki_dev.build_sparql_endpoint(self), self.urispace, 'en')
+            config = SkosmosVocabularyConfig('cat_general', self.name, self.name_with_version(
+            ), languages, fuseki_dev.build_sparql_endpoint(self), self.urispace, top_lang)
             skosmos_dev.add_vocabulary(config)
             self.state = State.REVIEW
             self.save()
-
 
     def set_dev(self) -> None:
         """Sets the state to dev
@@ -297,7 +402,6 @@ class Vocabulary(models.Model):
             self.state = State.DEV
             self.save()
 
-    # permission required participant or owner
     def remove_term(self, name: str) -> None:
         """Removes a Term from the Vocabulary and deletes it
 
@@ -312,17 +416,16 @@ class Vocabulary(models.Model):
         self.term_count -= 1
 
     # permission required participant or owner
-    def add_term(self, name: str) -> None:
+    def add_term(self, name: str, uri: str) -> None:
         """Adds a Term to the Vocabulary
 
         Args:
             name (str): Name of the Term
         """
-        self.term_set.add(Term.create(name=name))
+        self.term_set.add(Term.create(name=name, uri=uri))
         self.term_count += 1
         # record user who added Term as contributor if not already done
 
-    # permission required owner
     def add_profile(self, profile: Profile, permission: str) -> None:
         """Adds a User to the Vocabulary
 
@@ -333,7 +436,6 @@ class Vocabulary(models.Model):
         self.profiles.add(profile)
         assign_perm(permission, profile.user, self)
 
-    # permission required owner
     def add_group(self, group_profile: GroupProfile, permission: str) -> None:
         """Adds a group to the Vocabulary
 
@@ -344,7 +446,6 @@ class Vocabulary(models.Model):
         self.groups.add(group_profile)
         assign_perm(permission, group_profile.group, self)
 
-    # permission required owner
     def remove_profile(self, profile: Profile) -> None:
         """Removes a User from the Vocabulary
 
@@ -352,12 +453,9 @@ class Vocabulary(models.Model):
             profile (Profile): User that gets removed
         """
         self.profiles.remove(profile)
-        # currently removes all permissions user has :(
-        # does this remove permissions given by groups?
         for key in get_perms(profile.user, self):
             remove_perm(key, profile.user, self)
 
-    # permission required owner
     def remove_group(self, group_profile: GroupProfile) -> None:
         """Removes a group from the Vocabulary
 
@@ -368,21 +466,26 @@ class Vocabulary(models.Model):
         for key in get_perms(group_profile.group, self):
             remove_perm(key, group_profile.group, self)
 
-    def edit_field(url: str, type: str, content: str) -> None:
-        """Edits a Triple field by using SPARQL Queries and the Fuseki-Dev Instance
+    def edit_field(self, predicate: str, old_object: str, new_object: str) -> None:
+        """Replaces the object of a triple field with a new object, by using SPARQL Queries and the Fuseki-Dev Instance
 
         Args:
-            url (str): Url of the Triple
-            type (str): Typ of the Triple
-            content (str): Content of the Triple
+            predicate (str): Predicate of the triple
+            old_object (str): Old object of the triple
+            new_object (str): New object of the triple
         """
-        # fusek_dev.query(self,
-        #   'DELETE { {0} {1} {2} }
-        #   INSERT { {0} {1} {2} }
-        #   WHERE
-        #       { {0} {1} {2}
-        #       }'.format(url, type, content)
-        placeholder = 123
+        from evoks.fuseki import fuseki_dev
+
+        namespaces = self.get_namespaces()
+        query = self.prefixes_to_str(namespaces)
+        query += """
+        DELETE {{ <{urispace}> <{predicate}> {old_object} }}
+        INSERT {{ <{urispace}> <{predicate}> {new_object} }}
+        WHERE
+        {{ <{urispace}> <{predicate}> {old_object} }}
+        """.format(new_object=new_object, urispace=self.urispace, predicate=predicate, old_object=old_object)
+        fuseki_dev.query(
+            self, query, 'xml', 'update')
 
     def create_field(self, urispace: str, predicate: str, object: str) -> None:
         """Creates a Triple Field on the Fuseki-Dev Instance
@@ -402,18 +505,23 @@ class Vocabulary(models.Model):
         fuseki_dev.query(vocabulary=self, query=str(
             query), return_format='json', endpoint='update')
 
-    def delete_field(url: str) -> None:
-        """Deletes a Triple Field on the Fuseki-Dev Instance
+    def delete_field(self, predicate : str, object : str) -> None:
+        """Deletes a Triple Field of the vocabulary on the Fuseki-Dev Instance
 
         Args:
-            url (str): Url of the Triple
+            predicate (str): Predicate of the triple
+            object (str): Object of the triple
         """
-        # fuseki_dev.query(self,
-        #   'DELETE DATA
-        #   {
-        #       {0} {1} {2}  ;
-        #   }'.format(url, type, content)
-        placeholder = 123
+        from evoks.fuseki import fuseki_dev
+
+        namespaces = self.get_namespaces()
+        query = self.prefixes_to_str(namespaces)
+        query += """
+        DELETE DATA
+        {{ <{urispace}> <{predicate}> {object} }}
+        """.format(urispace=self.urispace, predicate=predicate, object=object)
+        fuseki_dev.query(
+            self, query, 'xml', 'update')
 
     def search(input: str):
         """Searches all Vocabularies for input. Vocabularies that contain input get put into a list and the list gets returned

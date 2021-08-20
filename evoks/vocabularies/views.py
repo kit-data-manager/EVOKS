@@ -11,16 +11,17 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from typing import List, Tuple
 from django.db import IntegrityError
 from urllib.parse import urlparse
-
+from langcodes import Language
 from evoks.settings import SKOSMOS_LIVE_URI, SKOSMOS_DEV_URI
 from django.core.exceptions import PermissionDenied
-from .forms import Vocabulary_Terms_Form
+from .forms import Property_Predicate_Form, Vocabulary_Terms_Form, CreateVocabularyForm
 from Tag.models import Tag
 from evoks.fuseki import fuseki_dev
 from Comment.models import Comment
 from itertools import chain
 from guardian.shortcuts import get_perms
 from django.contrib.auth.decorators import login_required, user_passes_test
+from rdflib.namespace import _is_valid_uri
 
 
 def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
@@ -44,8 +45,7 @@ def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
             vocabulary.prefixes = non_empty_prefixes  # save prefixes in vocabulary
             vocabulary.save()
         else:
-            #TODO error message
-            placeholder = 123
+            return HttpResponse('The given Prefix does not fit the required format', status=400)
 
     template = loader.get_template('vocabulary_prefixes.html')
     context = {
@@ -113,6 +113,7 @@ def uri_validator(uri: str) -> bool:
         return False
 
 
+
 def index(request: HttpRequest, voc_name: str) -> HttpResponse:
     """View for vocabulary overview
 
@@ -129,6 +130,8 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
     user_is_owner = 'owner' in get_perms(user, vocabulary)
     user_is_participant = 'participant' in get_perms(user, vocabulary)
     user_is_spectator = 'spectator' in get_perms(user, vocabulary)
+
+    form = Property_Predicate_Form(initial={'predicate': 'skos:Concept'})
 
     # check if user is allowed to view vocabulary
     if user_is_owner or user_is_participant or user_is_spectator or vocabulary.state == 'Review':
@@ -147,39 +150,34 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
         if request.method == 'POST':
 
             if 'obj' in request.POST:
-                namespaces = vocabulary.get_namespaces()
-
                 key = request.POST['key']
                 obj = request.POST['obj']
                 lang = request.POST['lang']
+                datatype = request.POST['obj-datatype']
                 new_obj = request.POST['new-obj']
                 type = request.POST['obj-type']
-                query = vocabulary.prefixes_to_str(namespaces)
-                # convert prefixes to sparql format
 
                 # if we want to edit a field
                 if new_obj != '':
                     if type == 'uri':
                         # if uri is not valid its using a prefix and does not need braces
                         if uri_validator(new_obj) != True:
-                            new_object = new_obj
-                        else:
-                            new_object = '<{0}>'.format(new_obj)
+                            valid, new_obj = vocabulary.convert_prefix(new_obj)
+                            if not valid:
+                                return HttpResponse('Invalid uri')
+
+                        if not _is_valid_uri(new_obj):
+                            return HttpResponse('Invalid uri')
+
+                        new_object = '<{0}>'.format(new_obj)
                     else:
+                        if "'''" in new_obj:
+                            return HttpResponse('Literal cannot contain \'\'\'')
                         new_object = '\'\'\'{0}\'\'\''.format(new_obj)
                         if lang != '':  # add lang tag if it exists
                             new_object += '@{0}'.format(lang)
-                # format the old object correctly
-                if type == 'uri':
-                    # if uri is not valid its using a prefix and does not need braces
-                    if uri_validator(new_obj) != True:
-                        new_object = new_obj
-                    else:
-                        new_object = '<{0}>'.format(new_obj)
-                else:
-                    new_object = '\'\'\'{0}\'\'\''.format(new_obj)
-                    if lang != '':  # add lang tag if it exists
-                        new_object += '@{0}'.format(lang)
+                        elif datatype != '':  # add datatype if it exists
+                            new_object += '^^<{0}>'.format(datatype)
 
                 # format the old object correctly
                 if type == 'uri':
@@ -191,25 +189,18 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                     object = '\'\'\'{0}\'\'\''.format(obj)
                     if lang != '':
                         object += '@{0}'.format(lang)
+                    elif datatype != '':  # add datatype if it exists
+                        object += '^^<{0}>'.format(datatype)
 
                 # delete field
                 if new_obj == '':
-                    query += """
-                    DELETE DATA
-                    {{ <{urispace}> <{predicate}> {object} }}
-                    """.format(urispace=vocabulary.urispace, predicate=key, object=object)
-                    fuseki_dev.query(
-                        vocabulary, query, 'xml', 'update')
+                    vocabulary.delete_field(key, object)
+
                 # edit field
                 else:
-                    query += """
-                    DELETE {{ <{urispace}> <{predicate}> {object} }}
-                    INSERT {{ <{urispace}> <{predicate}> {new_object} }}
-                    WHERE
-                    {{ <{urispace}> <{predicate}> {object} }}
-                    """.format(new_object=new_object, urispace=vocabulary.urispace, predicate=key, object=object)
-                    fuseki_dev.query(
-                        vocabulary, query, 'xml', 'update')
+                    vocabulary.edit_field(
+                        predicate=key, old_object=object, new_object=new_object)
+
             # create comment
             elif 'comment' in request.POST:
                 comment_text = request.POST['comment-text']
@@ -237,24 +228,55 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                 return redirect('vocabulary_overview', voc_name=vocabulary.name)
 
             elif 'create-property' in request.POST:
+                if 'predicate' not in request.POST:
+                    return HttpResponse('Empty predicate')
+                if 'type' not in request.POST:
+                    return HttpResponse('Empty type')
+                if 'object' not in request.POST or request.POST['object'] == '':
+                    return HttpResponse('Empty object')
+
                 predicate = request.POST['predicate']
+                
                 type = request.POST['type']
                 object_string = request.POST['object']
                 if type == 'uri':
                     # if uri is not valid its using a prefix and does not need braces
                     if uri_validator(object_string) != True:
-                        object = object_string
-                    else:
-                        object = '<{0}>'.format(object_string)
+                        namespaces = vocabulary.get_namespaces()
+                        valid, object_string = vocabulary.convert_prefix(
+                            namespaces, object_string)
+                        if not valid:
+                            return HttpResponse('Invalid uri')
+
+                    if not _is_valid_uri(object_string):
+                        return HttpResponse('Invalid uri')
+
+                    object = '<{0}>'.format(object_string)
                 else:
+                    if "'''" in object_string:
+                        return HttpResponse('Literal cannot contain \'\'\'')
                     object = '\'\'\'{0}\'\'\''.format(object_string)
+                    if 'language' in request.POST and request.POST['language'] != '':
+                        try:
+                            language = Language.get(request.POST['language'])
+                            if not language.is_valid() or type == 'uri':
+                                return HttpResponse('Invalid language')
+                            object += '@{0}'.format(language.language)
+                        except:
+                            return HttpResponse('Invalid language')
+                    elif 'datatype' in request.POST and request.POST['datatype'] != '':
+                        object += '^^<{0}>'.format(request.POST['datatype'])
+
                 urispace = '<{0}>'.format(vocabulary.urispace)
                 vocabulary.create_field(urispace, predicate, object)
 
             elif 'download' in request.POST:
                 dataformat = request.POST['download']
-                result = vocabulary.export_vocabulary(dataformat)
-                return result
+                export = vocabulary.export_vocabulary(dataformat)
+                response = HttpResponse(
+                    export['file_content'], export['content_type'])
+                response['Content-Disposition'] = export['content_disposition']
+                return response
 
         # query all fields of the vocabulary
         query_result = fuseki_dev.query(vocabulary, """
@@ -284,6 +306,8 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
             # add language tag
             if 'xml:lang' in obj:
                 obj['lang'] = obj['xml:lang']
+                obj['lang_display'] = Language.get(
+                    obj['xml:lang']).display_name()
 
             # append object to list of objects with same predicate
             fields[pred]['objects'].append(obj)
@@ -302,24 +326,23 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                     ?s skos:prefLabel ?o .
                 FILTER (strstarts(str(?o), '{0}'))
                 }}
+                LIMIT 50
             """.format(search), 'json')
 
             for x in query_result['results']['bindings']:
                 s = x['s']['value']
                 value = x['o']['value']
 
-
                 split = s.split(vocabulary.urispace)
                 if len(split) > 1:
                     id = s.split(vocabulary.urispace)[1]
-                    path = vocabulary.name + '/terms/' + id
+                    term = Term.objects.get(uri=id, vocabulary=vocabulary)
+                    path = vocabulary.name + '/terms/' + term.name
                     search_results.append(
                         (path, '{0}: {1}'.format(vocabulary.name, value)))
 
-
         template = loader.get_template('vocabulary.html')
         skosmos_url = SKOSMOS_DEV_URI if vocabulary.state == State.REVIEW else SKOSMOS_LIVE_URI
-        vocabularyVer = vocabulary.version - 1
         context = {
             'user': request.user,
             'vocabulary': vocabulary,
@@ -327,7 +350,8 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
             'activities': activity_list,
             'search_results': search_results,
             'search_term': search,
-            'skosmos_url': skosmos_url + vocabulary.name + '-' + str(vocabularyVer),
+            'skosmos_url': '{0}{1}-{2}'.format(skosmos_url, vocabulary.name, str(vocabulary.version-1 if vocabulary.state == 'Live' else vocabulary.version)),
+            'form': form,
         }
         return HttpResponse(template.render(context, request))
 
@@ -354,7 +378,7 @@ def settings(request: HttpRequest, voc_name: str):
     user_is_owner = 'owner' in get_perms(user, vocabulary)
 
     context = {
-        'user':user,
+        'user': user,
         'vocabulary': vocabulary
     }
 
@@ -414,7 +438,7 @@ def members(request: HttpRequest, voc_name: str):
         member_list.append(g)
 
     context = {
-        'user':user,
+        'user': user,
         'vocabulary': vocabulary,
         'members': member_list
     }
@@ -430,13 +454,15 @@ def members(request: HttpRequest, voc_name: str):
                     if invite_user.profile in vocabulary.profiles.all():
                         return HttpResponse('already in Vocabulary')
                     else:
-                        vocabulary.add_profile(invite_user.profile, 'participant')
+                        vocabulary.add_profile(
+                            invite_user.profile, 'participant')
                 elif Group.objects.filter(name=invite_str).exists():
                     invite_group = Group.objects.get(name=invite_str)
                     if invite_group.groupprofile in vocabulary.groups.all():
                         return HttpResponse('already in Vocabulary')
                     else:
-                        vocabulary.add_group(invite_group.groupprofile, 'participant')
+                        vocabulary.add_group(
+                            invite_group.groupprofile, 'participant')
                 else:
                     return HttpResponse('User/Group does not exist', status=404)
             elif 'kickall' in request.POST:
@@ -474,7 +500,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     Returns:
         HttpResponse: response object
     """
-    user=request.user
+    user = request.user
     vocabulary = Vocabulary.objects.get(name=voc_name)
 
     # get letter from querystring or default a
@@ -499,7 +525,6 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     WHERE {{
         ?sub skos:prefLabel ?obj .
     FILTER (strstarts(str(?obj), '{letter}'))
-    FILTER (lang(?obj) = 'en')
     }}
     ORDER BY ?obj
     LIMIT {limit} OFFSET {offset}
@@ -513,8 +538,9 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     for x in thing['results']['bindings']:
         sub = x['sub']['value']
         id = sub.split(vocabulary.urispace)[1]
+        term = Term.objects.get(uri=id, vocabulary=vocabulary)
         obj = x['obj']
-        terms.append({'display_name': obj['value'], 'name': id})
+        terms.append({'display_name': obj['value'], 'name': term.name})
 
     next_page_number = page_number + 1  # going over page limit does not matter
     previous_page_number = 1 if page_number - \
@@ -522,19 +548,35 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
 
     if request.method == 'POST':
         if 'create-term' in request.POST:
-            term_name = request.POST['term-name']
-            if Term.objects.filter(name=term_name).exists():
-                return HttpResponse("Term mit diesem Name existiert bereits")
+            term_subject = request.POST['term-subject']
+            term_name = term_subject.replace('/', '_')
             term_label = request.POST['term-label']
-            vocabulary.add_term(term_name)
+
+            # check if term already exists
+            if Term.objects.filter(uri=term_subject).exists():
+                return HttpResponse('term exists')
+
+            # find unique evoks url for term
+            name = term_name
+            i = 1
+            while Term.objects.filter(name=name).exists():
+                name = '{0}_{1}'.format(term_name, i)
+                i += 1
+
+            vocabulary.add_term(name, term_subject)
+
+            # insert into vocabulary
             object = '\'\'\'{0}\'\'\''.format(term_label)
-            urispace = '<{0}{1}>'.format(vocabulary.urispace, term_name.rstrip())
+            urispace = '<{0}{1}>'.format(
+                vocabulary.urispace, term_subject.rstrip())
             predicate = '<http://www.w3.org/2004/02/skos/core#prefLabel>'
             vocabulary.create_field(urispace, predicate, object)
-            # term = Term.objects.get(name=term_name)
+
+            # redirect to new term
+            return redirect('term_detail', voc_name=vocabulary.name, term_name=name)
 
     context = {
-        'user':user,
+        'user': user,
         'vocabulary': vocabulary,
         'terms': {'data': terms, 'next_page_number': next_page_number, 'previous_page_number': previous_page_number, 'start_index': offset, 'end_index': offset+len(terms)},
         'initial_letter': form,
@@ -576,25 +618,29 @@ def base(request: HttpRequest):
     if request.method == 'POST':
 
         if 'create-vocabulary' in request.POST:
+            form = CreateVocabularyForm(request.POST)
+            if form.is_valid():
+                voc_name = form.cleaned_data['name']
+                urispace = form.cleaned_data['urispace']
+            else:
+                return HttpResponse('Invalid form', status=400)
             try:
-                voc_name = request.POST['name']
-                urispace = request.POST['urispace']
                 vocabulary = Vocabulary.create(
                     name=voc_name, urispace=urispace, creator=user.profile)
             except IntegrityError:
-                return HttpResponse('vocabulary already exists')
+                return HttpResponse('vocabulary already exists', status=409)
             if 'file-upload' in request.FILES:
                 try:
                     import_voc = request.FILES['file-upload']
                     vocabulary.import_vocabulary(input=import_voc)
-                except:
+                except ValueError as e:
                     try:
                         fuseki_dev.delete_vocabulary(vocabulary)
-                    except:
-                        pass
-                    skosmos_dev.delete_vocabulary(voc_name)
-                    vocabulary.delete()
-                    return HttpResponse('import failed. May be a wrong import file.')
+                        vocabulary.delete()
+                    except Exception as e:
+                        print(e)
+                    return HttpResponse('Importing vocabulary failed')
+
             return redirect('base')
 
     search = request.GET.get('search')
@@ -621,7 +667,9 @@ def base(request: HttpRequest):
                 split = s.split(vocabulary.urispace)
                 if len(split) > 1:
                     id = s.split(vocabulary.urispace)[1]
-                    path = vocabulary.name + '/terms/' + id
+                    term = Term.objects.get(uri=id)
+
+                    path = vocabulary.name + '/terms/' + term.name
                     search_results.append(
                         (path, '{0}: {1}'.format(vocabulary.name, value)))
 

@@ -9,7 +9,10 @@ from urllib.parse import urlparse
 from Comment.models import Comment
 from Tag.models import Tag
 from django.shortcuts import redirect
-
+from django.http import HttpResponse
+from langcodes import Language
+from vocabularies.forms import Property_Predicate_Form
+from rdflib.namespace import _is_valid_uri
 
 def convert_predicate(namespaces: List[Tuple[str, str]], predicate: str) -> str:
     """Convert a URI predicate to a shortened predicate with namespaces
@@ -82,6 +85,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
 
     vocabulary = Vocabulary.objects.get(name=voc_name)
     # TODO turn slug into term name
+    print(term_name)
     term = Term.objects.get(name=term_name)
 
     if request.method == 'POST':
@@ -95,39 +99,34 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
             return redirect('vocabulary_overview', voc_name=vocabulary.name)
 
         if 'obj' in request.POST:
-            namespaces = vocabulary.get_namespaces()
-
             key = request.POST['key']
             obj = request.POST['obj']
             lang = request.POST['lang']
+            datatype = request.POST['obj-datatype']
             new_obj = request.POST['new-obj']
             type = request.POST['obj-type']
-            query = vocabulary.prefixes_to_str(namespaces)
-            # convert prefixes to sparql format
 
             # if we want to edit a field
             if new_obj != '':
                 if type == 'uri':
                     # if uri is not valid its using a prefix and does not need braces
                     if uri_validator(new_obj) != True:
-                        new_object = new_obj
-                    else:
-                        new_object = '<{0}>'.format(new_obj)
+                        valid, new_obj = vocabulary.convert_prefix(new_obj)
+                        if not valid:
+                            return HttpResponse('Invalid uri')
+
+                    if not _is_valid_uri(new_obj):
+                        return HttpResponse('Invalid uri')
+
+                    new_object = '<{0}>'.format(new_obj.rstrip())
                 else:
+                    if "'''" in new_obj:
+                        return HttpResponse('Literal cannot contain \'\'\'')
                     new_object = '\'\'\'{0}\'\'\''.format(new_obj)
                     if lang != '':  # add lang tag if it exists
                         new_object += '@{0}'.format(lang)
-            # format the old object correctly
-            if type == 'uri':
-                # if uri is not valid its using a prefix and does not need braces
-                if uri_validator(new_obj) != True:
-                    new_object = new_obj
-                else:
-                    new_object = '<{0}>'.format(new_obj)
-            else:
-                new_object = '\'\'\'{0}\'\'\''.format(new_obj)
-                if lang != '':  # add lang tag if it exists
-                    new_object += '@{0}'.format(lang)
+                    elif datatype != '':  # add datatype if it exists
+                        new_object += '^^<{0}>'.format(datatype)
 
             # format the old object correctly
             if type == 'uri':
@@ -139,25 +138,17 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
                 object = '\'\'\'{0}\'\'\''.format(obj)
                 if lang != '':
                     object += '@{0}'.format(lang)
+                elif datatype != '':  # add datatype if it exists
+                    object += '^^<{0}>'.format(datatype)
+
 
             # delete field
             if new_obj == '':
-                query += """
-                DELETE DATA
-                {{ <{urispace}{term}> <{predicate}> {object} }}
-                """.format(urispace=vocabulary.urispace, term=term.name, predicate=key, object=object)
-                fuseki_dev.query(
-                    vocabulary, query, 'xml', 'update')
+                term.delete_field(key, object)
             # edit field
             else:
-                query += """
-                DELETE {{ <{urispace}{term}> <{predicate}> {object} }}
-                INSERT {{ <{urispace}{term}> <{predicate}> {new_object} }}
-                WHERE
-                {{ <{urispace}{term}> <{predicate}> {object} }}
-                """.format(new_object=new_object, term=term.name, urispace=vocabulary.urispace, predicate=key, object=object)
-                fuseki_dev.query(
-                    vocabulary, query, 'xml', 'update')
+                term.edit_field(predicate=key, old_object=object, new_object=new_object)
+
         # create comment
         elif 'comment' in request.POST:
             comment_text = request.POST['comment-text']
@@ -185,24 +176,53 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
             return redirect('term_detail', voc_name=voc_name, term_name=term_name)
 
         elif 'create-property' in request.POST:
+            if 'predicate' not in request.POST:
+                return HttpResponse('Empty predicate')
+            if 'type' not in request.POST:
+                return HttpResponse('Empty type')
+            if 'object' not in request.POST or request.POST['object'] == '':
+                return HttpResponse('Empty object')
+
             predicate = request.POST['predicate']
+            
             type = request.POST['type']
             object_string = request.POST['object']
             if type == 'uri':
                 # if uri is not valid its using a prefix and does not need braces
                 if uri_validator(object_string) != True:
-                    object = object_string
-                else:
-                    object = '<{0}>'.format(object_string)
+                    valid, object_string = vocabulary.convert_prefix(object_string)
+                    if not valid:
+                        return HttpResponse('Invalid uri')
+
+                if not _is_valid_uri(object_string):
+                    return HttpResponse('Invalid uri')
+
+                object = '<{0}>'.format(object_string)
             else:
+                if "'''" in object_string:
+                    return HttpResponse('Literal cannot contain \'\'\'')
                 object = '\'\'\'{0}\'\'\''.format(object_string)
-            urispace = '<{0}{1}>'.format(vocabulary.urispace, term.name)
+                if 'language' in request.POST and request.POST['language'] != '':
+                    try:
+                        language = Language.get(request.POST['language'])
+                        if not language.is_valid() or type == 'uri':
+                            return HttpResponse('Invalid language')
+                        object += '@{0}'.format(language.language)
+                    except:
+                        return HttpResponse('Invalid language')
+                elif 'datatype' in request.POST and request.POST['datatype'] != '':
+                    object += '^^<{0}>'.format(request.POST['datatype'])
+
+            urispace = '<{0}{1}>'.format(vocabulary.urispace, term.uri)
             vocabulary.create_field(urispace, predicate, object)
         
         elif 'download' in request.POST:
                 dataformat = request.POST['download']
-                result = term.export_term(dataformat)
-                return result
+                export = term.export_term(dataformat)
+                response = HttpResponse(
+                    export['file_content'], export['content_type'])
+                response['Content-Disposition'] = export['content_disposition']
+                return response
 
     # put comments and tags on vocabulary into a list sorted from newest to oldest
     # TODO term
@@ -221,7 +241,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
         SELECT * WHERE {{
             <{0}{1}> ?pred ?obj .
         }}
-    """.format(vocabulary.urispace, term.name), 'json')
+    """.format(vocabulary.urispace, term.uri), 'json')
 
     namespaces = vocabulary.get_namespaces()
 
@@ -243,16 +263,18 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
 
         # add language tag
         if 'xml:lang' in obj:
-            obj['lang'] = obj['xml:lang']
+            obj['lang'] = obj['xml:lang'] 
+            obj['lang_display'] = Language.get(obj['xml:lang']).display_name() 
 
         # append object to list of objects with same predicate
         fields[pred]['objects'].append(obj)
+    form = Property_Predicate_Form(initial={'predicate': 'skos:Concept'})
 
     context = {
         'vocabulary': vocabulary,
         'fields': fields,
         'term': term,
         'activities': activity_list,
-
+        'form' : form,
     }
     return render(request, 'term_detail.html', context)
