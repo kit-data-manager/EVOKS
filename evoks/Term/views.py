@@ -84,8 +84,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
     user = request.user
 
     vocabulary = Vocabulary.objects.get(name=voc_name)
-    # TODO turn slug into term name
-    print(term_name)
+
     term = Term.objects.get(name=term_name)
 
     if request.method == 'POST':
@@ -93,7 +92,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
         if 'delete-term' in request.POST:
             query = """
             DELETE {{ ?s ?p ?o . }} WHERE {{ VALUES ?s {{ <{0}> }} ?s ?p ?o }}
-            """.format(vocabulary.urispace + term.name)
+            """.format(vocabulary.urispace + term.uri)
             fuseki_dev.query(vocabulary, query, 'json', 'update')
             term.delete()
             return redirect('vocabulary_overview', voc_name=vocabulary.name)
