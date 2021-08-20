@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Profil</title>
+    <title>Profile</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -35,16 +35,13 @@
                         <h1 class="text-2xl font-semibold text-gray-900">Your Profile</h1>
                     </div>
                     <div class="px-4 sm:px-6 md:px-0">
-                        <!-- Replace with your content -->
                         <div class="py-4">
-
-
                             <div class="space-y-8">
                                 <div>
                                     <div>
-
                                         <p class="mt-1 text-sm text-gray-500">
-                                            This information will be public! Maximum length of name is 50 characters and of description is 500 characters.
+                                            This information will be public! Maximum length of name is 50 characters and
+                                            of description is 500 characters.
                                         </p>
                                     </div>
                                     <form method="POST" action="">{% csrf_token %}
@@ -53,19 +50,14 @@
                                                 <label for="name" class="block text-sm font-medium text-gray-700">
                                                     Name
                                                 </label>
-
                                                 <div class="mt-1">
-                                                    <input id="name" name="name" type="text" autocomplete="given-name" maxlength="50"
-                                                        value="{{profile.name}}"
+                                                    <input id="name" name="name" type="text" autocomplete="given-name"
+                                                        maxlength="50" value="{{profile.name}}"
                                                         class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
                                                     <!--{{form.name}} !-->
                                                 </div>
-
                                             </div>
                                         </div>
-
-
-
 
                                         <div class="sm:col-span-6 mt-5">
                                             <label for="about" class="block text-sm font-medium text-gray-700">
@@ -76,7 +68,6 @@
                                                     value="{{profile.description}}"
                                                     class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border border-gray-300 rounded-md">{{profile.description}}
                                                 </textarea>
-
                                             </div>
                                             <p class="mt-2 text-sm text-gray-500">Write a few sentences about
                                                 yourself.</p>
@@ -89,9 +80,8 @@
                                             <div class="mt-1 flex items-center">
                                                 <span class="h-12 w-12 rounded-full overflow-hidden bg-gray-100">
                                                     <img class="h-full w-full rounded-full"
-                                                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Plato_Silanion_Musei_Capitolini_MC1377.jpg/440px-Plato_Silanion_Musei_Capitolini_MC1377.jpg"
-                                                    alt="">
-
+                                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Plato_Silanion_Musei_Capitolini_MC1377.jpg/440px-Plato_Silanion_Musei_Capitolini_MC1377.jpg"
+                                                        alt="">
                                                 </span>
                                             </div>
                                             <div class="pt-5">
@@ -110,10 +100,8 @@
                                         </div>
 
                                         <div class="grid grid-cols-6 gap-6 mt-5">
-
                                             <div class="col-span-6 sm:col-span-3">
-
-                                                <!-- This example requires Tailwind CSS v2.0+ -->
+                                                
                                                 <div class="bg-white shadow sm:rounded-lg">
                                                     <div class="px-4 py-5 sm:p-6">
                                                         <h3 class="text-lg leading-6 font-medium text-gray-900">
@@ -127,20 +115,16 @@
                                                             </p>
                                                         </div>
                                                         <div class="mt-5">
-
                                                             <button type="button" id="delete-account-button"
                                                                 class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
                                                                 Deactivate account
                                                             </button>
-
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div class="col-span-6 sm:col-span-3">
-
-                                                <!-- This example requires Tailwind CSS v2.0+ -->
                                                 <div class="bg-white shadow sm:rounded-lg">
                                                     <div class="px-4 py-5 sm:p-6">
                                                         <h3 class="text-lg leading-6 font-medium text-gray-900">
@@ -161,24 +145,38 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="col-span-6 sm:col-span-3">
+                                                <div class="bg-white shadow sm:rounded-lg">
+                                                    <div class="px-4 py-5 sm:p-6">
+                                                        <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                                            Change your password
+                                                        </h3>
+                                                        <div class="mt-2 max-w-xl text-sm text-gray-500">
+                                                            <p>
+                                                                You will get an email with instructions on how to change
+                                                                your password!
+                                                            </p>
+                                                        </div>
+                                                        <div class="mt-5">
+                                                            <button type="submit" id="delete-account-button"
+                                                                name="change-password"
+                                                                class="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
+                                                                Change password
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </form>
                                 </div>
-
                             </div>
-
                         </div>
                     </div>
                 </div>
+            </main>
         </div>
     </div>
-    <!-- /End replace -->
-    </div>
-    </div>
-    </main>
-    </div>
-    </div>
-
 </body>
 
 <script src="{% static 'js/profile.js' %}"></script>
