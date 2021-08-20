@@ -160,7 +160,10 @@ class Vocabulary(models.Model):
         p = fuseki_dev.query(
             self, """DESCRIBE <{0}>""".format(self.urispace), 'xml')
 
-        namespaces = []
+        namespaces = [('skos', 'http://www.w3.org/2004/02/skos/core#'),
+            ('dc', 'http://purl.org/dc/elements/1.1/'),
+            ('dct', 'http://purl.org/dc/terms/')
+        ]
 
         v_prefixes = self.split_prefixes(self.convert_prefixes(self.prefixes))
         for prefix in v_prefixes:

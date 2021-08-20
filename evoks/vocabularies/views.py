@@ -515,7 +515,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
         if 'create-term' in request.POST:
             term_name = request.POST['term-name']
             if Term.objects.filter(name=term_name).exists():
-                return HttpResponse("Term mit diesem Name existiert bereits")
+                return HttpResponse("Term with this name already exists", status=409)
             term_label = request.POST['term-label']
             vocabulary.add_term(term_name)
             object = '\'\'\'{0}\'\'\''.format(term_label)
@@ -577,7 +577,7 @@ def base(request: HttpRequest):
                 vocabulary = Vocabulary.create(
                     name=voc_name, urispace=urispace, creator=user.profile)
             except IntegrityError:
-                return HttpResponse('vocabulary already exists')
+                return HttpResponse('vocabulary already exists', status=409)
             if 'file-upload' in request.FILES:
                 try:
                     import_voc = request.FILES['file-upload']
