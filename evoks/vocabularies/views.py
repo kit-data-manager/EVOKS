@@ -45,7 +45,8 @@ def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
             prefixes = request.POST['prefixes'].split(
                 '\r\n')  # could lead to problems with \r\n
             # remove all empty lines
-            non_empty_prefixes = [line for line in prefixes if line.strip() != ""]
+            non_empty_prefixes = [
+                line for line in prefixes if line.strip() != ""]
             if vocabulary.validate_prefixes(non_empty_prefixes):
                 vocabulary.prefixes = non_empty_prefixes  # save prefixes in vocabulary
                 vocabulary.save()
@@ -62,7 +63,6 @@ def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
         return HttpResponse(template.render(context, request))
     else:
         return HttpResponse('Insufficient permissions', status=403)
-
 
 
 def convert_predicate(namespaces: List[Tuple[str, str]], predicate: str) -> str:
@@ -120,6 +120,7 @@ def uri_validator(uri: str) -> bool:
     except:
         return False
 
+
 def get_vocab_perm(user: User, vocabulary: Vocabulary) -> str:
     """Gets the highest permission that the User has on the Vocabulary
 
@@ -130,14 +131,14 @@ def get_vocab_perm(user: User, vocabulary: Vocabulary) -> str:
         str: Highest permission
     """
     permission = 'spectator'
-    #check for permissions given by groups that the user is part of
+    # check for permissions given by groups that the user is part of
     for group in user.groups.all():
         if 'owner' in get_perms(group, vocabulary):
             permission = 'owner'
             return permission
         elif 'participant' in get_perms(group, vocabulary):
             permission = 'member'
-    #checks for permissions of user
+    # checks for permissions of user
     if 'owner' in get_perms(user, vocabulary):
         permission = 'owner'
     elif 'participant' in get_perms(user, vocabulary):
@@ -396,7 +397,6 @@ def settings(request: HttpRequest, voc_name: str):
     vocabulary = Vocabulary.objects.get(name=voc_name)
     user = request.user
     permission = get_vocab_perm(user, vocabulary)
-
     context = {
         'user': user,
         'vocabulary': vocabulary
@@ -508,13 +508,13 @@ def members(request: HttpRequest, voc_name: str):
                 type = request.POST['type']
                 if type == 'Profile':
                     changed_user = User.objects.get(email=name_or_mail)
-                    #cant change perm if only owner
+                    # cant change perm if only owner
                     if owners <= 1 and 'owner' in get_perms(changed_user, vocabulary):
                         return HttpResponse('Cannot change role of last owner', status=400)
                     vocabulary.change_profile_perm(changed_user.profile, role)
                 else:
                     group = Group.objects.get(name=name_or_mail)
-                    #cant change perm if only owner
+                    # cant change perm if only owner
                     if owners <= 1 and 'owner' in get_perms(group, vocabulary):
                         return HttpResponse('Cannot change role of last owner', status=400)
                     vocabulary.change_group_perm(group.groupprofile, role)
@@ -524,13 +524,13 @@ def members(request: HttpRequest, voc_name: str):
                 name_or_mail = request.POST['kick-member']
                 if type == 'Profile':
                     kicked_user = User.objects.get(email=name_or_mail)
-                    #cant kick only owner
+                    # cant kick only owner
                     if owners <= 1 and 'owner' in get_perms(kicked_user, vocabulary):
                         return HttpResponse('Cannot kick last owner', status=400)
                     vocabulary.remove_profile(kicked_user.profile)
                 else:
                     group = Group.objects.get(name=name_or_mail)
-                    #cant kick only owner
+                    # cant kick only owner
                     if owners <= 1 and 'owner' in get_perms(group, vocabulary):
                         return HttpResponse('Cannot kick last owner', status=400)
                     vocabulary.remove_group(group.groupprofile)
@@ -690,6 +690,12 @@ def base(request: HttpRequest):
             else:
                 return HttpResponse('Invalid form', status=400)
             try:
+                if urispace == '' and 'file-upload' not in request.FILES:
+                    return HttpResponseBadRequest('empty urispace is not allowed when creating a new vocabulary')
+
+                if urispace != '' and (not uri_validator(urispace) or not _is_valid_uri(urispace)):
+                    return HttpResponseBadRequest('invalid urispace')
+
                 vocabulary = Vocabulary.create(
                     name=voc_name, urispace=urispace, creator=user.profile)
                 vocabulary.create_field('<{}>'.format(
@@ -737,7 +743,8 @@ def base(request: HttpRequest):
                     id = s.split(vocabulary.urispace)[1]
                     terms = Term.objects.filter(uri=id, vocabulary=vocabulary)
                     for term in terms:
-                        path = '{0}/terms/{1}'.format(vocabulary.name, term.name)
+                        path = '{0}/terms/{1}'.format(
+                            vocabulary.name, term.name)
                         search_results.append(
                             (path, '{0}: {1}'.format(vocabulary.name, value)))
 

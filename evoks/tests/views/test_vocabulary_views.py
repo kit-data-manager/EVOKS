@@ -174,7 +174,7 @@ class Vocabulary_views_test(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_kick_member(self):
-        #add member
+        # add member
         test_user = User.objects.create(
             username='member@example.com', email='member@example.com')
         test_user.profile.name = 'member'
@@ -202,7 +202,7 @@ class Vocabulary_views_test(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_change_user_permission(self):
-        #invite user
+        # invite user
         test_user = User.objects.create(
             username='member@example.com', email='member@example.com')
         test_user.profile.name = 'member'
@@ -215,7 +215,7 @@ class Vocabulary_views_test(TestCase):
         voc = Vocabulary.objects.get(name=self.vocabulary.name)
         self.assertTrue('participant' in get_perms(test_user, voc))
 
-        #change role
+        # change role
         response = self.c.post(
             '/vocabularies/{0}/members'.format(self.vocabulary.name),
             {'role': 'owner', 'nameormail': 'member@example.com', 'type': 'Profile'},
@@ -225,8 +225,8 @@ class Vocabulary_views_test(TestCase):
         self.assertFalse('participant' in get_perms(test_user, voc))
         self.assertTrue('owner' in get_perms(test_user, voc))
 
-
     # overview functionality tests
+
     def test_overview_view(self):
         get = self.c.get(
             '/vocabularies/{0}'.format(self.vocabulary.name),
@@ -483,6 +483,22 @@ class Vocabulary_views_test(TestCase):
         )
         self.assertTemplateUsed(get, "vocabulary_terms.html")
 
+    def test_terms_view_add_term(self):
+        term_subject = 'term123'
+        object = '\'\'\'{0}\'\'\''.format('apfel')
+        urispace = '<{0}{1}>'.format(
+            self.vocabulary.urispace, term_subject.rstrip())
+        predicate = '<http://www.w3.org/2004/02/skos/core#prefLabel>'
+        self.vocabulary.create_field(urispace, predicate, object)
+        self.vocabulary.create_field(urispace, '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+                                '<http://www.w3.org/2004/02/skos/core#Concept>')
+
+        self.vocabulary.add_term(term_subject, term_subject)
+        get = self.c.get(
+            '/vocabularies/{0}/terms'.format(self.vocabulary.name),
+        )
+        self.assertTemplateUsed(get, "vocabulary_terms.html")
+
     def test_create_term(self):
         response = self.c.post(
             '/vocabularies/{0}/terms'.format(self.vocabulary.name),
@@ -527,6 +543,22 @@ class Vocabulary_views_test(TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
+    def test_create_vocabulary_invalid_form_bad_name(self):
+        response = self.c.post(
+            '/vocabularies/',
+            {'create-vocabulary': '', 'name': 'example',
+                'urispace': ''}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_vocabulary_invalid_form_bad_urispace(self):
+        response = self.c.post(
+            '/vocabularies/',
+            {'create-vocabulary': '', 'name': 'example',
+                'urispace': 'localhost:8080'}
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_create_vocabulary_already_exists(self):
         response = self.c.post(
             '/vocabularies/',
@@ -553,8 +585,7 @@ class Vocabulary_views_test(TestCase):
         with open('tests/iptc-skos.ttl', 'rb') as ttl:
             response = self.c.post(
                 '/vocabularies/',
-                {'create-vocabulary': '', 'name': 'genel-ttl',
-                    'urispace': 'http://cv.iptc.org/newscodes/', 'file-upload': ttl},
+                {'create-vocabulary': '', 'name': 'genel-ttl', 'file-upload': ttl},
                 follow=True
             )
         self.assertEqual(response.status_code, 200)
@@ -568,7 +599,7 @@ class Vocabulary_views_test(TestCase):
             response = self.c.post(
                 '/vocabularies/',
                 {'create-vocabulary': '', 'name': 'genel-ttl',
-                    'urispace': 'http://cv.iptc.org/newscodes/', 'file-upload': ttl},
+                    'urispace': 'http://example.com', 'file-upload': ttl},
                 follow=True
             )
         self.assertEqual(response.status_code, 400)
@@ -578,7 +609,7 @@ class Vocabulary_views_test(TestCase):
             response = self.c.post(
                 '/vocabularies/',
                 {'create-vocabulary': '', 'name': 'genel-rdf',
-                    'urispace': 'http://cv.iptc.org/newscodes/', 'file-upload': rdf},
+                    'urispace': 'http://example.com/', 'file-upload': rdf},
                 follow=True
             )
         self.assertEqual(response.status_code, 200)

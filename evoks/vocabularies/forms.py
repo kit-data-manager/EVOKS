@@ -176,4 +176,4 @@ class CreateVocabularyForm(forms.Form):
         forms: Subclasses the Django Form class
     """
     name = forms.SlugField(max_length=50)
-    urispace = forms.CharField(max_length=100)
+    urispace = forms.CharField(max_length=100, required=False)
