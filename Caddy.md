@@ -9,7 +9,7 @@ Da Caddy auch als Loadbalancer arbeiten kann, haben wir es nicht zu docker-compo
 
 ## Installation
 
-Mit `caddy_install.sh` werden alle packages installiert die für Caddy notwendig sind. Caddy wird dann in dem gleichen Ordner wie Caddyfile mit `caddy start` gestartet
+Mit `caddy_install.sh` werden alle packages installiert die für Caddy notwendig sind. Caddy wird dann in dem gleichen Ordner wie Caddyfile mit `caddy start` gestartet. Das muss nur einmalig gemacht werden.
 
 ## Richtige Domain
 
@@ -26,5 +26,17 @@ wird zu
 example.com {
     reverse_proxy localhost:8000
 }
+
+skosmos-dev.example.com {
+    reverse_proxy localhost:9090
+}
+
+skosmos-live.example.com {
+    reverse_proxy localhost:9080
+}
+
 ```
 
+Außerdem müssen die Skosmos Domains in settings.py angepasst werden. Und nicht vergessen dass es A records für die Skosmos Domains gibt.
+Allowed Hosts muss auch in Settings angepasst werden.
+In production sollte es dann auch noch eine Firewall für die ganzen anderen Ports geben.
