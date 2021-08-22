@@ -46,6 +46,21 @@ class Dataformat(enum.Enum):
     TURTLE = 3
 
 
+def find_urispace(subjects):
+
+    prefix = subjects[0]
+    for word in subjects:
+        if len(prefix) > len(word):
+            prefix, word = word, prefix
+
+        while len(prefix) > 0:
+            if word[:len(prefix)] == prefix:
+                break
+            else:
+                prefix = prefix[:-1]
+    return prefix
+
+
 class Vocabulary(models.Model):
     name = models.SlugField(max_length=50, unique=True)
     profiles = models.ManyToManyField(Profile, blank=True)
@@ -103,9 +118,7 @@ class Vocabulary(models.Model):
         Args:
             input (): Vocabulary to import
         """
-        # TODO mögliche dateiformate: ?
         from evoks.fuseki import fuseki_dev
-
 
         user = settings.FUSEKI_USER
         password = settings.FUSEKI_PASSWORD
@@ -140,31 +153,33 @@ class Vocabulary(models.Model):
             elif extension == 'ttl':
                 content_type = 'text/turtle'
 
-
             headers = {'Content-Type': content_type}
             r = requests.put('http://fuseki-dev:3030/{0}/data'.format(
                 self.name), data=tmp.read(), auth=(user, password), headers=headers)
             if not r.ok:
                 raise ValueError('import failed', r.status_code)
 
-            query = """       
-                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-
+            query = """
                 SELECT DISTINCT ?s
-                WHERE {{
-                    ?s skos:prefLabel ?o .
-                FILTER (strstarts(str(?s), '{0}'))
-                }}
-            """.format(self.urispace)
+                WHERE {
+                ?s ?p ?o
+                }
+            """
             result = fuseki_dev.query(self, query, 'json')
+            subjects: List[str] = []
+            for x in result['results']['bindings']:
+                uri = x['s']['value']
+                subjects.append(uri)
+
+            new_urispace = find_urispace(subjects)
 
             for x in result['results']['bindings']:
                 try:
+
                     uri = x['s']['value']
-                    id = uri.split(self.urispace)[1]
+                    id = uri.split(new_urispace)[1]
                     base = id.replace('/', '_')
                     name = base
-
                     i = 1
                     while Term.objects.filter(name=name).exists():
                         name = '{0}_{1}'.format(base, i)
@@ -175,9 +190,37 @@ class Vocabulary(models.Model):
                 except Exception as e:
                     print(e)
 
+            if self.urispace != '':
+                last_char = new_urispace[-1]
+                last_char_new = self.urispace[-1]
+                if last_char == '/' or last_char == '#' and last_char_new != '/' and last_char_new != '#':
+                    self.urispace += '/'
+                    self.save()
+                query = """
+                DELETE
+                {{ ?oldIRI ?p ?o }}
+                INSERT
+                {{ ?newIRI ?p ?o }}
+                WHERE
+                {{
+                    ?oldIRI ?p ?o .
+                    BIND(
+                        IRI(CONCAT("{new_urispace}",
+                            SUBSTR(STR(?oldIRI), STRLEN(STR("{urispace}"))+1 ) 
+                    )) AS ?newIRI
+                    )
+
+                    FILTER(strstarts(str(?oldIRI), "{urispace}"))
+                }}""".format(new_urispace=self.urispace, urispace=new_urispace)
+                fuseki_dev.query(self, query, 'xml', 'update')
+
+            if self.urispace == '':
+                self.urispace = new_urispace
+                self.save()
+
     def validate_prefixes(self, prefixes: List):
         from vocabularies.views import uri_validator
-        
+
         for key in prefixes:
             split = key.split()
             if not len(split) == 3:
@@ -204,9 +247,9 @@ class Vocabulary(models.Model):
             self, """DESCRIBE <{0}>""".format(self.urispace), 'xml')
 
         namespaces = [('skos', 'http://www.w3.org/2004/02/skos/core#'),
-            ('dc', 'http://purl.org/dc/elements/1.1/'),
-            ('dct', 'http://purl.org/dc/terms/')
-        ]
+                      ('dc', 'http://purl.org/dc/elements/1.1/'),
+                      ('dct', 'http://purl.org/dc/terms/')
+                      ]
 
         v_prefixes = self.split_prefixes(self.convert_prefixes(self.prefixes))
         for prefix in v_prefixes:
@@ -241,7 +284,6 @@ class Vocabulary(models.Model):
                     valid = True
             break
         return (valid, object_string)
-
 
     def prefixes_to_str(self, namespaces: List[Tuple[str, str]]) -> str:
         prefix_list: List[str] = []
@@ -293,24 +335,27 @@ class Vocabulary(models.Model):
             thing = fuseki_dev.query(self, """
             DESCRIBE <{0}> """.format(urispace), 'xml')
             file_content = thing.serialize(format='json-ld')
-            content_type='application/json-ld'
-            content_disposition = 'attachment; filename={0}.jsonld'.format(self.name)
+            content_type = 'application/json-ld'
+            content_disposition = 'attachment; filename={0}.jsonld'.format(
+                self.name)
         elif dataformat == 'turtle':
             thing = fuseki_dev.query(self, """
             DESCRIBE <{0}> """.format(urispace), 'xml')
             file_content = thing.serialize(format='n3')
-            content_type='application/ttl'
-            content_disposition = 'attachment; filename={0}.ttl'.format(self.name)
+            content_type = 'application/ttl'
+            content_disposition = 'attachment; filename={0}.ttl'.format(
+                self.name)
         elif dataformat == 'rdf+xml':
             thing = fuseki_dev.query(self, query, 'xml')
             file_content = thing.toprettyxml()
-            content_type='application/rdf+xml'
-            content_disposition = 'attachment; filename={0}.rdf'.format(self.name)
+            content_type = 'application/rdf+xml'
+            content_disposition = 'attachment; filename={0}.rdf'.format(
+                self.name)
 
         export = {
-            'file_content' : file_content,
-            'content_type' : content_type,
-            'content_disposition' : content_disposition
+            'file_content': file_content,
+            'content_type': content_type,
+            'content_disposition': content_disposition
         }
         return export
 
@@ -372,7 +417,6 @@ class Vocabulary(models.Model):
 
             if self.state == State.REVIEW:
                 skosmos_dev.delete_vocabulary(self.name)
-
 
             context = MigrationContext(BackupMigrationStrategy())
             context.start(self)
@@ -481,10 +525,10 @@ class Vocabulary(models.Model):
             profile (Profile): given profile
             newperm (str): new permission of the profile
         """
-        #remove old perms
+        # remove old perms
         for key in get_perms(profile.user, self):
             remove_perm(key, profile.user, self)
-        #assign new perm
+        # assign new perm
         assign_perm(newperm, profile.user, self)
 
     def change_group_perm(self, group_profile: GroupProfile, newperm: str) -> None:
@@ -494,10 +538,10 @@ class Vocabulary(models.Model):
             profile (Profile): given profile
             newperm (str): new permission of the profile
         """
-        #remove old perms
+        # remove old perms
         for key in get_perms(group_profile.group, self):
             remove_perm(key, group_profile.group, self)
-        #assign new perm
+        # assign new perm
         assign_perm(newperm, group_profile.group, self)
 
     def edit_field(self, predicate: str, old_object: str, new_object: str) -> None:
@@ -543,7 +587,7 @@ class Vocabulary(models.Model):
         if self.state == State.LIVE:
             self.set_dev()
 
-    def delete_field(self, predicate : str, object : str) -> None:
+    def delete_field(self, predicate: str, object: str) -> None:
         """Deletes a Triple Field of the vocabulary on the Fuseki-Dev Instance
 
         Args:

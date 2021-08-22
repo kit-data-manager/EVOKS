@@ -53,7 +53,7 @@ class Teams_test(TestCase):
 
     def test_delete_in_empty_voc(self):
         self.c.post('/vocabularies', {'create-vocabulary': '',
-                    'name': 'testvocabulary', 'urispace': 'a'})
+                    'name': 'testvocabulary', 'urispace': 'http://localhost:8080'})
         self.assertTrue(Vocabulary.objects.filter(
             name='testvocabulary').exists())
         self.c.post('/profile', {'delete': ''})
@@ -62,7 +62,7 @@ class Teams_test(TestCase):
 
     def test_delete_in_voc(self):
         self.c.post('/vocabularies', {'create-vocabulary': '',
-                    'name': 'testvocabulary', 'urispace': 'a'})
+                    'name': 'testvocabulary', 'urispace': 'http://localhost:8080'})
         self.assertTrue(Vocabulary.objects.filter(
             name='testvocabulary').exists())
         self.c.post('/vocabularies/testvocabulary/members',
@@ -74,7 +74,7 @@ class Teams_test(TestCase):
 
     def test_delete_in_voc_with_group(self):
         self.c.post('/vocabularies', {'create-vocabulary': '',
-                    'name': 'testvocabulary', 'urispace': 'a'})
+                    'name': 'testvocabulary', 'urispace': 'http://localhost:8080'})
         self.assertTrue(Vocabulary.objects.filter(
             name='testvocabulary').exists())
         self.c.post('/teams', {'create-team': '', 'team-name': 'team1'})
