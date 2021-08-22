@@ -126,9 +126,32 @@
 
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 ">
-                                                                            {{ data.role }}
+                                                                            {% load guardian_tags %}
+                                                                	        {% get_obj_perms data.member for vocabulary as "member_perms" %}
+                                                                            {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+
+                                                                            {% if "owner" in vocabulary_perms and data.role != 'Owner' %}
+
+
+                                                                            <form action="#" method="post"> {% csrf_token %}
+                                                                                <input hidden value='{% if data.type == 'Profile' %}{{data.email}}{% else %}{{data.name}}{% endif %}' name="nameormail">
+                                                                                <input type="hidden" name="type" value="{{data.type}}">
+                                                                                <select onchange="this.form.submit()" id="role" name="role" class="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md">
+                                                                                    <option value="spectator" {% if 'spectator' in member_perms %} selected {% endif %}>Spectator</option>
+                                                                                    <option value="participant" {% if 'participant' in member_perms %} selected {% endif %}>Member</option>
+                                                                                    <option value="owner" {% if 'owner' in member_perms %} selected {% endif %}>Owner</option>
+                                                                                </select>
+                                                                            </form>
+                                                                            
+                                                                            {% else %}
+
+                                                                            {% if "owner" in member_perms %} Owner
+                                                                            {% elif "participant" in member_perms %} Member
+                                                                            {% elif "spectator" in member_perms %} Spectator
+                                                                            {% endif %}
+
+                                                                            {% endif %}
                                                                         </td>
-                                                                        
 
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
