@@ -21,6 +21,7 @@ import os
 from django.utils.crypto import get_random_string
 from tempfile import NamedTemporaryFile
 from time import sleep
+from rdflib.namespace import _is_valid_uri
 
 
 class State(models.TextChoices):
@@ -138,8 +139,7 @@ class Vocabulary(models.Model):
                 content_type = 'application/rdf+xml'
             elif extension == 'ttl':
                 content_type = 'text/turtle'
-            elif extension == 'jsonld':
-                content_type = 'application/ld+json'
+
 
             headers = {'Content-Type': content_type}
             r = requests.put('http://fuseki-dev:3030/{0}/data'.format(
@@ -176,11 +176,17 @@ class Vocabulary(models.Model):
                     print(e)
 
     def validate_prefixes(self, prefixes: List):
+        from vocabularies.views import uri_validator
+        
         for key in prefixes:
             split = key.split()
             if not len(split) == 3:
                 return False
             elif not (split[0] == "PREFIX" and split[1].endswith(":") and split[1].endswith(":") and split[2].startswith("<") and split[2].endswith(">")):
+                return False
+            elif not uri_validator(split[2][1:-1]):
+                return False
+            elif not _is_valid_uri(split[2][1:-1]):
                 return False
         return True
 
@@ -522,11 +528,3 @@ class Vocabulary(models.Model):
         """.format(urispace=self.urispace, predicate=predicate, object=object)
         fuseki_dev.query(
             self, query, 'xml', 'update')
-
-    def search(input: str):
-        """Searches all Vocabularies for input. Vocabularies that contain input get put into a list and the list gets returned
-
-        Args:
-            input (str): Search string
-        """
-        placeholder = 123

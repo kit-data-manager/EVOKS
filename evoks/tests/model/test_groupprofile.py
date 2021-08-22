@@ -11,7 +11,7 @@ class GroupProfileTest(TestCase):
         TestCase ([type]): [description]
     """
     @classmethod
-    def setUpTestData(cls):
+    def setUp(cls):
 
         # Set up non-modified objects used by all test methods
         user = User.objects.create(username='tom', password='ok')

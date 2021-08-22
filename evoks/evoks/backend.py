@@ -28,8 +28,8 @@ class CustomBackend(ModelBackend):
             user = user_model.objects.get(email=username)
         except user_model.DoesNotExist:
             return None
-        else:
-            if user.check_password(password) and self.user_can_authenticate(user):
-                if user.is_staff or user.profile.verified:
-                    return user
+
+        if user.check_password(password) and self.user_can_authenticate(user) and (user.is_staff or user.profile.verified):
+            return user
+
         return None

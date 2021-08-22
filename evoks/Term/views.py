@@ -84,7 +84,6 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
     user = request.user
 
     vocabulary = Vocabulary.objects.get(name=voc_name)
-
     term = Term.objects.get(name=term_name)
 
     if request.method == 'POST':
@@ -112,15 +111,15 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
                     if uri_validator(new_obj) != True:
                         valid, new_obj = vocabulary.convert_prefix(new_obj)
                         if not valid:
-                            return HttpResponse('Invalid uri')
+                            return HttpResponse('Invalid uri', status=400)
 
                     if not _is_valid_uri(new_obj):
-                        return HttpResponse('Invalid uri')
+                        return HttpResponse('Invalid uri', status=400)
 
                     new_object = '<{0}>'.format(new_obj.rstrip())
                 else:
                     if "'''" in new_obj:
-                        return HttpResponse('Literal cannot contain \'\'\'')
+                        return HttpResponse('Literal cannot contain \'\'\'', status=400)
                     new_object = '\'\'\'{0}\'\'\''.format(new_obj)
                     if lang != '':  # add lang tag if it exists
                         new_object += '@{0}'.format(lang)
@@ -176,11 +175,11 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
 
         elif 'create-property' in request.POST:
             if 'predicate' not in request.POST:
-                return HttpResponse('Empty predicate')
+                return HttpResponse('Empty predicate', status=400)
             if 'type' not in request.POST:
-                return HttpResponse('Empty type')
+                return HttpResponse('Empty type', status=400)
             if 'object' not in request.POST or request.POST['object'] == '':
-                return HttpResponse('Empty object')
+                return HttpResponse('Empty object', status=400)
 
             predicate = request.POST['predicate']
             
@@ -191,29 +190,29 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
                 if uri_validator(object_string) != True:
                     valid, object_string = vocabulary.convert_prefix(object_string)
                     if not valid:
-                        return HttpResponse('Invalid uri')
+                        return HttpResponse('Invalid uri', status=400)
 
                 if not _is_valid_uri(object_string):
-                    return HttpResponse('Invalid uri')
+                    return HttpResponse('Invalid uri', status=400)
 
                 object = '<{0}>'.format(object_string)
             else:
                 if "'''" in object_string:
-                    return HttpResponse('Literal cannot contain \'\'\'')
+                    return HttpResponse('Literal cannot contain \'\'\'', status=400)
                 object = '\'\'\'{0}\'\'\''.format(object_string)
                 if 'language' in request.POST and request.POST['language'] != '':
                     try:
                         language = Language.get(request.POST['language'])
                         if not language.is_valid() or type == 'uri':
-                            return HttpResponse('Invalid language')
+                            return HttpResponse('Invalid language', status=400)
                         object += '@{0}'.format(language.language)
                     except:
-                        return HttpResponse('Invalid language')
+                        return HttpResponse('Invalid language', status=400)
                 elif 'datatype' in request.POST and request.POST['datatype'] != '':
                     object += '^^<{0}>'.format(request.POST['datatype'])
 
             urispace = '<{0}{1}>'.format(vocabulary.urispace, term.uri)
-            vocabulary.create_field(urispace, predicate, object)
+            term.create_field(urispace, predicate, object)
         
         elif 'download' in request.POST:
                 dataformat = request.POST['download']
@@ -223,8 +222,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
                 response['Content-Disposition'] = export['content_disposition']
                 return response
 
-    # put comments and tags on vocabulary into a list sorted from newest to oldest
-    # TODO term
+    # put comments and tags on term into a list sorted from newest to oldest
     comments = term.comment_set.filter()
     tags = term.tag_set.filter()
     activity_list = sorted(
@@ -235,7 +233,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
     for index, key in enumerate(activity_list):
         activity_list[index].type = key.__class__.__name__
 
-    # query all fields of the vocabulary
+    # query all fields of the term
     query_result = fuseki_dev.query(vocabulary, """
         SELECT * WHERE {{
             <{0}{1}> ?pred ?obj .

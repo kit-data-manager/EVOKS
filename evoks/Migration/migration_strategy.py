@@ -13,4 +13,3 @@ class MigrationStrategy(ABC):
         Args:
             vocabulary (Vocabulary): Vocabulary to migrate
         """
-        pass

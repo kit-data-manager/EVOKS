@@ -66,7 +66,7 @@ class Fuseki:
         except:
             return False
 
-    def delete_vocabulary(self, vocabulary: Vocabulary) -> None:
+    def delete_vocabulary(self, vocabulary: Vocabulary, live=False) -> None:
         """
         Deletes a given vocabulary from fuseki
 
@@ -77,8 +77,12 @@ class Fuseki:
             ValueError: Vocabulary does not exist
             Exception: Vocabulary deleting failed for unknown reasons. Status code added as argument
         """
-        response = requests.delete(
-            '{base}datasets/{name}'.format(base=self.api_url, name=vocabulary.name), auth=(user, password))
+        if live:
+            response = requests.delete(
+                '{base}datasets/{name}'.format(base=self.api_url, name=vocabulary.name_with_version()), auth=(user, password))
+        else:
+            response = requests.delete(
+                '{base}datasets/{name}'.format(base=self.api_url, name=vocabulary.name), auth=(user, password))
 
         if response.status_code == HTTPStatus.NOT_FOUND:
             raise ValueError('Vocabulary does not exist')

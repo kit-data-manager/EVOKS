@@ -40,5 +40,5 @@ class Profile(models.Model):
         """
         sends a mail with the userdata to the user
         """
-        self.user.email_user(subject='userdata from evoks',message='data',from_email=settings.EVOKS_MAIL)
-        return
+        self.user.email_user(subject='userdata from evoks',
+                             message='data', from_email=settings.EVOKS_MAIL)

@@ -20,6 +20,9 @@ class SkosmosTest(TestCase):
         config_file.write(self.g.serialize(format='turtle'))
         config_file.close()
 
+    def test_invalid_config_path(self):
+        self.assertRaises(ValueError, Skosmos, 'invalid_path')
+
     def test_add_vocabulary(self):
         try:
             config = SkosmosVocabularyConfig('cat_general', 'evoks', 'evoks', [

@@ -1,9 +1,15 @@
+from datetime import datetime
+from unittest.case import skip
 from django.test import TestCase
 from Fuseki.fuseki import Fuseki
+from Fuseki.task import Task
+from Fuseki.copy import Copy
+
 from vocabularies.models import Vocabulary
 from time import sleep
 import os
-from unittest.case import skip
+from unittest.mock import patch
+import io
 
 
 class FusekiTestCase(TestCase):
@@ -14,6 +20,7 @@ class FusekiTestCase(TestCase):
         self.vocabulary = Vocabulary(name='ds')
         self.vocabulary.save()
         self.fuseki_dev.create_vocabulary(self.vocabulary)
+        self.delete_vocabularies = [self.vocabulary]
 
     def tearDown(self) -> None:
         # remove all backup files
@@ -21,7 +28,8 @@ class FusekiTestCase(TestCase):
             os.remove(os.path.join(self.fuseki_dev.backup_path, f))
         # delete all datasets
         try:
-            self.fuseki_dev.delete_vocabulary(self.vocabulary)
+            for vocab in self.delete_vocabularies:
+                self.fuseki_dev.delete_vocabulary(vocab)
         except:  # will fail when running the test_delete_vocabulary testcase
             pass
 
@@ -36,13 +44,20 @@ class FusekiTestCase(TestCase):
         self.assertIsNotNone(self.fuseki_dev.api_url)
         self.assertIsNotNone(self.fuseki_dev.url)
 
-    def test_constructor_bad_host(self):
-        # will fail because of wrong hostname
-        with self.assertRaises(ValueError):
-            Fuseki('fuseki-yeet', 3030, 'development', 'fuseki-dev/backup')
+    @patch('sys.stdout', new_callable=io.StringIO)
+    def test_constructor_bad_host(self, mock_stdout):
+
+        Fuseki('fuseki-wont-work', 3030, 'development', 'fuseki-dev/backup')
+
+        self.assertEqual(mock_stdout.getvalue(),
+                         'Invalid Fuseki configuration. Failed to ping server\n')
 
     def test_sparql_endpoint(self):
         url = self.fuseki_dev.build_sparql_endpoint(self.vocabulary)
+        self.assertIsNotNone(url)
+
+    def test_sparql_endpoint_live(self):
+        url = self.fuseki_dev.build_sparql_endpoint(self.vocabulary, True)
         self.assertIsNotNone(url)
 
     def test_get_copy_tasks(self):
@@ -62,36 +77,54 @@ class FusekiTestCase(TestCase):
         copy = self.fuseki_dev.get_copy(task, self.vocabulary)
         self.assertTrue(os.path.exists(copy.path))
 
+    def test_get_non_existing_copy(self):
+        task = Task('backup', '-1', datetime.now(), datetime.now(), True)
+        self.assertRaises(
+            ValueError, self.fuseki_dev.get_copy, task, self.vocabulary)
+
     def test_delete_vocabulary(self):
         self.fuseki_dev.delete_vocabulary(self.vocabulary)
-
         try:
-            copied_vocabulary = Vocabulary(name=self.vocabulary.get_name())
-            copied_vocabulary.save()
-            self.fuseki_dev.create_vocabulary(copied_vocabulary)
-            self.fuseki_dev.delete_vocabulary(copied_vocabulary)
-
+            self.fuseki_dev.create_vocabulary(self.vocabulary)
+            self.fuseki_dev.delete_vocabulary(self.vocabulary)
         except:
             self.fail('Vocabulary did not get deleted')
+
+    def test_delete_bad_vocabulary(self):
+        v = Vocabulary(name='cool_vocabulary26')
+        v.save()
+        self.fuseki_dev.delete_vocabulary(self.vocabulary)
+        # deleting the second time should fail
+        self.assertRaises(
+            ValueError, self.fuseki_dev.delete_vocabulary, self.vocabulary)
+
+    def test_create_duplicate_vocabulary(self):
+        v = Vocabulary(name='cool_vocabulary26')
+        v.save()
+        self.delete_vocabularies.append(v)
+
+        self.fuseki_dev.create_vocabulary(v)
+        self.assertRaises(ValueError, self.fuseki_dev.create_vocabulary, v)
 
     def test_create_vocabulary(self):
         v = Vocabulary(name='cool_vocabulary')
         v.save()
-
+        self.delete_vocabularies.append(v)
         try:
             self.fuseki_dev.create_vocabulary(v)
         except Exception as e:
             self.fail('Creating vocabulary failed ' + str(e))
-        self.fuseki_dev.delete_vocabulary(v)
 
     def test_restore_copy(self):
 
         try:
             source = Vocabulary(name='ds_source')
             source.save()
+            self.delete_vocabularies.append(source)
 
             target = Vocabulary(name='ds_target')
             target.save()
+            self.delete_vocabularies.append(target)
 
             self.fuseki_dev.create_vocabulary(source)
 
@@ -109,11 +142,18 @@ class FusekiTestCase(TestCase):
             copy = self.fuseki_dev.get_copy(task, source)
 
             self.fuseki_dev.restore_copy(target, copy)
-            self.fuseki_dev.delete_vocabulary(target)
+            self.fuseki_dev.delete_vocabulary(target, True)
             self.fuseki_dev.delete_vocabulary(source)
             copy.delete()
         except Exception as e:
             self.fail('Restoring vocabulary failed '+str(e))
+
+    def test_start_bad_vocabulary_copy(self):
+        source = Vocabulary(name='ds_source23')
+        source.save()
+        self.delete_vocabularies.append(source)
+        self.assertRaises(
+            Exception, self.fuseki_dev.start_vocabulary_copy, source)
 
     def test_query(self):
         try:
@@ -130,8 +170,14 @@ class FusekiTestCase(TestCase):
                 OPTIONAL { ?class rdfs:comment ?description}
                 }
                 LIMIT 25
-            """)
+            """, 'json')
             self.assertIsNotNone(results)
 
         except Exception as e:
             self.fail('Query failed: ' + str(e))
+
+    def test_delete_bad_copy(self):
+        task = Task('backup', '-1', datetime.now(), datetime.now(), True)
+
+        copy = Copy(task, 'thispathdoesnotexist.txt')
+        self.assertRaises(ValueError, copy.delete)

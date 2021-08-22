@@ -1,4 +1,4 @@
-from django.http.response import HttpResponse
+from django.http.response import Http404, HttpResponse, HttpResponseNotFound
 from vocabularies.models import Vocabulary
 from django.shortcuts import redirect
 
@@ -41,7 +41,7 @@ class PartOfVocabularyMiddleware:
                 try:
                     assert Vocabulary.objects.filter(name=name).exists()
                 except AssertionError:
-                    return HttpResponse('The vocabulary you`re looking for doesn`t exist')
+                    return HttpResponseNotFound('The vocabulary you`re looking for doesn`t exist')
 
                 voc = Vocabulary.objects.get(name=name)
                 part = voc.state == 'Review'

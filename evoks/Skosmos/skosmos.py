@@ -21,7 +21,7 @@ class Skosmos:
     def __build_vocabulary_uri(self, vocabulary_name: str) -> str:
         return '{path}#{name}'.format(path=Path(self.config_path).as_uri(), name=vocabulary_name)
 
-    def __print_graph(self) -> None:
+    def __print_graph(self) -> None: # pragma: no cover
         g = Graph()
         g.parse(self.config_path, format="n3")
         for stmt in g:
