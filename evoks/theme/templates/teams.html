@@ -111,12 +111,12 @@
 									</div>
 									<div class="flex-1 flex justify-between sm:justify-end">
 										{% if page_obj.has_previous %}
-										<button type="submit" name="page" value="{{page_obj.previous_page_number  }}"
+										<button type="submit" name="page" value="{{page_obj.previous_page_number}}"
 											class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
 											Previous
 										</button>
 										{% else %}
-										<button type="submit" name="page" value="{{page_obj  }}"
+										<button type="submit" name="page" value="{{page_obj}}"
 											class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
 											Previous
 										</button>
@@ -127,7 +127,7 @@
 											Next
 										</button>
 										{% else %}
-										<button type="submit" name='page' value='{{page_obj}}'
+										<button type="submit" name='page' value='{{page_obj.paginator.num_pages}}'
 											class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
 											Next
 										</button>
