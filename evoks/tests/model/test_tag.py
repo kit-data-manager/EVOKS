@@ -12,16 +12,16 @@ class TagTest(TestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
-        cls.user = User.objects.create(username='jhon', password='ok',
+    def setUp(self):
+        self.user = User.objects.create(username='jhon', password='ok',
                             email='someone@example.com')
-        cls.vocabulary = Vocabulary.create(name='kelime', urispace='', creator=cls.user.profile)
-        cls.term = Term.create(name='term')
-        cls.tag = Tag.create(name='yorum', author=cls.user.profile, vocabulary=cls.vocabulary, term=cls.term)
+        self.vocabulary = Vocabulary.create(name='example', urispace='www.example.com/', creator=self.user.profile)
+        self.term = Term.create(name='term', uri='coole/uri')
+        self.tag = Tag.create(name='yorum', author=self.user.profile, vocabulary=self.vocabulary, term=self.term)
 
     @classmethod
-    def tearDown(cls):
-        fuseki_dev.delete_vocabulary(cls.vocabulary)
+    def tearDown(self):
+        fuseki_dev.delete_vocabulary(self.vocabulary)
 
 
     def test_create(self):

@@ -37,7 +37,8 @@ Um einen Admin zu erstellen müssen folgende Schritte durchgeführt werden:
 **Tests ausführen**
 Um Unittests auszuführen:
 1. Führe Schritt 10-13 der Anleitung oben aus.
-2. Führe innerhalb des Docker Containers `python manage.py test evoks/tests` aus.
+2. Führe innerhalb des Docker Containers `coverage run --source='.' --omit='*/migrations/*.py','guardian/*','theme/*','evoks/__init__.py','evoks/asgi.py','evoks/wsgi.py','manage.py','tests/*' manage.py test  tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/  tests/evoks &&  coverage html` aus.
+3. Öffne index.html aus htmlcov mit einem Browser.
 
 **Bugs die eventuell auftreten**
 1. Wenn Fuseki nicht starten will weil es keine Zugriffsrechte hat: `sudo chmod 777 -R fuseki-dev/ fuseki-live/`
@@ -52,3 +53,4 @@ Um Unittests auszuführen:
 1. Erstelle .env Datei unter evoks/evoks/ 
 2. Schreibe `EMAIL_HOST_USER=deineemail`, `EMAIL_HOST_PASSWORD=deinpassword` in diese Datei rein. 
 3. Dann in Settings.py unter evoks/evoks/ muss die SMTP konfiguriert werden. Also Zeile 85 - 88 in Setting.py `EMAIL_HOST = 'smtp.gmail.com', EMAIL_PORT = 587, EMAIL_USE_TLS = TRUE(Beispiel für Gmail)`. Das kann man finden wenn man in einer Suchmaschiene "SMTP confiriguation gmail" schreibt. Die meisten Emails akzeptieren als default keine Less Secure Apps deshalb muss in den Einstellungen der verwendete Email Less Secure Apps akzeptiert werden.
+

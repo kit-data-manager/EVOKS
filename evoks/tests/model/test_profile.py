@@ -10,8 +10,9 @@ class ProfileTest(TestCase):
     @classmethod
     def setUp(self):
         # Set up non-modified objects used by all test methods
-        self.user=User.objects.create(username='jhon', password='ok',
-                            email='example@example.de')
+        self.user = User.objects.create(username='jhon', password='ok',
+                                        email='example@example.de')
+
     @classmethod
     def tearDown(self):
         self.user.delete()
@@ -26,11 +27,8 @@ class ProfileTest(TestCase):
     def test_verified_true(self):
         self.user.profile.verify()
         self.assertTrue(self.user.profile.verified)
-        
+
     def test_description(self):
         self.user.profile.description = 'hi'
         self.user.save()
         self.assertEquals(self.user.profile.description, 'hi')
-
-
-    

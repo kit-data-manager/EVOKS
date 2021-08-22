@@ -11,3 +11,4 @@ rdflib @ git+git://github.com/RDFLib/rdflib.git@26dba21d0562fdc8141cf758c61e14dd
 rdflib-jsonld
 language_data
 langcodes
+coverage

@@ -10,7 +10,7 @@ class NotificationTest(TestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUp(cls):
         cls.receiver = User.objects.create(username='jhon', password='ok',
                             email='someone@example.com')
         cls.notification = Notification.create(receiver=cls.receiver.profile, message='error test', type=Type.ERROR)

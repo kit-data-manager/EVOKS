@@ -12,11 +12,11 @@ class CommentTest(TestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUp(cls):
         cls.user = User.objects.create(username='jhon', password='ok',
                             email='someone@example.com')
         cls.vocabulary = Vocabulary.create(name='kelime', urispace='', creator=cls.user.profile)
-        cls.term = Term.create(name='term')
+        cls.term = Term.create(name='term', uri='cool/123')
         cls.comment = Comment.create(text='yorum', author=cls.user.profile, vocabulary=cls.vocabulary, term=cls.term)
 
     @classmethod
