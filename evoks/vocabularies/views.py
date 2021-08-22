@@ -144,7 +144,6 @@ def get_vocab_perm(user: User, vocabulary: Vocabulary) -> str:
     return permission
 
 
-
 def index(request: HttpRequest, voc_name: str) -> HttpResponse:
     """View for vocabulary overview
 

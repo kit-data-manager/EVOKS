@@ -56,4 +56,4 @@
     skosmos:mainConceptScheme <http://example.com/> ;
     void:sparqlEndpoint <http://fuseki-dev:3030/scratch/sparql> ;
     void:uriSpace "http://example.com/" .
-
+    
