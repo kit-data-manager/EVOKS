@@ -85,8 +85,7 @@ class Vocabulary(models.Model):
     @classmethod
     def create(cls, name: str, urispace: str, creator: Profile):
         from evoks.fuseki import fuseki_dev
-        # TODO return type
-        # TODO Save creator in triple field
+
         vocabulary = cls(name=name, urispace=urispace)
         vocabulary.save()
         creator.user.save()
@@ -188,7 +187,7 @@ class Vocabulary(models.Model):
                     self.add_term(name, id)
 
                 except Exception as e:
-                    print(e)
+                    pass
 
             if self.urispace != '':
                 last_char = new_urispace[-1]
@@ -323,7 +322,6 @@ class Vocabulary(models.Model):
         Args:
             dataformat (Enum): Desired dataformat
         """
-        # TODO put urispace in there
         from evoks.fuseki import fuseki_dev
         urispace = self.urispace
         query = """

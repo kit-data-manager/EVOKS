@@ -17,7 +17,6 @@ class SignupForm(forms.Form):
     Args:
         forms: Subclasses the Django Form class
     """
-    # is name optional?
     name = forms.CharField(label='Full Name', max_length=100)
     email = forms.EmailField(label='Email Address',
                              max_length=254, required=False)

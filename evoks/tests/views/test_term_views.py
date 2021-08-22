@@ -41,7 +41,6 @@ class Vocabulary_views_test(TestCase):
 
     def test_convert_predicate(self):
         namespaces = self.vocabulary.get_namespaces()
-        print(namespaces)
         converted = convert_predicate(
             namespaces, 'http://www.w3.org/2004/02/skos/core#ConceptScheme')
         self.assertEqual(converted, 'skos:ConceptScheme')
@@ -66,7 +65,6 @@ class Vocabulary_views_test(TestCase):
                 self.vocabulary.name, self.term.name),
             {'delete-term': ''}
         )
-        print(response.status_code)
         self.assertRedirects(
             response, '/vocabularies/{0}'.format(self.vocabulary.name))
         self.assertFalse(Term.objects.filter(name=self.term.name).exists())
@@ -95,7 +93,7 @@ class Vocabulary_views_test(TestCase):
         self.assertContains(add_tag, 'example tag')
         self.assertTrue(Tag.objects.filter(name='example tag').exists())
 
-        # delet tag
+        # delete tag
         delete_tag = self.c.post(
             '/vocabularies/{0}/terms/{1}'.format(
                 self.vocabulary.name, self.term.name),
@@ -234,7 +232,6 @@ class Vocabulary_views_test(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'https://github.com/')
         self.assertContains(response, 'skos:note')
-        #self.assertContains(response, 'https://gitlab.com/')
 
     def test_edit_literal_field(self):
         # create field
@@ -256,7 +253,6 @@ class Vocabulary_views_test(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'example label')
         self.assertContains(response, 'skos:note')
-        #self.assertContains(response, 'example field')
 
     def test_edit_uri_field_invalid_uri(self):
         # create field

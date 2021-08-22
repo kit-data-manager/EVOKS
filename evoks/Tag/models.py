@@ -22,7 +22,7 @@ class Tag(models.Model):
     """
 
     max_name_length = 100
-    name = models.CharField(max_length=max_name_length)  # type: str
+    name = models.CharField(max_length=max_name_length)
     post_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(to='Profile.Profile', on_delete=SET_NULL, blank=True, null=True)
     vocabulary = models.ForeignKey(to='vocabularies.Vocabulary', on_delete=CASCADE, blank=True, null=True)

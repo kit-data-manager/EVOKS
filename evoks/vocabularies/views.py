@@ -449,7 +449,6 @@ def members(request: HttpRequest, voc_name: str):
         if 'owner' in get_perms(group.group, vocabulary):
             owners += 1
 
-    print(owners)
 
     # put all users from groups and regulars into one list
     profiles_list = vocabulary.profiles.all()
@@ -648,8 +647,6 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     }
     return render(request, 'vocabulary_terms.html', context)
 
-# TODO should get merged into the vocabulary dashboard view
-
 
 def base(request: HttpRequest):
     user = request.user
@@ -712,7 +709,7 @@ def base(request: HttpRequest):
                         fuseki_dev.delete_vocabulary(vocabulary)
                         vocabulary.delete()
                     except Exception as e:
-                        print(e)
+                        pass
                     return HttpResponse('Importing vocabulary failed', status=400)
 
             return redirect('base')
@@ -721,7 +718,6 @@ def base(request: HttpRequest):
     search_results = None
     if search != None:
         search_results = []
-        # TODO: add filter for vocabulary
         for v in unique:
             vocabulary = v['vocabulary']
             # query all fields of the vocabulary

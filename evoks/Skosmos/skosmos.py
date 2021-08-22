@@ -7,7 +7,7 @@ from .skosmos_vocabulary_config import SkosmosVocabularyConfig
 
 
 class Skosmos:
-    # add fuseki instead of fuseki_url:(
+
     def __init__(self, config_path: str) -> None:
         self.config_path = self.__build_config_path(config_path)
 
@@ -27,7 +27,6 @@ class Skosmos:
         for stmt in g:
             print(stmt)
 
-    # todo add file lock
     def delete_vocabulary(self, vocabulary_name: str) -> None:
         """[summary]
         Deletes the given vocabulary from the Skosmos config

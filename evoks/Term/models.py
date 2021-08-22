@@ -80,7 +80,6 @@ class Term(models.Model):
             {{ <{urispace}{term}> <{predicate}> {old_object} }}
         """.format(urispace=self.vocabulary.urispace, term=self.uri,
                    predicate=predicate, old_object=old_object, new_object=new_object)
-        print(query)
         fuseki_dev.query(
             self.vocabulary, query, 'xml', 'update')
 
