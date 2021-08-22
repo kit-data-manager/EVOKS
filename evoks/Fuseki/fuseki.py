@@ -140,8 +140,6 @@ class Fuseki:
 
         file_upload_response = requests.post('{base}{name}'.format(
             base=self.url, name=vocabulary.name_with_version()), auth=(user, password), data={}, files=[('files', (filename, backup, 'application/octet-stream'))])
-        # graph=name
-        print(file_upload_response.status_code)
 
     def start_vocabulary_copy(self, vocabulary: Vocabulary) -> str:
         """
@@ -240,5 +238,4 @@ class Fuseki:
         sparql.setQuery(query)
         sparql.setReturnFormat(return_format)
         results = sparql.query().convert()
-        # print(results)
         return results

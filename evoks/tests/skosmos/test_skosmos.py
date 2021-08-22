@@ -31,8 +31,6 @@ class SkosmosTest(TestCase):
 
             g = Graph()
             g.parse(self.skosmos.config_path, format='n3', encoding='utf-8')
-            #To print the graph g use: 
-            #print(g.serialize(format="turtle"))
 
             added = False
             for s, p, o in g:
