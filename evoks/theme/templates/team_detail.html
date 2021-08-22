@@ -139,12 +139,12 @@
                                             <div class="flex-1 flex justify-between sm:justify-end">
                                                 {% if member_page.has_previous %}
                                                 <button type="submit" name="page"
-                                                    value="{{member_page.previous_page_number  }}"
+                                                    value="{{member_page.previous_page_number}}"
                                                     class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                     Previous
                                                 </button>
                                                 {% else %}
-                                                <button type="submit" name="page" value="{{member_page  }}"
+                                                <button type="submit" name="page" value="{{member_page}}"
                                                     class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                     Previous
                                                 </button>
@@ -156,7 +156,7 @@
                                                     Next
                                                 </button>
                                                 {% else %}
-                                                <button type="submit" name='page' value='{{member_page}}'
+                                                <button type="submit" name="page" value="{{member_page.paginator.num_pages}}"
                                                     class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                     Next
                                                 </button>
