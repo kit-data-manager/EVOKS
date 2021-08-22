@@ -317,10 +317,10 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
             SELECT DISTINCT ?s ?p ?o
             WHERE {{
                 ?s skos:prefLabel ?o .
-            FILTER (strstarts(str(?o), '{0}'))
+            FILTER (strstarts(lcase(str(?o)), '{0}'))
             }}
             LIMIT 50
-        """.format(search), 'json')
+        """.format(search.lower()), 'json')
 
         for x in query_result['results']['bindings']:
             s = x['s']['value']
@@ -415,12 +415,12 @@ def members(request: HttpRequest, voc_name: str):
 
     for group in group_profile_list:
         g = {'name': group.group.name, 'description': group.description,
-             'type': group.__class__.__name__, 'role': 'Member'}
+             'type': group.__class__.__name__, 'member': group.group}
         member_list.append(g)
 
     for profile in profiles_list:
-        g = {'name': profile.name, 'email': profile.user.email, 'type': profile.__class__.__name__,
-             'role': 'Owner' if profile.user.email == user.email else 'Member'}
+        g = {'name': profile.name, 'email': profile.user.email, 'type': profile.__class__.__name__
+            , 'member': profile.user}
         member_list.append(g)
 
     context = {
@@ -455,6 +455,19 @@ def members(request: HttpRequest, voc_name: str):
                 vocabulary.profiles.clear()
                 vocabulary.groups.clear()
                 vocabulary.add_profile(user.profile, 'owner')
+            elif 'role' in request.POST:
+                role = request.POST['role']
+                name_or_mail = request.POST['nameormail']
+                type = request.POST['type']
+                if type == 'Profile':
+                    changed_user = User.objects.get(email=name_or_mail)
+                    if changed_user == user:
+                        return HttpResponse('Cannot change own role', status=400)
+                    vocabulary.change_profile_perm(changed_user.profile, role)
+                else:
+                    group = Group.objects.get(name=name_or_mail)
+                    vocabulary.change_group_perm(group.groupprofile, role)
+                
             elif 'kick-member' in request.POST:
                 type = request.POST['type']
                 name_or_mail = request.POST['kick-member']
@@ -510,7 +523,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     SELECT DISTINCT ?sub ?pred ?obj
     WHERE {{
         ?sub skos:prefLabel ?obj .
-    FILTER (strstarts(str(?obj), '{letter}'))
+    FILTER (strstarts(lcase(str(?obj)), '{letter}'))
     }}
     ORDER BY ?obj
     LIMIT {limit} OFFSET {offset}
@@ -643,9 +656,9 @@ def base(request: HttpRequest):
                 SELECT DISTINCT ?s ?p ?o
                 WHERE {{
                     ?s skos:prefLabel ?o .
-                FILTER (strstarts(str(?o), '{0}'))
+                FILTER (strstarts(lcase(str(?o)), '{0}'))
                 }}
-            """.format(search), 'json')
+            """.format(search.lower()), 'json')
 
             for x in query_result['results']['bindings']:
                 s = x['s']['value']

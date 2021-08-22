@@ -472,6 +472,32 @@ class Vocabulary(models.Model):
         for key in get_perms(group_profile.group, self):
             remove_perm(key, group_profile.group, self)
 
+    def change_profile_perm(self, profile: Profile, newperm: str) -> None:
+        """Changes Permission of the given Profile to the given permission
+
+        Args:
+            profile (Profile): given profile
+            newperm (str): new permission of the profile
+        """
+        #remove old perms
+        for key in get_perms(profile.user, self):
+            remove_perm(key, profile.user, self)
+        #assign new perm
+        assign_perm(newperm, profile.user, self)
+
+    def change_group_perm(self, group_profile: GroupProfile, newperm: str) -> None:
+        """Changes Permission of the given Profile to the given permission
+
+        Args:
+            profile (Profile): given profile
+            newperm (str): new permission of the profile
+        """
+        #remove old perms
+        for key in get_perms(group_profile.group, self):
+            remove_perm(key, group_profile.group, self)
+        #assign new perm
+        assign_perm(newperm, group_profile.group, self)
+
     def edit_field(self, predicate: str, old_object: str, new_object: str) -> None:
         """Replaces the object of a triple field with a new object, by using SPARQL Queries and the Fuseki-Dev Instance
 
