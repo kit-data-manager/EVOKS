@@ -13,6 +13,7 @@ from django.http import HttpResponse
 from langcodes import Language
 from vocabularies.forms import Property_Predicate_Form
 from rdflib.namespace import _is_valid_uri
+from vocabularies.views import get_vocab_perm
 
 def convert_predicate(namespaces: List[Tuple[str, str]], predicate: str) -> str:
     """Convert a URI predicate to a shortened predicate with namespaces
@@ -84,11 +85,12 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
     user = request.user
 
     vocabulary = Vocabulary.objects.get(name=voc_name)
-    term = Term.objects.get(name=term_name, vocabulary=vocabulary)
+    term = Term.objects.get(name=term_name)
+    permission = get_vocab_perm(user, vocabulary)
 
     if request.method == 'POST':
 
-        if 'delete-term' in request.POST:
+        if 'delete-term' in request.POST and permission != 'spectator':
             query = """
             DELETE {{ ?s ?p ?o . }} WHERE {{ VALUES ?s {{ <{0}> }} ?s ?p ?o }}
             """.format(vocabulary.urispace + term.uri)
@@ -96,7 +98,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
             term.delete()
             return redirect('vocabulary_overview', voc_name=vocabulary.name)
 
-        if 'obj' in request.POST:
+        if 'obj' in request.POST and permission != 'spectator':
             key = request.POST['key']
             obj = request.POST['obj']
             lang = request.POST['lang']
@@ -173,7 +175,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
                 name=tag_name, term=term).delete()
             return redirect('term_detail', voc_name=voc_name, term_name=term_name)
 
-        elif 'create-property' in request.POST:
+        elif 'create-property' in request.POST and permission != 'spectator':
             if 'predicate' not in request.POST:
                 return HttpResponse('Empty predicate', status=400)
             if 'type' not in request.POST:

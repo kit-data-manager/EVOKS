@@ -1,4 +1,5 @@
 {% load static tailwind_tags %}
+{% load guardian_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -51,10 +52,13 @@
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Members
                             </a> 
+                            {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                            {% if "owner" in vocabulary_perms or "participant" in vocabulary_perms %} 
                             <a href='{% url 'vocabulary_prefixes' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Prefixes
                              </a>
+                             {% endif %}
                             <a href='{% url 'vocabulary_settings' voc_name=vocabulary.name %}'
                                 class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Settings
@@ -85,7 +89,6 @@
                                                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                             Role
                                                                         </th>
-                                                                        {% load guardian_tags %}
                                                                         {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
                                                                         {% if "owner" in vocabulary_perms %}
                                                                         <th scope="col"
@@ -126,7 +129,6 @@
 
                                                                         <td
                                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 ">
-                                                                            {% load guardian_tags %}
                                                                 	        {% get_obj_perms data.member for vocabulary as "member_perms" %}
                                                                             {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
 

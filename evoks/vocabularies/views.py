@@ -36,26 +36,32 @@ def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
         HttpResponse: HttpResponse
     """
     vocabulary = Vocabulary.objects.get(name=voc_name)
+    user = request.user
+    permission = get_vocab_perm(user, vocabulary)
 
-    if request.method == 'POST':
-        prefixes = request.POST['prefixes'].split(
-            '\r\n')  # could lead to problems with \r\n
-        # remove all empty lines
-        non_empty_prefixes = [line for line in prefixes if line.strip() != ""]
-        if vocabulary.validate_prefixes(non_empty_prefixes):
-            vocabulary.prefixes = non_empty_prefixes  # save prefixes in vocabulary
-            vocabulary.save()
-        else:
-            return HttpResponse('The given Prefix does not fit the required format', status=400)
+    if permission != 'spectator':
+        if request.method == 'POST':
+            prefixes = request.POST['prefixes'].split(
+                '\r\n')  # could lead to problems with \r\n
+            # remove all empty lines
+            non_empty_prefixes = [line for line in prefixes if line.strip() != ""]
+            if vocabulary.validate_prefixes(non_empty_prefixes):
+                vocabulary.prefixes = non_empty_prefixes  # save prefixes in vocabulary
+                vocabulary.save()
+            else:
+                return HttpResponse('The given Prefix does not fit the required format', status=400)
 
-    template = loader.get_template('vocabulary_prefixes.html')
-    context = {
-        'user': request.user,
-        'vocabulary': vocabulary,
-        'prefixes': '\n'.join(vocabulary.prefixes),
-    }
+        template = loader.get_template('vocabulary_prefixes.html')
+        context = {
+            'user': request.user,
+            'vocabulary': vocabulary,
+            'prefixes': '\n'.join(vocabulary.prefixes),
+        }
 
-    return HttpResponse(template.render(context, request))
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponse('Insufficient permissions', status=403)
+
 
 
 def convert_predicate(namespaces: List[Tuple[str, str]], predicate: str) -> str:
@@ -113,6 +119,31 @@ def uri_validator(uri: str) -> bool:
     except:
         return False
 
+def get_vocab_perm(user: User, vocabulary: Vocabulary) -> str:
+    """Gets the highest permission that the User has on the Vocabulary
+
+    Args:
+        user (User): User
+
+    Returns:
+        str: Highest permission
+    """
+    permission = 'spectator'
+    #check for permissions given by groups that the user is part of
+    for group in user.groups.all():
+        if 'owner' in get_perms(group, vocabulary):
+            permission = 'owner'
+            return permission
+        elif 'participant' in get_perms(group, vocabulary):
+            permission = 'member'
+    #checks for permissions of user
+    if 'owner' in get_perms(user, vocabulary):
+        permission = 'owner'
+    elif 'participant' in get_perms(user, vocabulary):
+        permission = 'member'
+    return permission
+
+
 
 def index(request: HttpRequest, voc_name: str) -> HttpResponse:
     """View for vocabulary overview
@@ -127,6 +158,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
 
     user = request.user
     vocabulary = Vocabulary.objects.get(name=voc_name)
+    permission = get_vocab_perm(user, vocabulary)
 
     form = Property_Predicate_Form(initial={'predicate': 'skos:Concept'})
 
@@ -143,7 +175,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
 
     if request.method == 'POST':
 
-        if 'obj' in request.POST:
+        if 'obj' in request.POST and permission != 'spectator':
             key = request.POST['key']
             obj = request.POST['obj']
             lang = request.POST['lang']
@@ -221,7 +253,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                 name=tag_name, vocabulary=vocabulary).delete()
             return redirect('vocabulary_overview', voc_name=vocabulary.name)
 
-        elif 'create-property' in request.POST:
+        elif 'create-property' in request.POST and permission != 'spectator':
             if 'predicate' not in request.POST:
                 return HttpResponse('Empty predicate', status=400)
             if 'type' not in request.POST:
@@ -363,7 +395,7 @@ def settings(request: HttpRequest, voc_name: str):
     """
     vocabulary = Vocabulary.objects.get(name=voc_name)
     user = request.user
-    user_is_owner = 'owner' in get_perms(user, vocabulary)
+    permission = get_vocab_perm(user, vocabulary)
 
     context = {
         'user': user,
@@ -371,7 +403,7 @@ def settings(request: HttpRequest, voc_name: str):
     }
 
     if request.method == 'POST':
-        if user_is_owner:
+        if permission == 'owner':
             # delete vocabulary
             if 'delete' in request.POST:
                 if vocabulary.state == State.REVIEW:
@@ -407,7 +439,17 @@ def members(request: HttpRequest, voc_name: str):
     """
     user = request.user
     vocabulary = Vocabulary.objects.get(name=voc_name)
-    user_is_owner = 'owner' in get_perms(user, vocabulary)
+    permission = get_vocab_perm(user, vocabulary)
+
+    owners = 0
+    for profile in vocabulary.profiles.all():
+        if 'owner' in get_perms(profile.user, vocabulary):
+            owners += 1
+    for group in vocabulary.groups.all():
+        if 'owner' in get_perms(group.group, vocabulary):
+            owners += 1
+
+    print(owners)
 
     # put all users from groups and regulars into one list
     profiles_list = vocabulary.profiles.all()
@@ -433,7 +475,7 @@ def members(request: HttpRequest, voc_name: str):
     }
 
     if request.method == 'POST':
-        if user_is_owner:
+        if permission == 'owner':
             if 'invite' in request.POST:
                 invite_str = request.POST['email']
 
@@ -455,8 +497,10 @@ def members(request: HttpRequest, voc_name: str):
                 else:
                     return HttpResponse('User/Group does not exist', status=404)
             elif 'kickall' in request.POST:
-                vocabulary.profiles.clear()
-                vocabulary.groups.clear()
+                for profile in vocabulary.profiles.all():
+                    vocabulary.remove_profile(profile)
+                for group in vocabulary.groups.all():
+                    vocabulary.remove_group(group)
                 vocabulary.add_profile(user.profile, 'owner')
             elif 'role' in request.POST:
                 role = request.POST['role']
@@ -464,25 +508,32 @@ def members(request: HttpRequest, voc_name: str):
                 type = request.POST['type']
                 if type == 'Profile':
                     changed_user = User.objects.get(email=name_or_mail)
-                    if changed_user == user:
-                        return HttpResponse('Cannot change own role', status=400)
+                    #cant change perm if only owner
+                    if owners <= 1 and 'owner' in get_perms(changed_user, vocabulary):
+                        return HttpResponse('Cannot change role of last owner', status=400)
                     vocabulary.change_profile_perm(changed_user.profile, role)
                 else:
                     group = Group.objects.get(name=name_or_mail)
+                    #cant change perm if only owner
+                    if owners <= 1 and 'owner' in get_perms(group, vocabulary):
+                        return HttpResponse('Cannot change role of last owner', status=400)
                     vocabulary.change_group_perm(group.groupprofile, role)
 
             elif 'kick-member' in request.POST:
                 type = request.POST['type']
                 name_or_mail = request.POST['kick-member']
                 if type == 'Profile':
-                    user = User.objects.get(email=name_or_mail)
-                    if 'owner' not in get_perms(user, vocabulary):
-                        profile = vocabulary.profiles.get(user=user)
-                        vocabulary.remove_profile(profile)
+                    kicked_user = User.objects.get(email=name_or_mail)
+                    #cant kick only owner
+                    if owners <= 1 and 'owner' in get_perms(kicked_user, vocabulary):
+                        return HttpResponse('Cannot kick last owner', status=400)
+                    vocabulary.remove_profile(kicked_user.profile)
                 else:
                     group = Group.objects.get(name=name_or_mail)
-                    group_profile = vocabulary.groups.get(group=group)
-                    vocabulary.remove_group(group_profile)
+                    #cant kick only owner
+                    if owners <= 1 and 'owner' in get_perms(group, vocabulary):
+                        return HttpResponse('Cannot kick last owner', status=400)
+                    vocabulary.remove_group(group.groupprofile)
             # refresh page
             return redirect('vocabulary_members', vocabulary.name)
 
@@ -504,6 +555,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     """
     user = request.user
     vocabulary = Vocabulary.objects.get(name=voc_name)
+    permission = get_vocab_perm(user, vocabulary)
 
     # get letter from querystring or default a
     letter = request.GET.get('letter') or 'a'
@@ -549,7 +601,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
         1 == 0 else page_number-1  # dont go to page 0
 
     if request.method == 'POST':
-        if 'create-term' in request.POST:
+        if 'create-term' in request.POST and permission != 'spectator':
             term_subject = request.POST['term-subject']
             term_label = request.POST['term-label']
 
