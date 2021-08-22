@@ -9,6 +9,7 @@ from Comment.models import Comment
 from Tag.models import Tag
 from evoks.fuseki import fuseki_dev, fuseki_live
 from evoks.skosmos import skosmos_dev, skosmos_live
+from guardian.shortcuts import get_perms
 
 
 class Vocabulary_views_test(TestCase):
@@ -164,13 +165,33 @@ class Vocabulary_views_test(TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_kick_member(self):
+    def test_kick_self(self):
         response = self.c.post(
             '/vocabularies/{0}/members'.format(self.vocabulary.name),
             {'kick-member': 'jhon@example.com', 'type': 'Profile'},
             follow=True
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
+
+    def test_kick_member(self):
+        #add member
+        test_user = User.objects.create(
+            username='member@example.com', email='member@example.com')
+        test_user.profile.name = 'member'
+        test_user.save()
+        self.c.post(
+            '/vocabularies/{0}/members'.format(self.vocabulary.name),
+            {'invite': '', 'email': 'member@example.com'},
+            follow=True
+        )
+        kick_response = self.c.post(
+            '/vocabularies/{0}/members'.format(self.vocabulary.name),
+            {'kick-member': 'member@example.com', 'type': 'Profile'},
+            follow=True
+        )
+        self.assertEqual(kick_response.status_code, 200)
+        voc = Vocabulary.objects.get(name=self.vocabulary.name)
+        self.assertFalse(voc.groups.filter(vocabulary=voc).exists())
 
     def test_kickall(self):
         response = self.c.post(
@@ -179,6 +200,31 @@ class Vocabulary_views_test(TestCase):
             follow=True
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_change_user_permission(self):
+        #invite user
+        test_user = User.objects.create(
+            username='member@example.com', email='member@example.com')
+        test_user.profile.name = 'member'
+        test_user.save()
+        self.c.post(
+            '/vocabularies/{0}/members'.format(self.vocabulary.name),
+            {'invite': '', 'email': 'member@example.com'},
+            follow=True
+        )
+        voc = Vocabulary.objects.get(name=self.vocabulary.name)
+        self.assertTrue('participant' in get_perms(test_user, voc))
+
+        #change role
+        response = self.c.post(
+            '/vocabularies/{0}/members'.format(self.vocabulary.name),
+            {'role': 'owner', 'nameormail': 'member@example.com', 'type': 'Profile'},
+            follow=True
+        )
+        voc = Vocabulary.objects.get(name=self.vocabulary.name)
+        self.assertFalse('participant' in get_perms(test_user, voc))
+        self.assertTrue('owner' in get_perms(test_user, voc))
+
 
     # overview functionality tests
     def test_overview_view(self):

@@ -430,6 +430,8 @@ class Vocabulary(models.Model):
         """
         self.term_set.add(Term.create(name=name, uri=uri))
         self.term_count += 1
+        if self.state == State.LIVE:
+            self.set_dev()
         # record user who added Term as contributor if not already done
 
     def add_profile(self, profile: Profile, permission: str) -> None:
@@ -518,6 +520,8 @@ class Vocabulary(models.Model):
         """.format(new_object=new_object, urispace=self.urispace, predicate=predicate, old_object=old_object)
         fuseki_dev.query(
             self, query, 'xml', 'update')
+        if self.state == State.LIVE:
+            self.set_dev()
 
     def create_field(self, urispace: str, predicate: str, object: str) -> None:
         """Creates a Triple Field on the Fuseki-Dev Instance
@@ -536,6 +540,8 @@ class Vocabulary(models.Model):
             urispace, predicate, object)
         fuseki_dev.query(vocabulary=self, query=str(
             query), return_format='json', endpoint='update')
+        if self.state == State.LIVE:
+            self.set_dev()
 
     def delete_field(self, predicate : str, object : str) -> None:
         """Deletes a Triple Field of the vocabulary on the Fuseki-Dev Instance
@@ -554,3 +560,5 @@ class Vocabulary(models.Model):
         """.format(urispace=self.urispace, predicate=predicate, object=object)
         fuseki_dev.query(
             self, query, 'xml', 'update')
+        if self.state == State.LIVE:
+            self.set_dev()
