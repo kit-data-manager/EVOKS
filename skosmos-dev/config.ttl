@@ -1,7 +1,9 @@
 @prefix : <file:///code/evoks/tests/skosmos/config.ttl#> .
+@prefix dc: <http://purl.org/dc/terms/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skosmos: <http://purl.org/net/skosmos#> .
+@prefix void: <http://rdfs.org/ns/void#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 :config a skosmos:Configuration ;
@@ -44,4 +46,14 @@
     skosmos:uiHoneypotEnabled true ;
     skosmos:uiHoneypotTime 5 ;
     skosmos:uiLanguageDropdown true .
+
+<file:///code/skosmos-dev/config.ttl#scratch-1> a skosmos:Vocabulary,
+        void:Dataset ;
+    dc:subject <file:///code/skosmos-dev/config.ttl#cat_general> ;
+    dc:title "scratch" ;
+    skosmos:defaultLanguage "" ;
+    skosmos:fullAlphabeticalIndex true ;
+    skosmos:mainConceptScheme <http://example.com/> ;
+    void:sparqlEndpoint <http://fuseki-dev:3030/scratch/sparql> ;
+    void:uriSpace "http://example.com/" .
 

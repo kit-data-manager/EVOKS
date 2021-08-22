@@ -84,7 +84,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
     user = request.user
 
     vocabulary = Vocabulary.objects.get(name=voc_name)
-    term = Term.objects.get(name=term_name)
+    term = Term.objects.get(name=term_name, vocabulary=vocabulary)
 
     if request.method == 'POST':
 
