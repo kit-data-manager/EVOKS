@@ -1,5 +1,6 @@
 from enum import unique
 from django.http.request import HttpRequest
+from django.http.response import HttpResponseBadRequest
 from django.shortcuts import render
 from django.http import HttpResponse
 from .models import *
@@ -111,7 +112,6 @@ def uri_validator(uri: str) -> bool:
         return all([result.scheme, result.netloc])
     except:
         return False
-
 
 
 def index(request: HttpRequest, voc_name: str) -> HttpResponse:
@@ -230,14 +230,15 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                 return HttpResponse('Empty object', status=400)
 
             predicate = request.POST['predicate']
-            
+
             type = request.POST['type']
             object_string = request.POST['object']
             if type == 'uri':
                 # if uri is not valid its using a prefix and does not need braces
                 if uri_validator(object_string) != True:
                     namespaces = vocabulary.get_namespaces()
-                    valid, object_string = vocabulary.convert_prefix(object_string)
+                    valid, object_string = vocabulary.convert_prefix(
+                        object_string)
                     if not valid:
                         return HttpResponse('Invalid uri', status=400)
 
@@ -329,10 +330,11 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
             split = s.split(vocabulary.urispace)
             if len(split) > 1:
                 id = s.split(vocabulary.urispace)[1]
-                term = Term.objects.get(uri=id, vocabulary=vocabulary)
-                path = vocabulary.name + '/terms/' + term.name
-                search_results.append(
-                    (path, '{0}: {1}'.format(vocabulary.name, value)))
+                terms = Term.objects.filter(uri=id, vocabulary=vocabulary)
+                for term in terms:
+                    path = vocabulary.name + '/terms/' + term.name
+                    search_results.append(
+                        (path, '{0}: {1}'.format(vocabulary.name, value)))
 
     template = loader.get_template('vocabulary.html')
     skosmos_url = SKOSMOS_DEV_URI if vocabulary.state == State.REVIEW else SKOSMOS_LIVE_URI
@@ -373,7 +375,8 @@ def settings(request: HttpRequest, voc_name: str):
             # delete vocabulary
             if 'delete' in request.POST:
                 if vocabulary.state == State.REVIEW:
-                    skosmos_dev.delete_vocabulary(vocabulary.name)
+                    skosmos_dev.delete_vocabulary(
+                        vocabulary.name_with_version())
                 fuseki_dev.delete_vocabulary(vocabulary)
                 vocabulary.delete()
                 return redirect('base')
@@ -419,8 +422,8 @@ def members(request: HttpRequest, voc_name: str):
         member_list.append(g)
 
     for profile in profiles_list:
-        g = {'name': profile.name, 'email': profile.user.email, 'type': profile.__class__.__name__
-            , 'member': profile.user}
+        g = {'name': profile.name, 'email': profile.user.email,
+             'type': profile.__class__.__name__, 'member': profile.user}
         member_list.append(g)
 
     context = {
@@ -467,7 +470,7 @@ def members(request: HttpRequest, voc_name: str):
                 else:
                     group = Group.objects.get(name=name_or_mail)
                     vocabulary.change_group_perm(group.groupprofile, role)
-                
+
             elif 'kick-member' in request.POST:
                 type = request.POST['type']
                 name_or_mail = request.POST['kick-member']
@@ -548,8 +551,9 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     if request.method == 'POST':
         if 'create-term' in request.POST:
             term_subject = request.POST['term-subject']
-            term_name = term_subject.replace('/', '_')
             term_label = request.POST['term-label']
+
+            term_name = term_subject.replace('/', '_')
 
             # check if term already exists
             if Term.objects.filter(uri=term_subject).exists():
@@ -562,6 +566,12 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
                 name = '{0}_{1}'.format(term_name, i)
                 i += 1
 
+            if not _is_valid_uri(vocabulary.urispace + term_subject):
+                return HttpResponseBadRequest('invalid subject')
+
+            if "'''" in term_label:
+                return HttpResponseBadRequest('prefLabel cannot contain \'\'\'', status=400)
+
             vocabulary.add_term(name, term_subject)
 
             # insert into vocabulary
@@ -570,7 +580,8 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
                 vocabulary.urispace, term_subject.rstrip())
             predicate = '<http://www.w3.org/2004/02/skos/core#prefLabel>'
             vocabulary.create_field(urispace, predicate, object)
-
+            vocabulary.create_field(urispace, '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+                                    '<http://www.w3.org/2004/02/skos/core#Concept>')
             # redirect to new term
             return redirect('term_detail', voc_name=vocabulary.name, term_name=name)
 
@@ -626,6 +637,9 @@ def base(request: HttpRequest):
             try:
                 vocabulary = Vocabulary.create(
                     name=voc_name, urispace=urispace, creator=user.profile)
+                vocabulary.create_field('<{}>'.format(
+                    urispace), '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>', '<http://www.w3.org/2004/02/skos/core#ConceptScheme>')
+
             except IntegrityError:
                 return HttpResponse('vocabulary already exists', status=409)
             if 'file-upload' in request.FILES:
@@ -666,11 +680,11 @@ def base(request: HttpRequest):
                 split = s.split(vocabulary.urispace)
                 if len(split) > 1:
                     id = s.split(vocabulary.urispace)[1]
-                    term = Term.objects.get(uri=id)
-
-                    path = vocabulary.name + '/terms/' + term.name
-                    search_results.append(
-                        (path, '{0}: {1}'.format(vocabulary.name, value)))
+                    terms = Term.objects.filter(uri=id, vocabulary=vocabulary)
+                    for term in terms:
+                        path = '{0}/terms/{1}'.format(vocabulary.name, term.name)
+                        search_results.append(
+                            (path, '{0}: {1}'.format(vocabulary.name, value)))
 
     context = {
         'user': request.user,
