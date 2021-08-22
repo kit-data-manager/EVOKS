@@ -42,7 +42,7 @@ def team_detail_view(request, group_name):
     user = request.user
     team = Group.objects.get(name=group_name)
     if user in team.user_set.all():
-        pagesize = 2
+        pagesize = 10
         member_all = team.user_set.all()
         member = Paginator(member_all, pagesize)
         page = request.POST.get("page")
