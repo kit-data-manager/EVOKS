@@ -78,9 +78,12 @@ class FusekiTestCase(TestCase):
         self.assertTrue(os.path.exists(copy.path))
 
     def test_get_non_existing_copy(self):
+        v = Vocabulary(name='cool_vocabulary999')
+        v.save()
+        self.delete_vocabularies.append(v)
         task = Task('backup', '-1', datetime.now(), datetime.now(), True)
         self.assertRaises(
-            ValueError, self.fuseki_dev.get_copy, task, self.vocabulary)
+            ValueError, self.fuseki_dev.get_copy, task, v)
 
     def test_delete_vocabulary(self):
         self.fuseki_dev.delete_vocabulary(self.vocabulary)
