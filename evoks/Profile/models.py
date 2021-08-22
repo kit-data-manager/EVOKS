@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
+from io import BytesIO
+from zipfile import ZipFile
+from django.core.mail import EmailMessage
 
 
 class Profile(models.Model):
@@ -40,5 +43,16 @@ class Profile(models.Model):
         """
         sends a mail with the userdata to the user
         """
-        self.user.email_user(subject='userdata from evoks',
-                             message='data', from_email=settings.EVOKS_MAIL)
+        # in memory zipfile
+        in_memory = BytesIO()
+
+        zip = ZipFile(in_memory, 'a')
+        # add basic info to zip
+        zip.writestr('data.txt', 'email: {0} \nname: {1}\ndescription: {2}'.format(
+            self.user.email, self.name, self.description))
+        zip.close()
+
+        email = EmailMessage(subject='userdata from evoks', to=[
+                             self.user.email], body='your userdata from evoks', from_email=settings.EVOKS_MAIL)
+        email.attach('data.zip', in_memory.getvalue(), 'application/zip')
+        email.send()
