@@ -23,6 +23,7 @@ from itertools import chain
 from guardian.shortcuts import get_perms
 from django.contrib.auth.decorators import login_required, user_passes_test
 from rdflib.namespace import _is_valid_uri
+import re
 
 
 def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
@@ -603,6 +604,9 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
         if 'create-term' in request.POST and permission != 'spectator':
             term_subject = request.POST['term-subject']
             term_label = request.POST['term-label']
+
+            if not (bool(re.match('^[a-zA-Z0-9]+$', term_subject))):
+                return HttpResponseBadRequest('invalid subject')
 
             term_name = term_subject.replace('/', '_')
 
