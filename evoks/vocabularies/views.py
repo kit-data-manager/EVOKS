@@ -591,9 +591,10 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     for x in thing['results']['bindings']:
         sub = x['sub']['value']
         id = sub.split(vocabulary.urispace)[1]
-        term = Term.objects.get(uri=id, vocabulary=vocabulary)
-        obj = x['obj']
-        terms.append({'display_name': obj['value'], 'name': term.name})
+        terms_filtered = Term.objects.filter(uri=id, vocabulary=vocabulary)
+        for term in terms_filtered:
+            obj = x['obj']
+            terms.append({'display_name': obj['value'], 'name': term.name})
 
     next_page_number = page_number + 1  # going over page limit does not matter
     previous_page_number = 1 if page_number - \
