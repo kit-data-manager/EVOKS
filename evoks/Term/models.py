@@ -10,7 +10,7 @@ from django.conf import settings
 
 class Term(models.Model):
     name = models.SlugField(max_length=50, unique=True)
-    uri = models.CharField(max_length=200, unique=True, default='')
+    uri = models.CharField(max_length=200, unique=False, default='')
     vocabulary = models.ForeignKey(
         to='vocabularies.Vocabulary', on_delete=CASCADE, blank=True, null=True)
 
