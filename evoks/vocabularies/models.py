@@ -187,7 +187,7 @@ class Vocabulary(models.Model):
                     self.add_term(name, id)
 
                 except Exception as e:
-                    pass
+                    print(e)
 
             if self.urispace != '':
                 last_char = new_urispace[-1]
