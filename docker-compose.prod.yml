@@ -18,7 +18,7 @@ services:
     volumes:
        - postgres:/data/postgres
     ports:
-      - "5432:5432"
+      - "8005:5432"
     networks:
       - postgres
     restart: unless-stopped
@@ -34,7 +34,7 @@ services:
        - pgadmin:/root/.pgadmin
 
     ports:
-      - "${PGADMIN_PORT:-5050}:80"
+      - "${PGADMIN_PORT:-8006}:80"
     networks:
       - postgres
     restart: unless-stopped
@@ -66,7 +66,7 @@ services:
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
     ports:
-      - "3030:3030"
+      - "8003:3030"
     volumes: 
       - ./fuseki-dev/data:/fuseki-base/databases
       - ./fuseki-dev/config:/fuseki-base/configuration
@@ -83,7 +83,7 @@ services:
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
     ports:
-      - "3040:3030"
+      - "8004:3030"
     volumes: 
       - ./fuseki-live/data:/fuseki-base/databases
       - ./fuseki-live/config:/fuseki-base/configuration
@@ -95,7 +95,7 @@ services:
       context: github.com/NatLibFi/Skosmos.git
       dockerfile: dockerfiles/Dockerfile.ubuntu
     ports: 
-      - 9090:80
+      - 8001:80
     hostname: skosmos-dev
     depends_on: 
       - fuseki-dev
@@ -108,7 +108,7 @@ services:
       context: github.com/NatLibFi/Skosmos.git
       dockerfile: dockerfiles/Dockerfile.ubuntu
     ports: 
-      - 9080:80
+      - 8002:80
     hostname: skosmos-live
     depends_on: 
       - fuseki-live
