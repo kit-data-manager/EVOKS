@@ -571,13 +571,29 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
         initial={'initial_letter': (letter, letter.upper())})
 
     # get limit terms starting at offset starting with letter
+
+    # use this query if A-Z selection should be available
+    # query = """
+    # PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+    # SELECT DISTINCT ?sub ?pred ?obj
+    # WHERE {{
+    #     ?sub skos:prefLabel ?obj .
+    # FILTER (strstarts(lcase(str(?obj)), '{letter}'))
+    # }}
+    # ORDER BY ?obj
+    # LIMIT {limit} OFFSET {offset}
+    # """.format(limit=20, offset=offset, letter=letter)
+
+
+    # use this query to remove A-Z selection so all terms are shown on the first page
+    # TODO Fallunterscheidung: use A-Z selection only for large vocabs 
     query = """
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
     SELECT DISTINCT ?sub ?pred ?obj
     WHERE {{
         ?sub skos:prefLabel ?obj .
-    FILTER (strstarts(lcase(str(?obj)), '{letter}'))
     }}
     ORDER BY ?obj
     LIMIT {limit} OFFSET {offset}
@@ -609,10 +625,9 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
                 return HttpResponseBadRequest('invalid subject')
 
             term_name = term_subject.replace('/', '_')
-
             # check if term already exists
-            if Term.objects.filter(uri=term_subject).exists():
-                return HttpResponse('term exists already', status=409)
+            #if Term.objects.filter(uri=term_subject).exists():
+            #    return HttpResponse('term exists already', status=409)
 
             # find unique evoks url for term
             name = term_name
