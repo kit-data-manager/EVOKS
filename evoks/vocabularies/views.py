@@ -687,7 +687,16 @@ def base(request: HttpRequest):
             form = CreateVocabularyForm(request.POST)
             if form.is_valid():
                 voc_name = form.cleaned_data['name']
-                urispace = form.cleaned_data['urispace']
+
+                # HACK hier wird der URIspace einfach aus dem Name generiert. 
+                # sorgt dafür, dass der Name eines erstellten Vokabulars unique sein muss, das muss verbessert werden
+                # TODO
+                # unhacked ->
+                # urispace = form.cleaned_data['urispace']
+                # <-
+                urispace = 'http://{0}.org/'.format(voc_name)
+
+
             else:
                 return HttpResponse('Invalid form', status=400)
             try:
