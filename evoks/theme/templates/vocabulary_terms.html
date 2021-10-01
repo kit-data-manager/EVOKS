@@ -99,11 +99,7 @@
                                                         <tr>
                                                             <th scope="col"
                                                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Name
-                                                            </th>
-                                                            <th scope="col"
-                                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Action
+                                                                Term
                                                             </th>
                                                         </tr>
                                                     </thead>
@@ -113,16 +109,11 @@
                                                             <td class="px-6 py-4 whitespace-nowrap">
                                                                 <div class="flex items-center">
                                                                     <div class="text-sm text-gray-900">
-                                                                        {{term.display_name}}
+                                                                        <a
+                                                                        href='{% url 'term_detail' voc_name=vocabulary.name term_name=term.name %}'>{{term.display_name}}
+                                                                        </a>
                                                                     </div>
                                                                 </div>
-                                                            </td>
-
-                                                            <td
-                                                                class="px-6 py-4 whitespace-nowrap text-sm text-regal-blue">
-                                                                <a
-                                                                    href='{% url 'term_detail' voc_name=vocabulary.name term_name=term.name %}'>Edit
-                                                                </a>
                                                             </td>
                                                         </tr>
                                                         {% endfor %}
