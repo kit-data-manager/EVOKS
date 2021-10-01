@@ -48,39 +48,9 @@
                                             <select id="type" name="type"
                                                     class="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md">
                                                     <option disabled selected value> -- select an option -- </option>
-                                                    <option value="uri"> uri </option>
-                                                    <option value="literal"> literal </option>
+                                                    <option value="uri"> Semantic relation </option>
+                                                    <option value="literal"> Freetext </option>
                                             </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label for="datatype-prefix" class="block text-sm font-medium text-gray-700">Datatype Namespace [optional]</label>
-                                        <div class="mt-1">
-                                            <select id="datatype-prefix" name="datatype-prefix"
-                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                                <option selected value="None">None</option>
-                                                {{% for a in form.datatype_prefix.field.choices%}
-                                                <option value="{{a.0}}">{{a.1}}</option>
-                                                {% endfor %}}
-                                            </select>
-                                        </div>
-                                        <label for="datatype" class="block text-sm font-medium text-gray-700">Datatype [optional]</label>
-                                        <div class="mt-1">
-                                            <select id="datatype" name="datatype"
-                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                                <option selected value="None"> None </option>
-                                                {{% for a in form.datatype.field.choices%}
-                                                <option hidden value="{{a.0}}">{{a.1}}</option>
-                                                {% endfor %}}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label for="language" class="block text-sm font-medium text-gray-700">Language (en, fi, en-GB according to BCP47) [optional]</label>
-                                        <div class="mt-1">
-                                            <input type="text" name="language" id="language" maxlength=5000
-                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-1/2 sm:text-sm border-gray-300 rounded-md"
-                                            >
                                         </div>
                                     </div>
                                     <div>
@@ -88,7 +58,7 @@
                                         <div class="mt-1">
                                             <input type="text" name="object" id="text" required maxlength=5000
                                                 class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                                placeholder="some value or url">
+                                                placeholder="Freetext or e.g. http://vocname.org/termname">
                                         </div>
                                     </div>
 
