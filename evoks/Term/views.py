@@ -199,6 +199,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
             type = request.POST['type']
             object_string = request.POST['object']
             if type == 'uri':
+                object_string = '{0}{1}'.format(vocabulary.urispace,object_string)
                 # if uri is not valid its using a prefix and does not need braces
                 if uri_validator(object_string) != True:
                     valid, object_string = vocabulary.convert_prefix(object_string)
