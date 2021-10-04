@@ -86,6 +86,17 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
 
     vocabulary = Vocabulary.objects.get(name=voc_name)
     term = Term.objects.get(name=term_name)
+    # [HACK]
+    # fix term name in header of term detail view
+    # remove any trailing "_1" etc
+    # TODO needs to be rethought, might cause problems in special term names
+    # goes together with URI=Term etc (which might be set for usability)
+    if term.name[-1:].isnumeric():
+        name_stripped = term.name.split("_")[0]
+    else:
+        name_stripped = term.name
+    # [/HACK]
+
     permission = get_vocab_perm(user, vocabulary)
 
     if request.method == 'POST':
@@ -267,12 +278,13 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
 
         # append object to list of objects with same predicate
         fields[pred]['objects'].append(obj)
-    form = Property_Predicate_Form(initial={'predicate': 'skos:Concept'})
+    form = Property_Predicate_Form(initial={'predicate': 'skos:altLabel', 'prefix': 'skos'})
 
     context = {
         'vocabulary': vocabulary,
         'fields': fields,
         'term': term,
+        'name_stripped': name_stripped,
         'activities': activity_list,
         'form' : form,
     }
