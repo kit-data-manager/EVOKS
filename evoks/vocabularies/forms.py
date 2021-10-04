@@ -35,10 +35,10 @@ class Vocabulary_Terms_Form(forms.Form):
 
 class Property_Predicate_Form(forms.Form):
     OPTIONS = (
-        ('skos:altLabel', 'skos:altLabel'),
-        ('skos:definition', 'skos:definition'),
-        ('skos:broader', 'skos:broader'),
-        ('skos:narrower', 'skos:narrower'),
+        ('skos:altLabel', 'Synonym (Freetext)'),
+        ('skos:definition', 'Definition (Freetext)'),
+        ('skos:broader', 'Broader term (semantic relation)'),
+        ('skos:narrower', 'Narrower term (semantic relation)'),
         # ('dc:description', 'dc:description'),
     )
     PREFIXES = (
