@@ -14,6 +14,9 @@
                         <h3 class="text-lg leading-6 font-medium text-gray-900" id="tag-title">
                             Create Property
                         </h3>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="tag-title">
+                            {{form.prefix.field.choices.0.0}}
+                        </h3>
                     </div>
 
                     <form class="space-y-8 divide-y divide-gray-200">
@@ -25,10 +28,7 @@
                                         <div class="mt-1">
                                             <select id="prefix" name="prefix"
                                                 class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                                <option disabled selected value> -- select an option -- </option>
-                                                {{% for a in form.prefix.field.choices%}
-                                                <option value="{{a.0}}">{{a.1}}</option>
-                                                {% endfor %}}
+                                                <option value="{{form.prefix.field.choices.0.0}}">{{form.prefix.field.choices.0.1}}</option>
                                             </select>
                                         </div>
                                         <label for="subprefix" class="block text-sm font-medium text-gray-700">Predicate</label>
@@ -39,6 +39,7 @@
                                                 {{% for a in form.predicate.field.choices%}
                                                 <option value="{{a.0}}">{{a.1}}</option>
                                                 {% endfor %}}
+                                                
                                             </select>
                                         </div>
                                     </div>
