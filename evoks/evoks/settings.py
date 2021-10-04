@@ -68,6 +68,9 @@ SECRET_KEY = 'django-insecure-_91@mjc8g-&q_f9io$jmicovci2bilh#)ud3$^iqhj1wnccr%t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# set to False to disable Browser-sync
+TAILWIND_DEV_MODE = False
+
 ALLOWED_HOSTS: list[str] = ['.kit.edu']
 
 LOGIN_REDIRECT_URL = '/vocabularies'
