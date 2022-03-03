@@ -15,6 +15,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       PGDATA: /data/postgres
+      POSTGRES_DB: dev
     volumes:
        - postgres:/data/postgres
     ports:
@@ -23,6 +24,7 @@ services:
       - postgres
     restart: unless-stopped
   
+<<<<<<< HEAD
   pgadmin:
     container_name: pgadmin_container
     image: dpage/pgadmin4
@@ -38,6 +40,23 @@ services:
     networks:
       - postgres
     restart: unless-stopped
+=======
+  # pgadmin:
+  #   container_name: pgadmin_container_${INSTANCE_NAME:-defaultinstance}
+  #   image: dpage/pgadmin4
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+  #     PGADMIN_CONFIG_SERVER_MODE: 'False'
+  #   volumes:
+  #      - pgadmin:/root/.pgadmin
+
+  #   ports:
+  #     - "${PGADMIN_PORT:-8306}:80"
+  #   networks:
+  #     - postgres
+  #   restart: unless-stopped
+>>>>>>> cde9113... removed pgadmin since it is not needed
   web:
     <<: *evoks
     command: "python ./evoks/manage.py runserver 0.0.0.0:8000"
