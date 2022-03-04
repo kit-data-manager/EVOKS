@@ -18,7 +18,11 @@ services:
     volumes:
        - postgres:/data/postgres
     ports:
+<<<<<<< HEAD
       - "5432:5432"
+=======
+      - "${POSTGRES_PORT:-8005}:5432"
+>>>>>>> f9d7b5f... ports aus docker-compose file raus in .env
     networks:
       - postgres
     restart: unless-stopped
@@ -42,7 +46,11 @@ services:
     <<: *evoks
     command: "python ./evoks/manage.py runserver 0.0.0.0:8000"
     ports:
+<<<<<<< HEAD
       - "8000:8000"
+=======
+      - "${EVOKS_PORT:-8000}:8000"
+>>>>>>> f9d7b5f... ports aus docker-compose file raus in .env
     depends_on:
       - postgres
       - fuseki-dev
@@ -74,7 +82,11 @@ services:
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
     ports:
+<<<<<<< HEAD
       - "3030:3030"
+=======
+      - "${FUSEKI_DEV_PORT:-8003}:3030"
+>>>>>>> f9d7b5f... ports aus docker-compose file raus in .env
     volumes: 
       - ./fuseki-dev/data:/fuseki-base/databases
       - ./fuseki-dev/config:/fuseki-base/configuration
@@ -91,7 +103,11 @@ services:
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
     ports:
+<<<<<<< HEAD
       - "3040:3030"
+=======
+      - "${FUSEKI_LIVE_PORT:-8004}:3030"
+>>>>>>> f9d7b5f... ports aus docker-compose file raus in .env
     volumes: 
       - ./fuseki-live/data:/fuseki-base/databases
       - ./fuseki-live/config:/fuseki-base/configuration
@@ -103,7 +119,11 @@ services:
       context: github.com/NatLibFi/Skosmos.git
       dockerfile: dockerfiles/Dockerfile.ubuntu
     ports: 
+<<<<<<< HEAD
       - 9090:80
+=======
+      - "${SKOSMOS_DEV_PORT:-8001}:80"
+>>>>>>> f9d7b5f... ports aus docker-compose file raus in .env
     hostname: skosmos-dev
     depends_on: 
       - fuseki-dev
@@ -116,7 +136,11 @@ services:
       context: github.com/NatLibFi/Skosmos.git
       dockerfile: dockerfiles/Dockerfile.ubuntu
     ports: 
+<<<<<<< HEAD
       - 9080:80
+=======
+      - "${SKOSMOS_LIVE_PORT:-8002}:80"
+>>>>>>> f9d7b5f... ports aus docker-compose file raus in .env
     hostname: skosmos-live
     depends_on: 
       - fuseki-live
