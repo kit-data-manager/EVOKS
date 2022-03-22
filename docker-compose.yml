@@ -23,22 +23,6 @@ services:
     networks:
       - postgres
     restart: unless-stopped
-  
-  # pgadmin:
-  #   container_name: pgadmin_container_${INSTANCE_NAME:-defaultinstance}
-  #   image: dpage/pgadmin4
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-  #     PGADMIN_CONFIG_SERVER_MODE: 'False'
-  #   volumes:
-  #      - pgadmin:/root/.pgadmin
-
-  #   ports:
-  #     - "${PGADMIN_PORT:-8306}:80"
-  #   networks:
-  #     - postgres
-  #   restart: unless-stopped
   web:
     <<: *evoks
     # caution, don't change this port since it is the one used within the container
@@ -61,14 +45,6 @@ services:
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
       - ./fuseki-dev/backup:/code/fuseki-dev/backup
-  tailwind:
-    <<: *evoks
-    command: "bash tailwind.sh"
-    ports:
-      - "8383:8383"
-    networks: 
-      - fuseki-dev
-      - fuseki-live
   fuseki-dev:
     container_name: fuseki-dev
     image: secoresearch/fuseki
