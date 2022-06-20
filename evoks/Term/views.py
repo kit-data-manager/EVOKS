@@ -213,7 +213,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
                 return HttpResponse('Empty object', status=400)
 
             predicate = request.POST['predicate']
-            
+
             type = request.POST['type']
             object_string = request.POST['object']
             if type == 'uri':
@@ -246,55 +246,28 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
             term.create_field(urispace, predicate, object)
 
         # # # TODO broader option 2
+        # TODO check if type is really uri or literal
+        # if type is literal, delete what is done with the uri and replace from above "if post is create property"
         elif 'create-broader' in request.POST and permission != 'spectator':
-            print("SDFLJSEFLISEJEEEEEEEEEEEEEEEEEEEEEe")
-            if 'predicate' not in request.POST:
-                return HttpResponse('Empty predicate', status=400)
-            if 'type' not in request.POST:
-                return HttpResponse('Empty type', status=400)
-            if 'object' not in request.POST or request.POST['object'] == '':
-                return HttpResponse('Empty object', status=400)
+            if 'broader' not in request.POST:
+                return HttpResponse('Empty broader', status=400)
 
+            predicate = "skos:broader"
+            type = "uri"
+            object_string =  request.POST['broader']
 
-
-
-
-
-
-
-
-
-
-
-            predicate = request.POST['predicate']
-            
-            type = request.POST['type']
-            object_string = request.POST['object']
-            if type == 'uri':
-                # if uri is not valid its using a prefix and does not need braces
-                if uri_validator(object_string) != True:
-                    valid, object_string = vocabulary.convert_prefix(object_string)
-                    if not valid:
-                        return HttpResponse('Invalid uri', status=400)
-
-                if not _is_valid_uri(object_string):
+            # do if type is uri
+            # if uri is not valid its using a prefix and does not need braces
+            if uri_validator(object_string) != True:
+                valid, object_string = vocabulary.convert_prefix(object_string)
+                if not valid:
                     return HttpResponse('Invalid uri', status=400)
 
-                object = '<{0}>'.format(object_string)
-            else:
-                if "'''" in object_string:
-                    return HttpResponse('Literal cannot contain \'\'\'', status=400)
-                object = '\'\'\'{0}\'\'\''.format(object_string)
-                if 'language' in request.POST and request.POST['language'] != '':
-                    try:
-                        language = Language.get(request.POST['language'])
-                        if not language.is_valid() or type == 'uri':
-                            return HttpResponse('Invalid language', status=400)
-                        object += '@{0}'.format(language.language)
-                    except:
-                        return HttpResponse('Invalid language', status=400)
-                elif 'datatype' in request.POST and request.POST['datatype'] != '':
-                    object += '^^<{0}>'.format(request.POST['datatype'])
+            if not _is_valid_uri(object_string):
+                return HttpResponse('Invalid uri', status=400)
+
+            object = '<{0}>'.format(object_string)
+
 
             urispace = '<{0}{1}>'.format(vocabulary.urispace, term.uri)
             term.create_field(urispace, predicate, object)
