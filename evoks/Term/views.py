@@ -108,12 +108,10 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
     for x in thing_nofilter['results']['bindings']:
         sub = x['sub']['value']
         id = sub.split(vocabulary.urispace)[1]
-        # fullid = vocabulary.urispace+"/"+id
         terms_filtered = Term.objects.filter(uri=id, vocabulary=vocabulary)
-        for term in terms_filtered:
+        for singleterm in terms_filtered:
             obj = x['obj']
-            print(obj)
-            terms_nofilter.append({'display_name': obj['value'], 'name': term.name, 'fullid': vocabulary.urispace + "/" + term.name})
+            terms_nofilter.append({'display_name': obj['value'], 'name': singleterm.name, 'fullid': vocabulary.urispace + "/" + singleterm.name})
 
 
 
