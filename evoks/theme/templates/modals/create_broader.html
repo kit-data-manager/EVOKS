@@ -27,8 +27,8 @@
                         <select id="broader" name="broader"
                             class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
                             <option selected value="None">None</option>
-                            {{% for term in terms_nofilter.data %}
-                            <option value={{term.fullid}}>{{term.display_name}}</option>
+                            {{% for term_dropdown in terms_nofilter.data %}
+                            <option value={{term_dropdown.fullid}}>{{term_dropdown.display_name}}</option>
                             {% endfor %}}
                         </select>
                     </div>

@@ -83,7 +83,6 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
         HttpResponse: Http Response object
     """
     user = request.user
-
     vocabulary = Vocabulary.objects.get(name=voc_name)
     term = Term.objects.get(name=term_name)
     permission = get_vocab_perm(user, vocabulary)
@@ -111,7 +110,10 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
         terms_filtered = Term.objects.filter(uri=id, vocabulary=vocabulary)
         for singleterm in terms_filtered:
             obj = x['obj']
-            terms_nofilter.append({'display_name': obj['value'], 'name': singleterm.name, 'fullid': vocabulary.urispace + "/" + singleterm.name})
+            # skip over current term such that a term cannot be chosen as broader term of itself
+            if singleterm.name==term.name:
+                continue
+            terms_nofilter.append({'display_name': obj['value'], 'name': singleterm.name, 'fullid': vocabulary.urispace + singleterm.name})
 
 
 
@@ -250,7 +252,8 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
             if 'broader' not in request.POST:
                 return HttpResponse('Empty broader', status=400)
 
-            predicate = "skos:broader"
+            predicate_broader = "skos:broader"
+            predicate_narrower = "skos:narrower"
             type = "uri"
             object_string =  request.POST['broader']
 
@@ -263,12 +266,18 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
 
             if not _is_valid_uri(object_string):
                 return HttpResponse('Invalid uri', status=400)
-
+            
             object = '<{0}>'.format(object_string)
 
-
             urispace = '<{0}{1}>'.format(vocabulary.urispace, term.uri)
-            term.create_field(urispace, predicate, object)
+            # add skos:broader proerto to current term
+            term.create_field(urispace, predicate_broader, object)
+            
+            # add skos:narrower property to broader term
+            # TODO sollte überarbeitet werden, besser wäre wenn im create_broader nur der term.name übergeben wird
+            # und die Uri hier in views zusammen gesetzt wird. Dann spart man sich das wenig robuste split("/")
+            term_broader = Term.objects.get(name=object_string.split("/")[-1])
+            term_broader.create_field(object, predicate_narrower, urispace)
         
         elif 'download' in request.POST:
                 dataformat = request.POST['download']
