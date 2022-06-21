@@ -21,6 +21,7 @@ e.g.
 `SKOSMOS_LIVE_URI = "http://evoks.mydomain.edu:8002/"`
 7. within settings.py adjust the allowed hosts to your needs (usually it should match the serverURL), e.g.
 ALLOWED_HOSTS: list[str] = ['.mydomain.edu']
+8. Very likely, a bug will occur since there are problems with fuseki folder access rights (creating vocabs will fail). Run `sudo chmod 777 -R fuseki-dev/ fuseki-live/` then. 
 
 
 **Admin erstellen**
