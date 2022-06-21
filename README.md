@@ -8,40 +8,28 @@ Wir empfehlen wsl zur Ausführung zu benutzen (windows subsystem für Linux) (So
 
 **Vorgehen:**
 
-1. Clone dieses Repository.
-2. Öffne ein neues Konsolenfenster und gehe in das geclonte Projekt auf die oberste Ordnerebene mit `cd implementierung`
-   Hier muss such die Datei `docker-compose.yml` befinden.
-3. Docker muss eventuell erst gestartet werden, hierzu führe `sudo systemctl start docker.service` aus.
-4. Führe `docker-compose -f docker-compose.prod.yml build --no-cache` aus. Docker wird dann die Python Umgebung einrichten und Bibliotheken herunterladen, dieser Schritt kann ein wenig Zeit in Anspruch nehmen. Führe dann `docker-compose -f docker-compose.prod.yml up` aus. Der Prozess läuft dann im Hintergrund. Er kann über `strg+C` oder in einem neuen Konsolenfenster über das Kommando `docker-compose down` innerhalb des gleichen Verzeichnisses beendet werden. Für die nächsten Schritte muss der Prozess aber im Hintergrund laufen.
-5. Öffne einen Browser.
-6. Gehe auf die Seite `localhost:5050`.
-7. Melde dich mit dem Passwort 'postgres' an.
-8. Hier muss die Django Datenbank eingerichtet werden. Erstelle einen neuen Server durch Rechtsklick auf 'Servers'
-   in der linken Seitenleiste, wähle 'create', dann 'Server' aus. Im Pop Up Fenster fülle auf der Seite 'General' das Feld 'Name' aus mit dem Wert 'evoks' und auf der Seite 'Connection' das Feld 'Host' mit dem Wert 'postgres' aus und fülle als Passwort 'changeme' aus. Drücke speichern.
-9. In der Seitenleiste erscheint nun ein neuer Server mit Namen evoks. Klappe die Unterpunkte unterhalb des Icons aus. Dort befindet sich ein Punkt 'Database'. Mache Rechtsklick auf 'Database' wähle 'Create' dann 'Database' aus. Setze im Pop Up Fenster für das Feld 'Database' den Wert 'dev'. Drücke speichern.
-10. Die Django Database ist aufgesetzt, sie muss jetzt in das Projekt migriert werden. Öffne hierzu ein neues Konsolenfenster und gehe wieder in die oberste Ordnerebene des Projektes. (Der Ordner in der sich die Datei `docker-compose.yml` befindet)
-11. Führe das Kommando `docker ps` aus. Es erscheint eine Liste aller Docker Container. In der ersten Spalte ist die id des Docker Containers gelistet. Kopiere die id des Kontainers mit namen: `implementierung_web`.
-12. Führe als nächstes folgendes Kommando aus, ersetze im folgenden Kommando container_id durch die zuvor kopierte Id: `docker exec -t -i container_id bash`. Nun befindest du dich innerhalb des Docker Kontainers.
-13. Wechsele in das Verzeichnis evoks mit `cd evoks`.
-14. Führe die Migration aus: `python manage.py migrate`.
-15. Verlasse den Container mit `exit`.
-16. Schließe Docker mit `docker-compose down`.
-17. Gehe in das erste Konsolenfenster und starte Docker neu mit `docker-compose up`.
-18. Nun ist das Projekt fertig eingerichtet. Im Browser kann unter localhost:8000/vocabularies die Startseite der Applikation aufgerufen werden.
+1. clone repo and go to folder
+2. `docker-compose build --no-cache` (using cache sometimes leads to errors)
+3. `docker-compose up`
+4. Open localhost:${EVOKS_PORT} which was set in .env file (default: 8000)
 
 **Admin erstellen**
 Um einen Admin zu erstellen müssen folgende Schritte durchgeführt werden:
 
-1. `docker-compose up` muss im Hintergrund laufen.
-2. Führe Schritt 10-13 der Anleitung oben aus, um wieder in die Konsole innerhalb des Docker Kontainers zu kommen. Führe innerhalb des Docker Containers `python manage.py createsuperuser` aus und befolge die Konsolenbefehle.
-3. Nun kann im Webbrowser `localhost:8000/admin` aufgerufen werden. Der Login funktioniert mit der im oberen Schritt festgelegten Email als username sowie Passwort.
+1. `docker ps`, look for <container_prefix>_web_1 container
+2. `docker exec -it <container_prefix>_web_1 bash`
+3. Within the container: `python evoks/manage.py createsuperuser`
+4. Follow instructions to create a superuser
+5. Log into EVOKS using the email as username and the chosen password
 
 **Tests ausführen**
-Um Unittests auszuführen:
+for running the unittests:
 
-1. Führe Schritt 10-13 der Anleitung oben aus.
-2. Führe innerhalb des Docker Containers `coverage run --source='.' --omit='*/migrations/*.py','guardian/*','theme/*','evoks/__init__.py','evoks/asgi.py','evoks/wsgi.py','manage.py','tests/*' manage.py test tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks && coverage html` aus.
-3. Öffne index.html aus htmlcov mit einem Browser.
+1. `docker ps`, look for <container_prefix>_web_1 container
+2. `docker exec -it <container_prefix>_web_1 bash`
+3. Within the container: `cd evoks`
+4. run `coverage run --source='.' --omit='*/migrations/*.py','guardian/*','theme/*','evoks/__init__.py','evoks/asgi.py','evoks/wsgi.py','manage.py','tests/*' manage.py test tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks && coverage html` aus.
+4. Open index.html from folder htmlcov with a browser.
 
 **Bugs die eventuell auftreten**
 
@@ -52,6 +40,7 @@ Um Unittests auszuführen:
 5. Wenn Vokabular import ganz lange dauert, Linux oder WSL benutzen.
 6. Wenn Seiten langsam laden, Linux oder WSL benutzen.
 7. Docker neustarten
+8. Wenn Änderungen am Code nicht erkannt werden, `docker-compose build --no-cache` und dann `docker-compose up` (und evlt alle container, images und volumes löschen aber Achtung, Datenverlust!)
 
 **Mail Server konfigurieren**
 
