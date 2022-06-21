@@ -12,6 +12,16 @@ Wir empfehlen wsl zur Ausführung zu benutzen (windows subsystem für Linux) (So
 2. `docker-compose build --no-cache` (using cache sometimes leads to errors)
 3. `docker-compose up`
 4. Open localhost:${EVOKS_PORT} which was set in .env file (default: 8000)
+5. open evoks/evoks/settings.py
+6. skosmos URLs: 
+`SKOSMOS_DEV_URI = "http://<yourserverURL>:<chosen_port_in_evn_file>/"`
+`SKOSMOS_LIVE_URI = "http://<yourserverURL>:<chosen_port_in_evn_file>/`"
+e.g. 
+`SKOSMOS_DEV_URI = "http://evoks.mydomain.edu:8001/"`
+`SKOSMOS_LIVE_URI = "http://evoks.mydomain.edu:8002/"`
+7. within settings.py adjust the allowed hosts to your needs (usually it should match the serverURL), e.g.
+ALLOWED_HOSTS: list[str] = ['.mydomain.edu']
+
 
 **Admin erstellen**
 Um einen Admin zu erstellen müssen folgende Schritte durchgeführt werden:
