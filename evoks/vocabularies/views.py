@@ -577,7 +577,6 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
     SELECT DISTINCT ?sub ?pred ?obj
     WHERE {{
         ?sub skos:prefLabel ?obj .
-    FILTER (strstarts(lcase(str(?obj)), '{letter}'))
     }}
     ORDER BY ?obj
     LIMIT {limit} OFFSET {offset}
