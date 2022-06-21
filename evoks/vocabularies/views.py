@@ -611,8 +611,12 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
             term_name = term_subject.replace('/', '_')
 
             # check if term already exists
-            if Term.objects.filter(uri=term_subject).exists():
-                return HttpResponse('term exists already', status=409)
+            # HACK TODO
+            # this is wrongly implemented
+            # when the term exists in another vocabulary, it cannot be created
+            # should only fail if the term already exists in the current vocabulary
+            # if Term.objects.filter(uri=term_subject).exists():
+                # return HttpResponse('term exists already', status=409)
 
             # find unique evoks url for term
             name = term_name
