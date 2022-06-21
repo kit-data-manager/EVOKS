@@ -18,8 +18,10 @@
     {% include "modals/create_team.html" %}
     <!-- Create Tag Modal -->
     {% include "modals/create_tag.html" %}
-    <!-- Create Tag Modal -->
+    <!-- Create Property Modal -->
     {% include "modals/create_property.html" %}
+    <!-- Broader Term Modal (broader option 2) -->
+    {% include "modals/create_broader.html" %}
     <!-- Create Vocabulary Modal -->
     {% include "modals/create_vocabulary.html" %}
 
@@ -152,6 +154,36 @@
                                             </button>
                                         </span>
                                     </dd>
+                                    <!-- broader option 2 -->
+                                    <dt class="text-sm font-medium text-regal-blue">
+                                    </dt>
+                                </div>
+                                {% endif %}
+
+                                {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                {% if "owner" in vocabulary_perms or "participant" in vocabulary_perms %}
+                                <div class="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
+                                    <dt class="text-sm font-medium text-regal-blue">
+                                    </dt>
+                                    <dd class="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                        <span class="flex-grow">
+
+                                        </span>
+                                        <span class="ml-4 flex-shrink-0">
+
+                                            <button id="create-broader-button"
+                                                class="inline-flex items-center px-3 py-2 font-medium rounded px-4 py-2 leading-5 bg-regal-blue text-primary-100 text-white hover:text-white focus:ring-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                                                <svg class="inline-block w-5 h-5 mr-1" fill="none"
+                                                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg> Add broader term
+                                            </button>
+                                        </span>
+                                    </dd>
+                                    <dt class="text-sm font-medium text-regal-blue">
+                                    </dt>
                                 </div>
                                 {% endif %}
                                     <dd class="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
