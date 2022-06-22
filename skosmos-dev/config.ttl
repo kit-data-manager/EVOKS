@@ -47,6 +47,7 @@
     skosmos:uiHoneypotTime 5 ;
     skosmos:uiLanguageDropdown true .
 
+<<<<<<< HEAD
 <file:///code/skosmos-dev/config.ttl#scratch-1> a skosmos:Vocabulary,
         void:Dataset ;
     dc:subject <file:///code/skosmos-dev/config.ttl#cat_general> ;
@@ -57,3 +58,6 @@
     void:sparqlEndpoint <http://fuseki-dev:3030/scratch/sparql> ;
     void:uriSpace "http://example.com/" .
     
+=======
+
+>>>>>>> 7e26b5e (remove leftover vocabularies in skosmos dev and live configs)
