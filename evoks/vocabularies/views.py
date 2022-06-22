@@ -601,8 +601,9 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
 
     if request.method == 'POST':
         if 'create-term' in request.POST and permission != 'spectator':
-            term_subject = request.POST['term-subject']
+            # term_subject = request.POST['term-subject']
             term_label = request.POST['term-label']
+            term_subject = term_label.replace(" ", "")
 
             if not (bool(re.match('^[a-zA-Z0-9]+$', term_subject))):
                 return HttpResponseBadRequest('invalid subject')

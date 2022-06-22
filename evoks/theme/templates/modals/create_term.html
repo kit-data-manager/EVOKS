@@ -27,27 +27,15 @@
                                 <div>
                                     <div class="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
                                         <div>
-                                            <label for="company-website" class="block text-sm font-medium text-gray-700">
-                                              Subject (only numbers and letters without blanks)
-                                            </label>
-                                            <div class="mt-1 flex rounded-md shadow-sm">
-                                              <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                                                {{vocabulary.urispace}}
-                                              </span>
-                                              <input type="text" required name="term-subject" id="company-website" required='True'
-                                                pattern="[A-Za-z0-9_-]+"
-                                                title="Error, only letters and numbers without blanks are supported"
-                                                class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-r-md" placeholder="scene/010100" maxlength=5000> 
-                                            </div>
-                                        </div>
-                                        <div>
                                             <label for="term-label"
                                                 class="block text-sm font-medium text-gray-700">skos:prefLabel
                                             </label>
                                             <div>
                                                 <input type="text" name="term-label" id="text" required maxlength=5000
+                                                    pattern="[A-Za-z0-9_ -]+"
+                                                    title="Error, only letters, numbers, dashes and blanks are supported"
                                                     class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                                    placeholder="Term Beschreibung">
+                                                    placeholder="Term label">
                                             </div>
                                         </div>
                                     </div>
