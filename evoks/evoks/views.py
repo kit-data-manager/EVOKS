@@ -98,14 +98,14 @@ def signup_view(request: HttpRequest) -> HttpResponse:
             url = request.build_absolute_uri(reverse("admin:%s_%s_change" % (
                 user.profile._meta.app_label, user.profile._meta.model_name), args=(user.profile.id,)))
 
-            send_mail(
-                'Verify a new Evoks account',
-                'Please visit the evoks admin panel {0} and verify the new user'.format(
-                    url),
-                EMAIL_HOST_USER,
-                emails,
-                fail_silently=False,
-            )
+            # send_mail(
+            #     'Verify a new Evoks account',
+            #     'Please visit the evoks admin panel {0} and verify the new user'.format(
+            #         url),
+            #     EMAIL_HOST_USER,
+            #     emails,
+            #     fail_silently=False,
+            # )
 
             return HttpResponse('Your account will be usable as soon as an admin verifies it!')
 
