@@ -9,19 +9,21 @@ Wir empfehlen wsl zur Ausführung zu benutzen (windows subsystem für Linux) (So
 **Vorgehen:**
 
 1. clone repo and go to folder
-2. `docker-compose build --no-cache` (using cache sometimes leads to errors)
-3. `docker-compose up`
-4. Open localhost:${EVOKS_PORT} which was set in .env file (default: 8000)
-5. open evoks/evoks/settings.py
-6. skosmos URLs: 
+2. copy .example.env and rename to .env
+3. open .env and change ports if desired
+4. `docker-compose build --no-cache` (using cache sometimes leads to errors)
+5. `docker-compose up`
+6. Open localhost:${EVOKS_PORT} which was set in .env file (default: 8000)
+7. open evoks/evoks/settings.py
+8. skosmos URLs: 
 `SKOSMOS_DEV_URI = "http://<yourserverURL>:<chosen_port_in_evn_file>/"`
 `SKOSMOS_LIVE_URI = "http://<yourserverURL>:<chosen_port_in_evn_file>/`"
 e.g. 
 `SKOSMOS_DEV_URI = "http://evoks.mydomain.edu:8001/"`
 `SKOSMOS_LIVE_URI = "http://evoks.mydomain.edu:8002/"`
-7. within settings.py adjust the allowed hosts to your needs (usually it should match the serverURL), e.g.
+9. within settings.py adjust the allowed hosts to your needs (usually it should match the serverURL), e.g.
 ALLOWED_HOSTS: list[str] = ['.mydomain.edu']
-8. Very likely, a bug will occur since there are problems with fuseki folder access rights (creating vocabs will fail). Run `sudo chmod 777 -R fuseki-dev/ fuseki-live/` then. 
+10. Very likely, a bug will occur since there are problems with fuseki folder access rights (creating vocabs will fail). Run `sudo chmod 777 -R fuseki-dev/ fuseki-live/` then. 
 
 
 **Admin erstellen**
