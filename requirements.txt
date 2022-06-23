@@ -12,3 +12,4 @@ rdflib-jsonld
 language_data
 langcodes
 coverage
+requests
