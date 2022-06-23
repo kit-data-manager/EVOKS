@@ -24,6 +24,7 @@ e.g.
 9. within settings.py adjust the allowed hosts to your needs (usually it should match the serverURL), e.g.
 ALLOWED_HOSTS: list[str] = ['.mydomain.edu']
 10. Very likely, a bug will occur since there are problems with fuseki folder access rights (creating vocabs will fail). Run `sudo chmod 777 -R fuseki-dev/ fuseki-live/` then. 
+11. docker-compose down (oder prozess beenden) und nochmal neu starten (docker-compose up)
 
 
 **Admin erstellen**
