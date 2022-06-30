@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   postgres:
-    container_name: evoks_${INSTANCE_NAME}_postgres
+    container_name: evoks_${INSTANCE_NAME:-evoks}_postgres
     image: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
