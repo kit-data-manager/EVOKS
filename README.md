@@ -1,3 +1,6 @@
+*Achtung*
+Der Masterbranch enthält nicht die neusten Entwicklungen. Diese sind unter dem *testing* (mehr Funktionen, weniger usability) bzw. *sfb980* (weniger Funktionen, höhere usability) branch zu finden. 
+
 Das folgende Vorgehen zum Aufsetzen der Applikation ist unter Linux getestet:
 
 **Vorbedingung:**
