@@ -13,3 +13,4 @@ language_data
 langcodes
 coverage
 requests
+unidecode
