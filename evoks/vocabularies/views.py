@@ -24,7 +24,7 @@ from guardian.shortcuts import get_perms
 from django.contrib.auth.decorators import login_required, user_passes_test
 from rdflib.namespace import _is_valid_uri
 import re
-
+from unidecode import unidecode
 
 def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
     """Views for prefixes tab
@@ -604,6 +604,16 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
         if 'create-term' in request.POST and permission != 'spectator':
             term_subject = request.POST['term-subject']
             term_label = request.POST['term-label']
+            # remove german umlaute
+            term_subject = term_label.replace(" ", "")
+            term_subject = term_subject.replace("ü","ue")
+            term_subject = term_subject.replace("ö","oe")
+            term_subject = term_subject.replace("ä","ae")
+            term_subject = term_subject.replace("ß","ss")
+            # transfer non standard chars like greek into alphanumeric chars
+            term_subject = unidecode(term_subject)
+            # remove any special chars
+            term_subject = re.sub(r'[^a-zA-Z0-9]', '', term_subject)
 
             if not (bool(re.match('^[a-zA-Z0-9]+$', term_subject))):
                 return HttpResponseBadRequest('invalid subject')
