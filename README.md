@@ -56,3 +56,7 @@ To create an admin the following steps must be performed:
 1. do while containers are not running
 2. See Caddy.md for Caddy setup
 3. run containers again
+
+**License**
+
+EVOKS is licensed under the Apache License, Version 2.0.
