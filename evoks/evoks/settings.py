@@ -56,8 +56,8 @@ SKOSMOS_LIVE_DIR = "skosmos-live/config.ttl"
 SKOSMOS_TEST_CONFIG = "evoks/tests/skosmos/config.ttl"
 
 
-SKOSMOS_DEV_URI = "http://vocabulary.datamanager.kit.edu:8001/"
-SKOSMOS_LIVE_URI = "http://vocabulary.datamanager.kit.edu:8002/"
+SKOSMOS_DEV_URI = ""
+SKOSMOS_LIVE_URI = ""
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
