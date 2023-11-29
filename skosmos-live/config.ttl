@@ -47,3 +47,54 @@
     skosmos:uiHoneypotTime 5 ;
     skosmos:uiLanguageDropdown true .
 
+<file:///code/skosmos-live/config.ttl#KitVocabulary-1> a skosmos:Vocabulary,
+        void:Dataset ;
+    dc:subject <file:///code/skosmos-live/config.ttl#cat_general> ;
+    dc:title "KitVocabulary-1" ;
+    skosmos:defaultLanguage "" ;
+    skosmos:fullAlphabeticalIndex true ;
+    skosmos:mainConceptScheme <http://localhost:8001/KitVocabulary-1/en/page/> ;
+    void:sparqlEndpoint <http://fuseki-live:3030/KitVocabulary-1/sparql> ;
+    void:uriSpace "http://localhost:8001/KitVocabulary-1/en/page/" .
+
+<file:///code/skosmos-live/config.ttl#KitVocabulary-2> a skosmos:Vocabulary,
+        void:Dataset ;
+    dc:subject <file:///code/skosmos-live/config.ttl#cat_general> ;
+    dc:title "KitVocabulary-2" ;
+    skosmos:defaultLanguage "" ;
+    skosmos:fullAlphabeticalIndex true ;
+    skosmos:mainConceptScheme <http://localhost:8001/KitVocabulary-1/en/page/> ;
+    void:sparqlEndpoint <http://fuseki-live:3030/KitVocabulary-2/sparql> ;
+    void:uriSpace "http://localhost:8001/KitVocabulary-1/en/page/" .
+
+<file:///code/skosmos-live/config.ttl#MDMCfirst-1> a skosmos:Vocabulary,
+        void:Dataset ;
+    dc:subject <file:///code/skosmos-live/config.ttl#cat_general> ;
+    dc:title "MDMCfirst-1" ;
+    skosmos:defaultLanguage "" ;
+    skosmos:fullAlphabeticalIndex true ;
+    skosmos:mainConceptScheme <http://localhost:8001/MDMCfirst-1/en/page/> ;
+    void:sparqlEndpoint <http://fuseki-live:3030/MDMCfirst-1/sparql> ;
+    void:uriSpace "http://localhost:8001/MDMCfirst-1/en/page/" .
+
+<file:///code/skosmos-live/config.ttl#MatWerkAcronyms-1> a skosmos:Vocabulary,
+        void:Dataset ;
+    dc:subject <file:///code/skosmos-live/config.ttl#cat_general> ;
+    dc:title "MatWerkAcronyms-1" ;
+    skosmos:defaultLanguage "" ;
+    skosmos:fullAlphabeticalIndex true ;
+    skosmos:mainConceptScheme <http://localhost:8001/MatWerkAcronyms-1/en/page/> ;
+    void:sparqlEndpoint <http://fuseki-live:3030/MatWerkAcronyms-1/sparql> ;
+    void:uriSpace "http://localhost:8001/MatWerkAcronyms-1/en/page/" .
+
+<file:///code/skosmos-live/config.ttl#NewTestVocabulary-1> a skosmos:Vocabulary,
+        void:Dataset ;
+    dc:subject <file:///code/skosmos-live/config.ttl#cat_general> ;
+    dc:title "NewTestVocabulary-1" ;
+    skosmos:defaultLanguage "" ;
+    skosmos:fullAlphabeticalIndex true ;
+    skosmos:language "en" ;
+    skosmos:mainConceptScheme <http://localhost:8001/NewTestVocabulary-1/> ;
+    void:sparqlEndpoint <http://fuseki-live:3030/NewTestVocabulary-1/sparql> ;
+    void:uriSpace "http://localhost:8001/NewTestVocabulary-1/" .
+

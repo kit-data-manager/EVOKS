@@ -3,7 +3,7 @@ version: "3.7"
 services:
   postgres:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_postgres
-    image: postgres
+    image: postgres:13.8-bullseye
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
