@@ -107,7 +107,7 @@ def signup_view(request: HttpRequest) -> HttpResponse:
             #     fail_silently=False,
             # )
 
-            return HttpResponse('Your account needs to be verified first. Please contact Danah and Germaine')
+            return HttpResponse('Your account needs to be verified first. Please contact Felix (felix.ernst@kit.edu)')
 
     else:
         form = SignupForm()
