@@ -1,3 +1,6 @@
+**Caution**
+This software is only for internal development purposes. It is *not ready* for production and shall not be available for public. 
+
 *Achtung*
 Der Masterbranch enthält nicht die neusten Entwicklungen. Diese sind unter dem *testing* (mehr Funktionen, weniger usability) bzw. *sfb980* (weniger Funktionen, höhere usability) branch zu finden. 
 
