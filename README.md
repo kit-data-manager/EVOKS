@@ -1,3 +1,6 @@
+**Caution**
+This software is only for internal development purposes. It is *not ready* for production and shall not be available for public. 
+
 Install instructions (tested for linux)
 
 **Prerequisites:**
