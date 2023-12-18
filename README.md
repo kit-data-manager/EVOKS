@@ -1,14 +1,7 @@
-<<<<<<< HEAD
 **Caution**
 This software is only for internal development purposes. It is *not ready* for production and shall not be available for public. 
 
-*Achtung*
-Der Masterbranch enthält nicht die neusten Entwicklungen. Diese sind unter dem *testing* (mehr Funktionen, weniger usability) bzw. *sfb980* (weniger Funktionen, höhere usability) branch zu finden. 
-
-Das folgende Vorgehen zum Aufsetzen der Applikation ist unter Linux getestet:
-=======
 Install instructions (tested for linux)
->>>>>>> f3971b4 (readme vollständig übersetzt, unnötige Sachen entfernt)
 
 **Prerequisites:**
 Installation of git, docker and docker compose (docker-compose (with dash) will not be supported anymore)
