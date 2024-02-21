@@ -72,7 +72,7 @@ DEBUG = True
 # set to False to disable Browser-sync
 TAILWIND_DEV_MODE = False
 
-ALLOWED_HOSTS: list[str] = ['.kit.edu']
+ALLOWED_HOSTS: list[str] = ['']
 
 
 LOGIN_REDIRECT_URL = '/vocabularies'
