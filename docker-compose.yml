@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   postgres:
-    container_name: evoks_${INSTANCE_NAME}_postgres
+    container_name: evoks_${INSTANCE_NAME:-defaultinstance}_postgres
     image: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -17,7 +17,7 @@ services:
       - postgres
     restart: unless-stopped
   web:
-    container_name: evoks_${INSTANCE_NAME:-evoks}_web
+    container_name: evoks_${INSTANCE_NAME:-defaultinstance}_web
     build:
       context: "."
     # caution, don't change this port since it is the one used within the container
@@ -42,7 +42,7 @@ services:
       - ./fuseki-dev/backup:/code/fuseki-dev/backup
     restart: unless-stopped
   fuseki-dev:
-    container_name: evoks_${INSTANCE_NAME}_fuseki-dev
+    container_name: evoks_${INSTANCE_NAME:-defaultinstance}_fuseki-dev
     image: secoresearch/fuseki
     hostname: fuseki-dev
     environment: 
@@ -59,7 +59,7 @@ services:
     networks:
       - fuseki-dev
   fuseki-live:
-    container_name: evoks_${INSTANCE_NAME}_fuseki-live
+    container_name: evoks_${INSTANCE_NAME:-defaultinstance}_fuseki-live
     image: secoresearch/fuseki
     hostname: fuseki-live
     environment: 
@@ -76,9 +76,9 @@ services:
     networks:
       - fuseki-live
   skosmos-dev:
-    container_name: evoks_${INSTANCE_NAME}_skosmos-dev
+    container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-dev
     build:
-      context: github.com/NatLibFi/Skosmos.git
+      context: github.com/NatLibFi/Skosmos.git#main
       dockerfile: dockerfiles/Dockerfile.ubuntu
     ports: 
       - "${SKOSMOS_DEV_PORT:-8001}:80"
@@ -90,9 +90,9 @@ services:
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
   skosmos-live:
-    container_name: evoks_${INSTANCE_NAME}_skosmos-live
+    container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-live
     build:
-      context: github.com/NatLibFi/Skosmos.git
+      context: github.com/NatLibFi/Skosmos.git#main
       dockerfile: dockerfiles/Dockerfile.ubuntu
     ports: 
       - "${SKOSMOS_LIVE_PORT:-8002}:80"
