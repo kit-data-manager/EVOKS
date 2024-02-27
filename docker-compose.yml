@@ -78,7 +78,7 @@ services:
   skosmos-dev:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-dev
     build:
-      context: github.com/NatLibFi/Skosmos.git#main
+      context: github.com/NatLibFi/Skosmos.git#v2.17
       dockerfile: dockerfiles/Dockerfile.ubuntu
     ports: 
       - "${SKOSMOS_DEV_PORT:-8001}:80"
@@ -92,7 +92,7 @@ services:
   skosmos-live:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-live
     build:
-      context: github.com/NatLibFi/Skosmos.git#main
+      context: github.com/NatLibFi/Skosmos.git#v2.17
       dockerfile: dockerfiles/Dockerfile.ubuntu
     ports: 
       - "${SKOSMOS_LIVE_PORT:-8002}:80"
