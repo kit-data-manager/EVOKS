@@ -59,7 +59,7 @@ for running the unittests:
 1. `docker ps`, look for <container_prefix>_web_1 container
 2. `docker exec -it <container_prefix>_web_1 bash`
 3. Within the container: `cd evoks`
-4. run `coverage run --source='.' --omit='*/migrations/*.py','guardian/*','theme/*','evoks/__init__.py','evoks/asgi.py','evoks/wsgi.py','manage.py','tests/*' manage.py test tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks && coverage html` aus.
+4. run this command: `coverage run --source='.' --omit='*/migrations/*.py','guardian/*','theme/*','evoks/__init__.py','evoks/asgi.py','evoks/wsgi.py','manage.py','tests/*' manage.py test tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks && coverage html` 
 5. Open index.html from folder htmlcov with a browser.
 
 **License**
