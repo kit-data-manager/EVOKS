@@ -46,7 +46,7 @@ services:
     image: secoresearch/fuseki
     hostname: fuseki-dev
     environment: 
-      ADMIN_PASSWORD: 'fuseki_password'
+      ADMIN_PASSWORD: ${FUSEKI_PASSWORD:-fuseki_password}'
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
@@ -63,7 +63,7 @@ services:
     image: secoresearch/fuseki
     hostname: fuseki-live
     environment: 
-      ADMIN_PASSWORD: 'fuseki_password'
+      ADMIN_PASSWORD: ${FUSEKI_PASSWORD:-fuseki_password}'
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
