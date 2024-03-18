@@ -112,5 +112,4 @@ networks:
     driver: bridge
 volumes:
     postgres:
-    pgadmin:
     fuseki:
