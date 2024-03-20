@@ -7,6 +7,9 @@ import socket
 import environ
 import os
 
+
+base_dir = environ.Path(__file__) - 3  # .env is three levels up from this file, therefore - 3
+env_file = str(base_dir.path('.env'))  
 env = environ.Env(
     FUSEKI_USER=(str, 'admin'),
     FUSEKI_PASSWORD=(str, 'fuseki_password'),
@@ -14,7 +17,7 @@ env = environ.Env(
     EMAIL_HOST_USER=(str, ''),
     EMAIL_HOST_PASSWORD=(str, '')
 )
-environ.Env.read_env()
+environ.Env.read_env(env_file)
 
 """
 Django settings for evoks project.
