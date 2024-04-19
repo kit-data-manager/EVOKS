@@ -89,7 +89,7 @@ def find_urispace(data, extension):
     # Use regular expressions to extract the base URI from each full URI
     # finds URIs with up to 4 slashes after the domain name
     # can be adjusted in the {1,4} part
-    pattern = re.compile(r'(https?://[^/]+(?:/[^/]+){1,4}/)')
+    pattern = re.compile(r'(https?://[^/]+(?:/[^/]+){0,4}/)')
     uri_prefixes = [pattern.match(uri) for uri in uris]
     uri_prefixes = [match.group(1) for match in uri_prefixes if match]
 
