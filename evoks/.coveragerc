@@ -1,0 +1,10 @@
+[run]
+omit =
+    */migrations/*.py
+    guardian/*
+    theme/*
+    evoks/__init__.py
+    evoks/asgi.py
+    evoks/wsgi.py
+    manage.py
+    tests/*
