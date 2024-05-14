@@ -1,0 +1,109 @@
+version: "3.7"
+services:
+  postgres:
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+      POSTGRES_DB: dev
+    ports:
+      - "${POSTGRES_PORT:-8005}:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+    healthcheck:
+      test: pg_isready
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  web:
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_testrunner
+    build:
+      context: "."
+    # caution, don't change this port since it is the one used within the container
+    # to change port, use the "ports:" section
+    command: >
+      sh -c "cd ./evoks &&
+             python manage.py migrate &&
+             coverage run manage.py test -v 3 tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks ;
+             coverage report"
+    ports:
+      - "${EVOKS_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+          condition: service_healthy
+    networks: 
+      - postgres
+      - fuseki-dev
+      - fuseki-live
+    volumes:
+      - .:/code
+      - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
+      - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
+  fuseki-dev:
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_fuseki-dev
+    image: secoresearch/fuseki
+    hostname: fuseki-dev
+    environment: 
+      ADMIN_PASSWORD: 'fuseki_password'
+      ENABLE_DATA_WRITE: 'True'
+      ENABLE_UPDATE: 'True'
+      ENABLE_UPLOAD: 'True'
+    ports:
+      - "${FUSEKI_DEV_PORT:-8003}:3030"
+    networks:
+      - fuseki-dev
+  fuseki-live:
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_fuseki-live
+    image: secoresearch/fuseki
+    hostname: fuseki-live
+    environment: 
+      ADMIN_PASSWORD: 'fuseki_password'
+      ENABLE_DATA_WRITE: 'True'
+      ENABLE_UPDATE: 'True'
+      ENABLE_UPLOAD: 'True'
+    ports:
+      - "${FUSEKI_LIVE_PORT:-8004}:3030"
+    networks:
+      - fuseki-live
+  skosmos-dev:
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_skosmos-dev
+    build:
+      context: https://github.com/NatLibFi/Skosmos.git#v2.17
+      dockerfile: dockerfiles/Dockerfile.ubuntu
+    ports: 
+      - "${SKOSMOS_DEV_PORT:-8001}:80"
+    hostname: skosmos-dev
+    depends_on: 
+      - fuseki-dev
+    networks:
+      - fuseki-dev
+    volumes:
+      - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
+  skosmos-live:
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_skosmos-live
+    build:
+      context: https://github.com/NatLibFi/Skosmos.git#v2.17
+      dockerfile: dockerfiles/Dockerfile.ubuntu
+    ports: 
+      - "${SKOSMOS_LIVE_PORT:-8002}:80"
+    hostname: skosmos-live
+    depends_on: 
+      - fuseki-live
+    networks:
+      - fuseki-live
+    volumes:
+      - ./skosmos-live/config.ttl:/var/www/html/config.ttl
+networks:
+  postgres:
+    driver: bridge
+  fuseki-dev:
+    driver: bridge
+  fuseki-live:
+    driver: bridge
+volumes:
+    postgres:
+    pgadmin:
+    fuseki:

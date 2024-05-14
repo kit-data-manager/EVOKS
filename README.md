@@ -56,11 +56,13 @@ To create an administrator account for evoks the following steps have to be perf
 **Execution of Tests (only for developers needed)**
 for running the unittests:
 
-1. `docker ps`, look for <container_prefix>_web_1 container
-2. `docker exec -it <container_prefix>_web_1 bash`
-3. Within the container: `cd evoks`
-4. run this command: `coverage run --source='.' --omit='*/migrations/*.py','guardian/*','theme/*','evoks/__init__.py','evoks/asgi.py','evoks/wsgi.py','manage.py','tests/*' manage.py test tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks && coverage html` 
-5. Open index.html from folder htmlcov with a browser.
+Run the unit/integration tests with `docker compose -f docker-compose.test.yml up --abort-on-container-exit`. 
+This will run all tests, create a coverage report and stop all containers afterwards.
+
+- You can keep the associated containers running by removing `--abort-on-container-exit`. This might be useful for checking database states after testing (mainly for troubleshooting test setup).
+- Change [configuration for coverage](https://coverage.readthedocs.io/en/latest/config.html) report in `evoks/.coveragerc` if needed.
+- Add or remove test targets in `docker-compose.test.yml` in the `command` section of the web / testrunner container.
+- You can change the verbosity level of the test runner by changing or removing the `-v` parameter from the command.
 
 **License**
 
