@@ -11,8 +11,6 @@ services:
       POSTGRES_DB: dev
     volumes:
        - postgres:/data/postgres
-    ports:
-      - "${POSTGRES_PORT:-8005}:5432"
     networks:
       - postgres
     restart: unless-stopped
@@ -50,8 +48,6 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
-    ports:
-      - "${FUSEKI_DEV_PORT:-8003}:3030"
     volumes: 
       - ./fuseki-dev/data:/fuseki-base/databases
       - ./fuseki-dev/config:/fuseki-base/configuration
@@ -67,8 +63,6 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
-    ports:
-      - "${FUSEKI_LIVE_PORT:-8004}:3030"
     volumes: 
       - ./fuseki-live/data:/fuseki-base/databases
       - ./fuseki-live/config:/fuseki-base/configuration
