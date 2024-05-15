@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   postgres:
-    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_postgres
+    container_name: evokstest_postgres
     image: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -19,7 +19,7 @@ services:
       timeout: 3s
       retries: 5
   web:
-    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_testrunner
+    container_name: evokstest_testrunner
     build:
       context: "."
     # caution, don't change this port since it is the one used within the container
@@ -43,7 +43,7 @@ services:
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
   fuseki-dev:
-    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_fuseki-dev
+    container_name: evokstest_fuseki-dev
     image: secoresearch/fuseki
     hostname: fuseki-dev
     environment: 
@@ -56,7 +56,7 @@ services:
     networks:
       - fuseki-dev
   fuseki-live:
-    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_fuseki-live
+    container_name: evokstest_fuseki-live
     image: secoresearch/fuseki
     hostname: fuseki-live
     environment: 
@@ -69,7 +69,7 @@ services:
     networks:
       - fuseki-live
   skosmos-dev:
-    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_skosmos-dev
+    container_name: evokstest_skosmos-dev
     build:
       context: https://github.com/NatLibFi/Skosmos.git#v2.17
       dockerfile: dockerfiles/Dockerfile.ubuntu
@@ -83,7 +83,7 @@ services:
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
   skosmos-live:
-    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_skosmos-live
+    container_name: evokstest_skosmos-live
     build:
       context: https://github.com/NatLibFi/Skosmos.git#v2.17
       dockerfile: dockerfiles/Dockerfile.ubuntu
