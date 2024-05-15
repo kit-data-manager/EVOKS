@@ -3,7 +3,6 @@ psycopg2-binary>=2.8
 sty
 django-tailwind
 sparqlwrapper
-mypy
 django-stubs
 django-environ
 skosify
