@@ -1,12 +1,10 @@
-name: CI
+name: docker compose tests
 
 on:
   push:
-    branches:
-      - '**'
+    branches: [ master, main, development ]
   pull_request:
-    branches:
-      - '**'
+    branches: [ master, main, development ]
 
 jobs:
   test-all:
