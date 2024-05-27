@@ -1,5 +1,5 @@
 # EVOKS repository
-![tests](https://github.com/github/kit-data-manager/EVOKS/actions/workflows/compose-ci.yml/badge.svg)
+![tests](https://github.com/kit-data-manager/EVOKS/actions/workflows/compose-ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/kit-data-manager/EVOKS/graph/badge.svg?token=qXx2sFQPxW)](https://codecov.io/gh/kit-data-manager/EVOKS)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
