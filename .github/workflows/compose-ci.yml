@@ -2,9 +2,9 @@ name: docker compose tests
 
 on:
   push:
-    branches: [ master, main, development, github-ci ]
-  pull_request:
-    branches: [ master, main, development, github-ci ]
+    branches: [ master, main, development]
+  # pull_request:
+  #   branches: [ master, main, development]
   workflow_dispatch:
 
 jobs:
