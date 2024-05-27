@@ -1,52 +1,40 @@
 version: "3.7"
-
-x-app: &evoks
-  build:
-    context: "."
-  volumes:
-    - .:/code
-  restart: "unless-stopped"
-
 services:
   postgres:
-    container_name: postgres_container
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_postgres
     image: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       PGDATA: /data/postgres
-    volumes:
-       - postgres:/data/postgres
+      POSTGRES_DB: dev
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-8005}:5432"
     networks:
       - postgres
     restart: unless-stopped
-  
-  pgadmin:
-    container_name: pgadmin_container
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-       - pgadmin:/root/.pgadmin
-
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
-    networks:
-      - postgres
-    restart: unless-stopped
+    healthcheck:
+      test: pg_isready
+      interval: 10s
+      timeout: 3s
+      retries: 5
   web:
-    <<: *evoks
-    command: "python ./evoks/manage.py runserver 0.0.0.0:8000"
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_testrunner
+    build:
+      context: "."
+    # caution, don't change this port since it is the one used within the container
+    # to change port, use the "ports:" section
+    command: >
+      sh -c "cd ./evoks &&
+             python manage.py migrate &&
+             coverage run manage.py test -v 3 tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks ;
+             coverage report ;
+             coverage xml"
     ports:
-      - "8000:8000"
+      - "${EVOKS_PORT:-8000}:8000"
     depends_on:
-      - postgres
-      - fuseki-dev
-      - fuseki-live
+      postgres:
+          condition: service_healthy
     networks: 
       - postgres
       - fuseki-dev
@@ -55,9 +43,8 @@ services:
       - .:/code
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
-      - ./fuseki-dev/backup:/code/fuseki-dev/backup
   fuseki-dev:
-    container_name: fuseki-dev
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_fuseki-dev
     image: secoresearch/fuseki
     hostname: fuseki-dev
     environment: 
@@ -66,15 +53,11 @@ services:
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
     ports:
-      - "3030:3030"
-    volumes: 
-      - ./fuseki-dev/data:/fuseki-base/databases
-      - ./fuseki-dev/config:/fuseki-base/configuration
-      - ./fuseki-dev/backup:/fuseki-base/backups
+      - "${FUSEKI_DEV_PORT:-8003}:3030"
     networks:
       - fuseki-dev
   fuseki-live:
-    container_name: fuseki-live
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_fuseki-live
     image: secoresearch/fuseki
     hostname: fuseki-live
     environment: 
@@ -83,19 +66,16 @@ services:
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
     ports:
-      - "3040:3030"
-    volumes: 
-      - ./fuseki-live/data:/fuseki-base/databases
-      - ./fuseki-live/config:/fuseki-base/configuration
-      - ./fuseki-live/backup:/fuseki-base/backups
+      - "${FUSEKI_LIVE_PORT:-8004}:3030"
     networks:
       - fuseki-live
   skosmos-dev:
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_skosmos-dev
     build:
-      context: github.com/NatLibFi/Skosmos.git
+      context: https://github.com/NatLibFi/Skosmos.git#v2.17
       dockerfile: dockerfiles/Dockerfile.ubuntu
     ports: 
-      - 9090:80
+      - "${SKOSMOS_DEV_PORT:-8001}:80"
     hostname: skosmos-dev
     depends_on: 
       - fuseki-dev
@@ -104,11 +84,12 @@ services:
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
   skosmos-live:
+    container_name: evokstest_${INSTANCE_NAME:-defaultinstance}_skosmos-live
     build:
-      context: github.com/NatLibFi/Skosmos.git
+      context: https://github.com/NatLibFi/Skosmos.git#v2.17
       dockerfile: dockerfiles/Dockerfile.ubuntu
     ports: 
-      - 9080:80
+      - "${SKOSMOS_LIVE_PORT:-8002}:80"
     hostname: skosmos-live
     depends_on: 
       - fuseki-live

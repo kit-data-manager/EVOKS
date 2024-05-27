@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  postgres:
+    ports:
+      - "${POSTGRES_PORT:-8005}:5432"
+  fuseki-dev:
+    ports:
+      - "${FUSEKI_DEV_PORT:-8003}:3030"
+  fuseki-live:
+    ports:
+      - "${FUSEKI_LIVE_PORT:-8004}:3030"
