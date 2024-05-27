@@ -28,7 +28,8 @@ services:
       sh -c "cd ./evoks &&
              python manage.py migrate &&
              coverage run manage.py test -v 3 tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks ;
-             coverage report"
+             coverage report ;
+             coverage xml"
     ports:
       - "${EVOKS_PORT:-8000}:8000"
     depends_on:

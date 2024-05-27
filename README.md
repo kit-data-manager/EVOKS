@@ -1,4 +1,5 @@
 # EVOKS repository
+[![codecov](https://codecov.io/gh/kit-data-manager/EVOKS/graph/badge.svg?token=qXx2sFQPxW)](https://codecov.io/gh/kit-data-manager/EVOKS)
 
 EVOKS (Editor for Vocabularies to Know Semantics) is a software for creating and publishing SKOS vocabularies and thesauri. 
 It allows you to:
