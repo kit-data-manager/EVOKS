@@ -9,7 +9,6 @@ on:
 
 jobs:
   test-all:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     services:
