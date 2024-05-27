@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  test-all:
+    runs-on: ubuntu-latest
+
+    services:
+      dockerdind:
+        image: docker:20.10.7
+        options: --privileged
+        ports:
+          - 2375:2375
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and run tests
+        run: |
+          docker compose -f docker-compose.test.yml build
+          docker compose -f docker-compose.test.yml up --abort-on-container-exit
+
+      - name: Remove Docker containers
+        if: always()
+        run: docker compose -f docker-compose.test.yml down
