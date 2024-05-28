@@ -122,5 +122,8 @@ GitHub.sublime-settings
 .history
 .vscode/settings.js
 
-# apache jena fuseki bs
+# apache jena fuseki
 fuseki-data
+
+# macos
+.DS_Store
