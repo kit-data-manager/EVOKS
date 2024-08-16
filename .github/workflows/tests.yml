@@ -1,7 +1,8 @@
 name: tests
 
 on:
-  # push:
+  push:
+    branches: [ dependency-updates ]
   #   branches: [ master, main, development]
   pull_request:
     branches: [ master, main, development]
