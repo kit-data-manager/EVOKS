@@ -1,11 +1,10 @@
 name: tests
 
 on:
-  push:
-    branches: [ dependency-updates ]
+  # push:
   #   branches: [ master, main, development]
-  pull_request:
-    branches: [ master, main, development]
+  # pull_request:
+  #   branches: [ master, main, development]
   workflow_dispatch:
 
 jobs:
@@ -40,5 +39,4 @@ jobs:
       - name: Remove Docker containers
         if: always()
         run: docker compose -f docker-compose.test.yml down
-
 
