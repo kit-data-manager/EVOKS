@@ -8,11 +8,16 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       PGDATA: /data/postgres
       POSTGRES_DB: dev
-    volumes:
-       - postgres:/data/postgres
+    ports:
+      - "${POSTGRES_PORT:-8005}:5432"
     networks:
       - postgres
     restart: unless-stopped
+    healthcheck:
+      test: pg_isready
+      interval: 10s
+      timeout: 3s
+      retries: 5
   web:
     container_name: evokstest_testrunner
     build:
@@ -28,9 +33,8 @@ services:
     ports:
       - "${EVOKS_PORT:-8000}:8000"
     depends_on:
-      - postgres
-      - fuseki-dev
-      - fuseki-live
+      postgres:
+          condition: service_healthy
     networks: 
       - postgres
       - fuseki-dev
@@ -40,20 +44,21 @@ services:
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
       - ./fuseki-dev/backup:/code/fuseki-dev/backup
-    restart: unless-stopped
   fuseki-dev:
     container_name: evokstest_fuseki-dev
     image: secoresearch/fuseki
     hostname: fuseki-dev
     environment: 
-      ADMIN_PASSWORD: ${FUSEKI_PASSWORD:-fuseki_password}
+      ADMIN_PASSWORD: 'fuseki_password'
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
-    volumes: 
-      - ./fuseki-dev/data:/fuseki-base/databases
-      - ./fuseki-dev/config:/fuseki-base/configuration
-      - ./fuseki-dev/backup:/fuseki-base/backups
+    # volumes: 
+    #   - ./fuseki-dev/data:/fuseki-base/databases
+    #   - ./fuseki-dev/config:/fuseki-base/configuration
+    #   - ./fuseki-dev/backup:/fuseki-base/backups
+    ports:
+      - "${FUSEKI_DEV_PORT:-8003}:3030"
     networks:
       - fuseki-dev
   fuseki-live:
@@ -61,14 +66,16 @@ services:
     image: secoresearch/fuseki
     hostname: fuseki-live
     environment: 
-      ADMIN_PASSWORD: ${FUSEKI_PASSWORD:-fuseki_password}
+      ADMIN_PASSWORD: 'fuseki_password'
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
-    volumes: 
-      - ./fuseki-live/data:/fuseki-base/databases
-      - ./fuseki-live/config:/fuseki-base/configuration
-      - ./fuseki-live/backup:/fuseki-base/backups
+    # volumes: 
+    #   - ./fuseki-live/data:/fuseki-base/databases
+    #   - ./fuseki-live/config:/fuseki-base/configuration
+    #   - ./fuseki-live/backup:/fuseki-base/backups
+    ports:
+      - "${FUSEKI_LIVE_PORT:-8004}:3030"
     networks:
       - fuseki-live
   skosmos-dev:
