@@ -35,8 +35,8 @@ jobs:
           files: ./coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      # - name: Remove Docker containers
-      #   if: always()
-      #   run: docker compose -f docker-compose.custom-test.yml down
+      - name: Remove Docker containers
+        if: always()
+        run: docker compose -f docker-compose.custom-test.yml down
 
 
