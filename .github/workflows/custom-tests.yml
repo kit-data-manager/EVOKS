@@ -1,6 +1,9 @@
 name: custom-tests
 
 on:
+  push:    
+    branches: 
+      - ci-error
   workflow_dispatch:
 
 jobs:
