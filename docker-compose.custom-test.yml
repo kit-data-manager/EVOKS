@@ -53,10 +53,10 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
-    # volumes: 
-    #   - ./fuseki-dev/data:/fuseki-base/databases
-    #   - ./fuseki-dev/config:/fuseki-base/configuration
-    #   - ./fuseki-dev/backup:/fuseki-base/backups
+    volumes: 
+      - ./fuseki-dev/data:/fuseki-base/databases
+      - ./fuseki-dev/config:/fuseki-base/configuration
+      - ./fuseki-dev/backup:/fuseki-base/backups
     ports:
       - "${FUSEKI_DEV_PORT:-8003}:3030"
     networks:
