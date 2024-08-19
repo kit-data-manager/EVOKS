@@ -29,7 +29,7 @@ services:
              python manage.py migrate &&
              coverage run manage.py test -v 3 tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks ;
              coverage report ;
-             coverage xml;"
+             coverage xml"
     ports:
       - "${EVOKS_PORT:-8000}:8000"
     depends_on:
@@ -43,6 +43,7 @@ services:
       - .:/code
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
+      # - ./fuseki-dev/backup:/code/fuseki-dev/backup
   fuseki-dev:
     container_name: evokstest_fuseki-dev
     image: secoresearch/fuseki
@@ -52,6 +53,10 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
+    # volumes: 
+    #   - ./fuseki-dev/data:/fuseki-base/databases
+    #   - ./fuseki-dev/config:/fuseki-base/configuration
+    #   - ./fuseki-dev/backup:/fuseki-base/backups
     ports:
       - "${FUSEKI_DEV_PORT:-8003}:3030"
     networks:
@@ -65,6 +70,10 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
+    # volumes: 
+    #   - ./fuseki-live/data:/fuseki-base/databases
+    #   - ./fuseki-live/config:/fuseki-base/configuration
+    #   - ./fuseki-live/backup:/fuseki-base/backups
     ports:
       - "${FUSEKI_LIVE_PORT:-8004}:3030"
     networks:
@@ -106,5 +115,4 @@ networks:
     driver: bridge
 volumes:
     postgres:
-    pgadmin:
     fuseki:
