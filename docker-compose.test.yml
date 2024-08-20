@@ -25,10 +25,11 @@ services:
     # caution, don't change this port since it is the one used within the container
     # to change port, use the "ports:" section
     command: >
-      sh -c "cd ./evoks &&
+      sh -c "set -e &&
+             cd ./evoks &&
              python manage.py migrate &&
-             coverage run manage.py test -v 3 tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks ;
-             coverage report ;
+             coverage run manage.py test -v 3 tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks &&
+             coverage report &&
              coverage xml"
     ports:
       - "${EVOKS_PORT:-8000}:8000"
