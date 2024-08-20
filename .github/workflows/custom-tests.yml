@@ -1,10 +1,10 @@
-name: tests
+name: custom-tests
 
 on:
-  # push:
-  #   branches: [ master, main, development]
-  # pull_request:
-  #   branches: [ master, main, development]
+  push:    
+    branches: 
+      - ci-error
+      - ci-pipeline
   workflow_dispatch:
 
 jobs:
