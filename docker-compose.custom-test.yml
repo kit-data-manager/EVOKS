@@ -18,6 +18,26 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+  change-vol-ownership:
+    # Fix Ownership of Build Directory
+    # Thanks to Bug in Docker itself
+    # We need to use steps like this
+    # Because by default, the volume directory
+    # Is owned by Root
+    # So this helps correct it
+    # We can use any image we want as long as we can chown
+    image: ubuntu
+    # Need a user priviliged enough to chown
+    user: "root"
+    # Specify the group in question
+    # group_add:
+    #   - '${GROUP_ID}'
+    volumes:
+      # The volume to chown
+      - fuseki-dev-backup:/tmp/change-ownership
+    # command: chown -R ${USER_ID}:${GROUP_ID} /tmp/change-ownership
+    command: chmod 777 -R  /tmp/change-ownership
+
   web:
     container_name: evokstest_testrunner
     build:
@@ -35,6 +55,9 @@ services:
     depends_on:
       postgres:
           condition: service_healthy
+      change-vol-ownership:
+        # Wait for the ownership to change
+        condition: service_completed_successfully
     networks: 
       - postgres
       - fuseki-dev
@@ -43,7 +66,8 @@ services:
       - .:/code
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
-      - ./fuseki-dev/backup:/code/fuseki-dev/backup
+      # - ./fuseki-dev/backup:/code/fuseki-dev/backup
+      - fuseki-dev-backup:/code/fuseki-dev/backup:z
   fuseki-dev:
     container_name: evokstest_fuseki-dev
     image: secoresearch/fuseki
@@ -53,10 +77,11 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
-    # volumes: 
-    #   - ./fuseki-dev/data:/fuseki-base/databases
-    #   - ./fuseki-dev/config:/fuseki-base/configuration
-    #   - ./fuseki-dev/backup:/fuseki-base/backups
+    volumes: 
+      - fuseki-dev-data:/fuseki-base/databases
+      - fuseki-dev-config:/fuseki-base/configuration
+      # - ./fuseki-dev/backup:/fuseki-base/backups
+      - fuseki-dev-backup:/fuseki-base/backups
     ports:
       - "${FUSEKI_DEV_PORT:-8003}:3030"
     networks:
@@ -70,10 +95,10 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
-    # volumes: 
-    #   - ./fuseki-live/data:/fuseki-base/databases
-    #   - ./fuseki-live/config:/fuseki-base/configuration
-    #   - ./fuseki-live/backup:/fuseki-base/backups
+    volumes: 
+      - fuseki-live-data:/fuseki-base/databases
+      - fuseki-live-config:/fuseki-base/configuration
+      - ./fuseki-live/backup:/fuseki-base/backups
     ports:
       - "${FUSEKI_LIVE_PORT:-8004}:3030"
     networks:
@@ -116,3 +141,9 @@ networks:
 volumes:
     postgres:
     fuseki:
+    fuseki-dev-data:
+    fuseki-dev-config:
+    fuseki-dev-backup:
+    fuseki-live-data:
+    fuseki-live-config:
+    
