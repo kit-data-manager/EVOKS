@@ -34,13 +34,14 @@ services:
     #   - '${GROUP_ID}'
     volumes:
       # The volume to chown
-      - fuseki-dev-backup:/tmp/change-ownership
+      - fuseki-dev-backup:/tmp/change-ownership-fuseki-dev
+      - fuseki-live-backup:/tmp/change-ownership-fuseki-live
     # execute chmod to enable writing to the volume by other containers
     # write exit status to file
     # keep container running to enable abort-on-container-exit for testrunner container
     # abort-on-container-exit is a prerequisite for using 
     command: >
-      sh -c "chmod -R 777 /tmp/change-ownership && echo $? > /tmp/chmod_exit_status && tail -f /dev/null"
+      sh -c "chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live || echo $? > /tmp/chmod_exit_status ; tail -f /dev/null"
     healthcheck:
       test: ["CMD-SHELL", "cat /tmp/chmod_exit_status | grep -q '^0$'"]
       interval: 5s
@@ -76,8 +77,8 @@ services:
       - .:/code
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
-      # - ./fuseki-dev/backup:/code/fuseki-dev/backup
       - fuseki-dev-backup:/code/fuseki-dev/backup
+      - fuseki-live-backup:/code/fuseki-live/backup
   fuseki-dev:
     container_name: evokstest_fuseki-dev
     image: secoresearch/fuseki
@@ -90,7 +91,6 @@ services:
     volumes: 
       - fuseki-dev-data:/fuseki-base/databases
       - fuseki-dev-config:/fuseki-base/configuration
-      # - ./fuseki-dev/backup:/fuseki-base/backups
       - fuseki-dev-backup:/fuseki-base/backups
     ports:
       - "${FUSEKI_DEV_PORT:-8003}:3030"
@@ -108,7 +108,7 @@ services:
     volumes: 
       - fuseki-live-data:/fuseki-base/databases
       - fuseki-live-config:/fuseki-base/configuration
-      - ./fuseki-live/backup:/fuseki-base/backups
+      - fuseki-live-backup:/fuseki-base/backups
     ports:
       - "${FUSEKI_LIVE_PORT:-8004}:3030"
     networks:
@@ -156,4 +156,5 @@ volumes:
     fuseki-dev-backup:
     fuseki-live-data:
     fuseki-live-config:
-    
+    fuseki-live-backup:
+
