@@ -10,6 +10,8 @@ from time import sleep
 import os
 from unittest.mock import patch
 import io
+import random
+import string
 
 
 class FusekiTestCase(TestCase):
@@ -17,7 +19,7 @@ class FusekiTestCase(TestCase):
     def setUp(self) -> None:
         self.fuseki_dev = Fuseki(
             'fuseki-dev', 3030, 'development', 'fuseki-dev/backup')
-        self.vocabulary = Vocabulary(name='ds')
+        self.vocabulary = Vocabulary(name=''.join(random.choices(string.ascii_letters, k=10)))
         self.vocabulary.save()
         self.fuseki_dev.create_vocabulary(self.vocabulary)
         self.delete_vocabularies = [self.vocabulary]
