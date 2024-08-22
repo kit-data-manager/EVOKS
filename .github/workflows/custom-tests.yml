@@ -4,6 +4,7 @@ on:
   push:    
     branches: 
       - ci-error
+      - ci-pipeline
   workflow_dispatch:
 
 jobs:
