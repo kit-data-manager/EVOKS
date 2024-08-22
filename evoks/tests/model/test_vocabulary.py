@@ -69,14 +69,7 @@ class VocabularyTest(TestCase):
         vocabulary = self.vocabulary
         namespaces = vocabulary.get_namespaces()
         self.assertCountEqual(namespaces,
-                              [('xls', 'http://xmlns.com/foaf/0.1/'),
-                               ('pls', 'http://plmns.com/foaf/0.1/'),
-                                  ('skos', 'http://www.w3.org/2004/02/skos/core#'),
-                                  ('dc', 'http://purl.org/dc/elements/1.1/'),
-                                  ('dct', 'http://purl.org/dc/terms/'),
-                                  ('xml', 'http://www.w3.org/XML/1998/namespace'),
-                                  ('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'),
-                                  ('rdfs', 'http://www.w3.org/2000/01/rdf-schema#'), ('xsd', 'http://www.w3.org/2001/XMLSchema#')])
+                              [('skos', 'http://www.w3.org/2004/02/skos/core#'), ('dc', 'http://purl.org/dc/elements/1.1/'), ('dct', 'http://purl.org/dc/terms/'), ('xls', 'http://xmlns.com/foaf/0.1/'), ('pls', 'http://plmns.com/foaf/0.1/'), ('brick', 'https://brickschema.org/schema/Brick#'), ('csvw', 'http://www.w3.org/ns/csvw#'), ('dc', 'http://purl.org/dc/elements/1.1/'), ('dcat', 'http://www.w3.org/ns/dcat#'), ('dcmitype', 'http://purl.org/dc/dcmitype/'), ('dcterms', 'http://purl.org/dc/terms/'), ('dcam', 'http://purl.org/dc/dcam/'), ('doap', 'http://usefulinc.com/ns/doap#'), ('foaf', 'http://xmlns.com/foaf/0.1/'), ('geo', 'http://www.opengis.net/ont/geosparql#'), ('odrl', 'http://www.w3.org/ns/odrl/2/'), ('org', 'http://www.w3.org/ns/org#'), ('prof', 'http://www.w3.org/ns/dx/prof/'), ('prov', 'http://www.w3.org/ns/prov#'), ('qb', 'http://purl.org/linked-data/cube#'), ('schema', 'https://schema.org/'), ('sh', 'http://www.w3.org/ns/shacl#'), ('skos', 'http://www.w3.org/2004/02/skos/core#'), ('sosa', 'http://www.w3.org/ns/sosa/'), ('ssn', 'http://www.w3.org/ns/ssn/'), ('time', 'http://www.w3.org/2006/time#'), ('vann', 'http://purl.org/vocab/vann/'), ('void', 'http://rdfs.org/ns/void#'), ('wgs', 'https://www.w3.org/2003/01/geo/wgs84_pos#'), ('owl', 'http://www.w3.org/2002/07/owl#'), ('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'), ('rdfs', 'http://www.w3.org/2000/01/rdf-schema#'), ('xsd', 'http://www.w3.org/2001/XMLSchema#'), ('xml', 'http://www.w3.org/XML/1998/namespace')])
 
     def test_prefixes_to_str(self):
         vocabulary = self.vocabulary
@@ -88,10 +81,36 @@ prefix dc: <http://purl.org/dc/elements/1.1/>
 prefix dct: <http://purl.org/dc/terms/>
 prefix xls: <http://xmlns.com/foaf/0.1/>
 prefix pls: <http://plmns.com/foaf/0.1/>
-prefix xml: <http://www.w3.org/XML/1998/namespace>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix csvw: <http://www.w3.org/ns/csvw#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcat: <http://www.w3.org/ns/dcat#>
+prefix dcmitype: <http://purl.org/dc/dcmitype/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix dcam: <http://purl.org/dc/dcam/>
+prefix doap: <http://usefulinc.com/ns/doap#>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix odrl: <http://www.w3.org/ns/odrl/2/>
+prefix org: <http://www.w3.org/ns/org#>
+prefix prof: <http://www.w3.org/ns/dx/prof/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix qb: <http://purl.org/linked-data/cube#>
+prefix schema: <https://schema.org/>
+prefix sh: <http://www.w3.org/ns/shacl#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix sosa: <http://www.w3.org/ns/sosa/>
+prefix ssn: <http://www.w3.org/ns/ssn/>
+prefix time: <http://www.w3.org/2006/time#>
+prefix vann: <http://purl.org/vocab/vann/>
+prefix void: <http://rdfs.org/ns/void#>
+prefix wgs: <https://www.w3.org/2003/01/geo/wgs84_pos#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix xsd: <http://www.w3.org/2001/XMLSchema#>""")
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix xml: <http://www.w3.org/XML/1998/namespace>""")
+
 
     def test_split_prefixes(self):
         vocabulary = self.vocabulary

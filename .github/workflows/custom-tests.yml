@@ -1,10 +1,11 @@
-name: tests
+name: custom-tests
 
 on:
-  # push:
-  #   branches: [ master, main, development]
-  # pull_request:
-  #   branches: [ master, main, development]
+  push:
+    branches-ignore:
+      - master
+      - main
+      - development
   workflow_dispatch:
 
 jobs:
@@ -27,16 +28,10 @@ jobs:
 
       - name: Build and run tests
         run: |
-          docker compose -f docker-compose.test.yml build
-          docker compose -f docker-compose.test.yml up --abort-on-container-exit
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.0.1
-        with:
-          files: ./coverage.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
+          docker compose -f docker-compose.custom-test.yml build
+          docker compose -f docker-compose.custom-test.yml up --abort-on-container-exit --exit-code-from web
 
       - name: Remove Docker containers
         if: always()
-        run: docker compose -f docker-compose.test.yml down
+        run: docker compose -f docker-compose.custom-test.yml down
 
