@@ -27,7 +27,7 @@ jobs:
       - name: Build and run tests
         run: |
           docker compose -f docker-compose.custom-test.yml build
-          docker compose -f docker-compose.custom-test.yml up --abort-on-container-exit
+          docker compose -f docker-compose.custom-test.yml up --abort-on-container-exit --exit-code-from web
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
