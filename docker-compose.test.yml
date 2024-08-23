@@ -51,8 +51,6 @@ services:
     container_name: evokstest_testrunner
     build:
       context: "."
-    # caution, don't change this port since it is the one used within the container
-    # to change port, use the "ports:" section
     command: >
       sh -c "set -e &&
              cd ./evoks &&
@@ -60,8 +58,6 @@ services:
              coverage run manage.py test -v 3 tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks &&
              coverage report &&
              coverage xml"
-    ports:
-      - "${EVOKS_PORT:-8000}:8000"
     depends_on:
       postgres:
           condition: service_healthy
@@ -106,8 +102,6 @@ services:
       - fuseki-dev-data:/fuseki-base/databases
       - fuseki-dev-config:/fuseki-base/configuration
       - fuseki-dev-backup:/fuseki-base/backups
-    ports:
-      - "${FUSEKI_DEV_PORT:-8003}:3030"
     networks:
       - fuseki-dev
     restart: unless-stopped
@@ -146,8 +140,6 @@ services:
     build:
       context: https://github.com/NatLibFi/Skosmos.git#v2.17
       dockerfile: dockerfiles/Dockerfile.ubuntu
-    ports: 
-      - "${SKOSMOS_DEV_PORT:-8001}:80"
     hostname: skosmos-dev
     depends_on: 
       - fuseki-dev
@@ -168,8 +160,6 @@ services:
     build:
       context: https://github.com/NatLibFi/Skosmos.git#v2.17
       dockerfile: dockerfiles/Dockerfile.ubuntu
-    ports: 
-      - "${SKOSMOS_LIVE_PORT:-8002}:80"
     hostname: skosmos-live
     depends_on: 
       - fuseki-live
