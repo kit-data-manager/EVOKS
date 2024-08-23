@@ -19,7 +19,7 @@ services:
       retries: 5
       start_period: 2m
 
-change-vol-ownership:
+  change-vol-ownership:
     # Fix Ownership of Build Directory
     # Thanks to Bug in Docker itself
     # We need to use steps like this
