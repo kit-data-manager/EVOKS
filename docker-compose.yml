@@ -12,6 +12,13 @@ services:
     networks:
       - postgres
     restart: unless-stopped
+    healthcheck:
+      test: pg_isready
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
   web:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_web
     build:
@@ -24,9 +31,16 @@ services:
     ports:
       - "${EVOKS_PORT:-8000}:8000"
     depends_on:
-      - postgres
-      - fuseki-dev
-      - fuseki-live
+      postgres:
+          condition: service_healthy
+      fuseki-dev:
+          condition: service_healthy
+      fuseki-live:
+          condition: service_healthy
+      skosmos-dev:
+          condition: service_healthy
+      skosmos-live:
+          condition: service_healthy
     networks: 
       - postgres
       - fuseki-dev
@@ -37,6 +51,13 @@ services:
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
       - ./fuseki-dev/backup:/code/fuseki-dev/backup
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
   fuseki-dev:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_fuseki-dev
     image: secoresearch/fuseki
@@ -52,6 +73,14 @@ services:
       - ./fuseki-dev/backup:/fuseki-base/backups
     networks:
       - fuseki-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+      
   fuseki-live:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_fuseki-live
     image: secoresearch/fuseki
@@ -67,6 +96,14 @@ services:
       - ./fuseki-live/backup:/fuseki-base/backups
     networks:
       - fuseki-live
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
   skosmos-dev:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-dev
     build:
@@ -81,6 +118,14 @@ services:
       - fuseki-dev
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
   skosmos-live:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-live
     build:
@@ -95,6 +140,14 @@ services:
       - fuseki-live
     volumes:
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
 networks:
   postgres:
     driver: bridge
