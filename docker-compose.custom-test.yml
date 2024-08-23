@@ -17,6 +17,7 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+
   change-vol-ownership:
     # Fix Ownership of Build Directory
     # Thanks to Bug in Docker itself
@@ -66,8 +67,6 @@ services:
       postgres:
           condition: service_healthy
       change-vol-ownership:
-        # # Wait for the ownership to change
-        # condition: service_completed_successfully
           condition: service_healthy
       fuseki-dev:
           condition: service_healthy
