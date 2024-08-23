@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   postgres:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_postgres
