@@ -2,8 +2,12 @@ name: tests
 
 on:
   push:
-    branches: [ dependency-updates ]
+    # branches: [ dependency-updates ]
   #   branches: [ master, main, development]
+    branches-ignore:
+      - master
+      - main
+      - development
   pull_request:
     branches: [ master, main, development]
   workflow_dispatch:
