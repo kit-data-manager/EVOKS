@@ -69,6 +69,14 @@ services:
         # # Wait for the ownership to change
         # condition: service_completed_successfully
           condition: service_healthy
+      fuseki-dev:
+          condition: service_healthy
+      fuseki-live:
+          condition: service_healthy
+      skosmos-dev:
+          condition: service_healthy
+      skosmos-live:
+          condition: service_healthy
     networks: 
       - postgres
       - fuseki-dev
@@ -79,6 +87,13 @@ services:
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
       - fuseki-dev-backup:/code/fuseki-dev/backup
       - fuseki-live-backup:/code/fuseki-live/backup
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
   fuseki-dev:
     container_name: evokstest_fuseki-dev
     image: secoresearch/fuseki
@@ -96,6 +111,13 @@ services:
       - "${FUSEKI_DEV_PORT:-8003}:3030"
     networks:
       - fuseki-dev
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+      
   fuseki-live:
     container_name: evokstest_fuseki-live
     image: secoresearch/fuseki
@@ -113,6 +135,13 @@ services:
       - "${FUSEKI_LIVE_PORT:-8004}:3030"
     networks:
       - fuseki-live
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
   skosmos-dev:
     container_name: evokstest_skosmos-dev
     build:
@@ -127,6 +156,13 @@ services:
       - fuseki-dev
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
   skosmos-live:
     container_name: evokstest_skosmos-live
     build:
@@ -141,6 +177,13 @@ services:
       - fuseki-live
     volumes:
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
 networks:
   postgres:
     driver: bridge
