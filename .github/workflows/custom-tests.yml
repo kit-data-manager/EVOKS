@@ -28,10 +28,10 @@ jobs:
 
       - name: Build and run tests
         run: |
-          docker compose -f docker-compose.custom-test.yml build
-          docker compose -f docker-compose.custom-test.yml up --abort-on-container-exit --exit-code-from web
+          docker compose -f docker-compose.yml -f docker-compose.custom-test.yml build
+          docker compose -f docker-compose.yml -f docker-compose.custom-test.yml up --abort-on-container-exit --exit-code-from web
 
       - name: Remove Docker containers
         if: always()
-        run: docker compose -f docker-compose.custom-test.yml down
+        run: docker compose -f docker-compose.yml -f docker-compose.custom-test.yml down
 
