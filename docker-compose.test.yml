@@ -3,20 +3,19 @@ services:
     container_name: evokstest_postgres
     image: postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'changeme'
       PGDATA: /data/postgres
       POSTGRES_DB: dev
-    ports:
-      - "${POSTGRES_PORT:-8005}:5432"
     networks:
       - postgres
     restart: unless-stopped
     healthcheck:
       test: pg_isready
-      interval: 10s
-      timeout: 3s
+      interval: 20s
+      timeout: 10s
       retries: 5
+      start_period: 2m
 
   change-vol-ownership:
     # Fix Ownership of Build Directory
@@ -86,6 +85,7 @@ services:
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
       - fuseki-dev-backup:/code/fuseki-dev/backup
       - fuseki-live-backup:/code/fuseki-live/backup
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
       interval: 20s
@@ -110,6 +110,7 @@ services:
       - "${FUSEKI_DEV_PORT:-8003}:3030"
     networks:
       - fuseki-dev
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
       interval: 20s
@@ -130,10 +131,9 @@ services:
       - fuseki-live-data:/fuseki-base/databases
       - fuseki-live-config:/fuseki-base/configuration
       - fuseki-live-backup:/fuseki-base/backups
-    ports:
-      - "${FUSEKI_LIVE_PORT:-8004}:3030"
     networks:
       - fuseki-live
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
       interval: 20s
@@ -155,6 +155,7 @@ services:
       - fuseki-dev
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
       interval: 20s
@@ -176,6 +177,7 @@ services:
       - fuseki-live
     volumes:
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
       interval: 20s
@@ -199,4 +201,3 @@ volumes:
     fuseki-live-data:
     fuseki-live-config:
     fuseki-live-backup:
-
