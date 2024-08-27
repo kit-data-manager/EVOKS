@@ -57,8 +57,8 @@ SKOSMOS_LIVE_DIR = "skosmos-live/config.ttl"
 SKOSMOS_TEST_CONFIG = "evoks/tests/skosmos/config.ttl"
 
 
-SKOSMOS_DEV_URI = "http://localhost:9090/"
-SKOSMOS_LIVE_URI = "http://localhost:9080/"
+SKOSMOS_DEV_URI = f"http://{PUBLICURL}:{SKOSMOS_DEV_PORT}/"
+SKOSMOS_LIVE_URI = f"http://{PUBLICURL}:{SKOSMOS_LIVE_PORT}/"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -73,7 +73,7 @@ DEBUG = True
 # set to False to disable Browser-sync
 TAILWIND_DEV_MODE = False
 
-ALLOWED_HOSTS: list[str] = ['localhost']
+ALLOWED_HOSTS = [PUBLICURL]
 
 
 LOGIN_REDIRECT_URL = '/vocabularies'
