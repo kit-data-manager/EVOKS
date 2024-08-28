@@ -36,7 +36,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DOCKER_BASE_DIR = BASE_DIR.parent
 
 FUSEKI_USER = get_env('FUSEKI_USER', 'admin')
-FUSEKI_PASSWORD = get_env('FUSEKI_PASSWORD', 'fuseki_password')
+FUSEKI_PASSWORD = get_env('FUSEKI_PASSWORD', 'insecure_changeme')
 EVOKS_MAIL = get_env('EVOKS_MAIL', 'example@example.de')
 
 DOCKER_BASE_DIR = BASE_DIR.parent
