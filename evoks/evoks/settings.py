@@ -160,12 +160,14 @@ WSGI_APPLICATION = 'evoks.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+POSTGRES_USER = get_env('POSTGRES_USER', 'postgres')
+POSTGRES_PASSWORD =get_env('POSTGRES_PASSWORD', 'insecure_changeme')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'dev',
-        'USER': 'postgres',
-        'PASSWORD': 'changeme',
+        'USER': POSTGRES_USER,
+        'PASSWORD': POSTGRES_PASSWORD,
         'HOST': 'postgres',
         'PORT': 5432,
     }
