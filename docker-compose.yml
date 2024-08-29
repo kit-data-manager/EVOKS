@@ -1,4 +1,16 @@
 services:
+  proxy:
+    build: proxy
+    ports:
+      - 9000:80
+    depends_on:
+      - web
+    restart: always
+    networks:
+    - frontnet
+    volumes:
+      - static:/app/static
+
   postgres:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_postgres
     image: postgres
@@ -55,9 +67,11 @@ services:
       context: "."
     # caution, don't change this port since it is the one used within the container
     # to change port, use the "ports:" section
-    command: >
-      sh -c "python ./evoks/manage.py migrate && 
-             python ./evoks/manage.py runserver 0.0.0.0:8000"
+    # command: >
+    #   sh -c "python ./evoks/manage.py migrate && 
+    #          python ./evoks/manage.py runserver 0.0.0.0:8000"
+    entrypoint: >
+      sh -c "python ./evoks/manage.py collectstatic --noinput --verbosity 0 && gunicorn evoks.evoks.wsgi:application --bind 0.0.0.0:8000 --log-level debug"
     ports:
       - "${EVOKS_PORT:-8000}:8000"
     depends_on:
@@ -77,12 +91,14 @@ services:
       - postgres
       - fuseki-dev
       - fuseki-live
+      - frontnet
     volumes:
       - .:/code
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
       - fuseki-dev-backup:/code/fuseki-dev/backup
       - fuseki-live-backup:/code/fuseki-live/backup
+      - static:/code/evoks/theme/staticfiles 
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
@@ -188,6 +204,8 @@ networks:
     driver: bridge
   fuseki-live:
     driver: bridge
+  frontnet:
+    driver: bridge
 volumes:
     postgres:
     fuseki:
@@ -197,3 +215,4 @@ volumes:
     fuseki-live-data:
     fuseki-live-config:
     fuseki-live-backup:
+    static:
