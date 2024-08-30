@@ -71,7 +71,7 @@ services:
     #   sh -c "python ./evoks/manage.py migrate && 
     #          python ./evoks/manage.py runserver 0.0.0.0:8000"
     entrypoint: >
-      sh -c "python ./evoks/manage.py collectstatic --noinput --verbosity 0 && gunicorn evoks.evoks.wsgi:application --bind 0.0.0.0:8000 --log-level debug"
+      sh -c "python ./evoks/manage.py collectstatic --noinput --verbosity 0 && gunicorn evoks.wsgi:application --bind 0.0.0.0:8000 --chdir evoks --log-level debug"
     ports:
       - "${EVOKS_PORT:-8000}:8000"
     depends_on:
