@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   postgres:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_postgres
@@ -14,6 +12,43 @@ services:
     networks:
       - postgres
     restart: unless-stopped
+    healthcheck:
+      test: pg_isready
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
+  change-vol-ownership:
+    # Fix Ownership of Build Directory
+    # Thanks to Bug in Docker itself
+    # We need to use steps like this
+    # Because by default, the volume directory
+    # Is owned by Root
+    # So this helps correct it
+    # We can use any image we want as long as we can chown
+    image: ubuntu
+    # Need a user priviliged enough to chown
+    # user: "root"
+    # Specify the group in question
+    # group_add:
+    #   - '${GROUP_ID}'
+    volumes:
+      # The volume to chown
+      - fuseki-dev-backup:/tmp/change-ownership-fuseki-dev
+      - fuseki-live-backup:/tmp/change-ownership-fuseki-live
+    # execute chmod to enable writing to the volume by other containers
+    # write exit status to file
+    # only exit status of last command is used, but thats ok since either both or none should fail
+    # keep container running to enable abort-on-container-exit for testrunner container
+    # abort-on-container-exit is a prerequisite for using 
+    command: >
+      sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; tail -f /dev/null"
+    healthcheck:
+      test: ["CMD-SHELL", "cat /tmp/chmod_exit_status | grep -q '^0$'"]
+      interval: 5s
+      retries: 5
+
   web:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_web
     build:
@@ -26,9 +61,18 @@ services:
     ports:
       - "${EVOKS_PORT:-8000}:8000"
     depends_on:
-      - postgres
-      - fuseki-dev
-      - fuseki-live
+      postgres:
+          condition: service_healthy
+      change-vol-ownership:
+          condition: service_healthy
+      fuseki-dev:
+          condition: service_healthy
+      fuseki-live:
+          condition: service_healthy
+      skosmos-dev:
+          condition: service_healthy
+      skosmos-live:
+          condition: service_healthy
     networks: 
       - postgres
       - fuseki-dev
@@ -37,8 +81,16 @@ services:
       - .:/code
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
-      - ./fuseki-dev/backup:/code/fuseki-dev/backup
+      - fuseki-dev-backup:/code/fuseki-dev/backup
+      - fuseki-live-backup:/code/fuseki-live/backup
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
   fuseki-dev:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_fuseki-dev
     image: secoresearch/fuseki
@@ -49,11 +101,19 @@ services:
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
     volumes: 
-      - ./fuseki-dev/data:/fuseki-base/databases
-      - ./fuseki-dev/config:/fuseki-base/configuration
-      - ./fuseki-dev/backup:/fuseki-base/backups
+      - fuseki-dev-data:/fuseki-base/databases
+      - fuseki-dev-config:/fuseki-base/configuration
+      - fuseki-dev-backup:/fuseki-base/backups
     networks:
       - fuseki-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+      
   fuseki-live:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_fuseki-live
     image: secoresearch/fuseki
@@ -64,11 +124,19 @@ services:
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
     volumes: 
-      - ./fuseki-live/data:/fuseki-base/databases
-      - ./fuseki-live/config:/fuseki-base/configuration
-      - ./fuseki-live/backup:/fuseki-base/backups
+      - fuseki-live-data:/fuseki-base/databases
+      - fuseki-live-config:/fuseki-base/configuration
+      - fuseki-live-backup:/fuseki-base/backups
     networks:
       - fuseki-live
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
   skosmos-dev:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-dev
     build:
@@ -83,6 +151,14 @@ services:
       - fuseki-dev
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
   skosmos-live:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-live
     build:
@@ -97,6 +173,14 @@ services:
       - fuseki-live
     volumes:
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+
 networks:
   postgres:
     driver: bridge
@@ -107,3 +191,9 @@ networks:
 volumes:
     postgres:
     fuseki:
+    fuseki-dev-data:
+    fuseki-dev-config:
+    fuseki-dev-backup:
+    fuseki-live-data:
+    fuseki-live-config:
+    fuseki-live-backup:
