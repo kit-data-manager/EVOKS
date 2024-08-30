@@ -1,5 +1,6 @@
 services:
   proxy:
+    container_name: evoks_${INSTANCE_NAME:-defaultinstance}_proxy
     build: proxy
     ports:
       - 9000:80
@@ -9,7 +10,7 @@ services:
     networks:
     - frontnet
     volumes:
-      - static:/app/static
+      - ./evoks/theme/static:/app/static
 
   postgres:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_postgres
@@ -71,7 +72,7 @@ services:
     #   sh -c "python ./evoks/manage.py migrate && 
     #          python ./evoks/manage.py runserver 0.0.0.0:8000"
     entrypoint: >
-      sh -c "python ./evoks/manage.py collectstatic --noinput --verbosity 0 && gunicorn evoks.wsgi:application --bind 0.0.0.0:8000 --chdir evoks --log-level debug"
+      sh -c "python ./evoks/manage.py migrate && python ./evoks/manage.py collectstatic --noinput --verbosity 0 && gunicorn evoks.wsgi:application --bind 0.0.0.0:8000 --chdir evoks --log-level debug"
     ports:
       - "${EVOKS_PORT:-8000}:8000"
     depends_on:
@@ -97,8 +98,7 @@ services:
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
       - fuseki-dev-backup:/code/fuseki-dev/backup
-      - fuseki-live-backup:/code/fuseki-live/backup
-      - static:/code/evoks/theme/staticfiles 
+      - fuseki-live-backup:/code/fuseki-live/backup 
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
@@ -215,4 +215,3 @@ volumes:
     fuseki-live-data:
     fuseki-live-config:
     fuseki-live-backup:
-    static:
