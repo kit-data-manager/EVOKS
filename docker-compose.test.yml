@@ -1,9 +1,6 @@
 services:
   postgres:
     container_name: evokstest_postgres
-    environment:
-      POSTGRES_USER: 'postgres'
-      POSTGRES_PASSWORD: 'changeme'
     restart: no
 
   web:
@@ -19,14 +16,10 @@ services:
 
   fuseki-dev:
     container_name: evokstest_fuseki-dev
-    environment: 
-      ADMIN_PASSWORD: 'fuseki_password'
     restart: no
       
   fuseki-live:
     container_name: evokstest_fuseki-live
-    environment: 
-      ADMIN_PASSWORD: 'fuseki_password'
     restart: no
 
   skosmos-dev:
