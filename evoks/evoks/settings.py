@@ -7,14 +7,17 @@ import socket
 import environ
 import os
 
-env = environ.Env(
-    FUSEKI_USER=(str, 'admin'),
-    FUSEKI_PASSWORD=(str, 'fuseki_password'),
-    EVOKS_MAIL=(str, 'example@example.de'),
-    EMAIL_HOST_USER=(str, ''),
-    EMAIL_HOST_PASSWORD=(str, '')
-)
-environ.Env.read_env()
+
+base_dir = environ.Path(__file__) - 3  # .env is three levels up from this file, therefore - 3
+env_file = str(base_dir.path('.env'))  
+# Load .env manually if needed
+if os.path.exists(env_file):
+    environ.Env.read_env(env_file)
+
+# Use a custom function to retrieve environment variables with fallbacks
+# Default fallback is overwritten by empty string without this function
+def get_env(key, fallback):
+    return os.getenv(key) or fallback
 
 """
 Django settings for evoks project.
@@ -32,14 +35,12 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 BASE_DIR = Path(__file__).resolve().parent.parent
 DOCKER_BASE_DIR = BASE_DIR.parent
 
-FUSEKI_USER = env('FUSEKI_USER')
-FUSEKI_PASSWORD = env('FUSEKI_PASSWORD')
-EVOKS_MAIL = env('EVOKS_MAIL')
+FUSEKI_USER = get_env('FUSEKI_USER', 'admin')
+FUSEKI_PASSWORD = get_env('FUSEKI_PASSWORD', 'insecure_changeme')
+EVOKS_MAIL = get_env('EVOKS_MAIL', 'example@example.de')
 
 DOCKER_BASE_DIR = BASE_DIR.parent
 
-FUSEKI_USER = env('FUSEKI_USER')
-FUSEKI_PASSWORD = env('FUSEKI_PASSWORD')
 
 FUSEKI_DEV_HOST = 'fuseki-dev'
 FUSEKI_LIVE_HOST = 'fuseki-live'
@@ -49,15 +50,17 @@ FUSEKI_LIVE_BACKUP_PATH = 'fuseki-live/backup'
 
 FUSEKI_PORT = 3030
 
-EVOKS_MAIL = env('EVOKS_MAIL')
 
 SKOSMOS_DEV_DIR = "skosmos-dev/config.ttl"
 SKOSMOS_LIVE_DIR = "skosmos-live/config.ttl"
 SKOSMOS_TEST_CONFIG = "evoks/tests/skosmos/config.ttl"
 
+SKOSMOS_DEV_PORT = get_env('SKOSMOS_DEV_PORT', '8001')
+SKOSMOS_LIVE_PORT = get_env('SKOSMOS_LIVE_PORT', '8002')
+PUBLICURL = get_env('PUBLICURL', 'localhost')
 
-SKOSMOS_DEV_URI = "http://localhost:9090/"
-SKOSMOS_LIVE_URI = "http://localhost:9080/"
+SKOSMOS_DEV_URI = f"http://{PUBLICURL}:{SKOSMOS_DEV_PORT}/"
+SKOSMOS_LIVE_URI = f"http://{PUBLICURL}:{SKOSMOS_LIVE_PORT}/"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -72,7 +75,7 @@ DEBUG = True
 # set to False to disable Browser-sync
 TAILWIND_DEV_MODE = False
 
-ALLOWED_HOSTS: list[str] = ['localhost']
+ALLOWED_HOSTS = [PUBLICURL]
 
 
 LOGIN_REDIRECT_URL = '/vocabularies'
@@ -86,8 +89,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER = get_env('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD', '')
 
 
 
@@ -157,12 +160,14 @@ WSGI_APPLICATION = 'evoks.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+POSTGRES_USER = get_env('POSTGRES_USER', 'postgres')
+POSTGRES_PASSWORD =get_env('POSTGRES_PASSWORD', 'insecure_changeme')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'dev',
-        'USER': 'postgres',
-        'PASSWORD': 'changeme',
+        'USER': POSTGRES_USER,
+        'PASSWORD': POSTGRES_PASSWORD,
         'HOST': 'postgres',
         'PORT': 5432,
     }
