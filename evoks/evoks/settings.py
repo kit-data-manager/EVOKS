@@ -155,7 +155,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'evoks.wsgi.application'
-
+FORCE_SCRIPT_NAME = get_env('FORCE_SCRIPT_NAME', '/evoks')
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
