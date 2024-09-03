@@ -10,7 +10,10 @@ services:
     networks:
     - frontnet
     volumes:
-      - ./evoks/theme/static:/app/static
+      - ./evoks/theme/static:/app/evoks/static
+      - static-skosmos-dev:/app/skosmos-dev/static
+      - static-skosmos-live:/app/skosmos-live/static
+
 
   postgres:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_postgres
@@ -165,8 +168,10 @@ services:
       - fuseki-dev
     networks:
       - fuseki-dev
+      - frontnet
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
+      - static-skosmos-dev:/var/www/html/resource
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
@@ -187,8 +192,10 @@ services:
       - fuseki-live
     networks:
       - fuseki-live
+      - frontnet
     volumes:
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
+      - static-skosmos-live:/var/www/html/resource
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
@@ -215,3 +222,5 @@ volumes:
     fuseki-live-data:
     fuseki-live-config:
     fuseki-live-backup:
+    static-skosmos-dev:
+    static-skosmos-live:

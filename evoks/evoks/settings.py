@@ -215,7 +215,7 @@ INTERNAL_IPS += [".".join(ip.split(".")[:-1] + ["1"]) for ip in ips]
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = "/static/"
+STATIC_URL = "/evoks/static/"
 STATIC_ROOT = BASE_DIR / "theme/static"
 
 # Default primary key field type
