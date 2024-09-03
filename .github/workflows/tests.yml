@@ -8,6 +8,7 @@ on:
       - master
       - main
       - development
+      - reverse-proxy
   pull_request:
     branches: [ master, main, development]
   workflow_dispatch:
