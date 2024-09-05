@@ -134,4 +134,5 @@ Run the unittests:
 
 **License**
 
-EVOKS is licensed under the Apache License, Version 2.0.
+EVOKS is licensed under the Apache License, Version 2.0. 
+License owner: Karlsruhe Institute of Technology (KIT)
