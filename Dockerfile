@@ -19,7 +19,7 @@ ENV DEBUG="${DEBUG}" \
     PATH="${PATH}:/home/python/.local/bin" 
 
 COPY . .
-RUN cd evoks/theme/static_src && npm install
+RUN cd evoks/theme/static_src && npm install --production
 RUN cd /code
 RUN SECRET_KEY=nothing python ./evoks/manage.py tailwind install --no-input;
 RUN SECRET_KEY=nothing python ./evoks/manage.py tailwind build --no-input;
