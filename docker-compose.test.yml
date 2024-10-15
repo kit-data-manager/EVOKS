@@ -1,11 +1,15 @@
 services:
+  proxy:
+    container_name: evokstest_proxy
+    restart: no
+
   postgres:
     container_name: evokstest_postgres
     restart: no
 
   web:
     container_name: evokstest_testrunner
-    command: >
+    entrypoint: >
       sh -c "set -e &&
              cd ./evoks &&
              python manage.py migrate &&
