@@ -1,7 +1,8 @@
 services:
   proxy:
+    build: 
+      context: ./proxy
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_proxy
-    build: proxy
     ports:
       - 9000:80
     depends_on:
@@ -13,7 +14,8 @@ services:
       - ./evoks/theme/static:/app/evoks/static
       - static-skosmos-dev:/app/skosmos-dev/static
       - static-skosmos-live:/app/skosmos-live/static
-
+    environment:
+      - EVOKS_URL=${EVOKS_URL:-}
 
   postgres:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_postgres
