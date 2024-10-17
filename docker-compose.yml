@@ -4,9 +4,10 @@ services:
       context: ./proxy
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_proxy
     ports:
-      - 9000:80
+      - "${PROXY_PORT:-9000}:80"
     depends_on:
-      - web
+      web:
+          condition: service_healthy
     restart: always
     networks:
     - frontnet
@@ -38,28 +39,18 @@ services:
       start_period: 2m
 
   change-vol-ownership:
-    # Fix Ownership of Build Directory
-    # Thanks to Bug in Docker itself
-    # We need to use steps like this
-    # Because by default, the volume directory
-    # Is owned by Root
-    # So this helps correct it
-    # We can use any image we want as long as we can chown
+    # By default, the volume directory is owned by root
+    # This would result in permissions errors when other services try to write to the volume
+    # Solution: change permissions of volume
     image: ubuntu
-    # Need a user priviliged enough to chown
-    # user: "root"
-    # Specify the group in question
-    # group_add:
-    #   - '${GROUP_ID}'
     volumes:
-      # The volume to chown
+      # The volumes to chown
       - fuseki-dev-backup:/tmp/change-ownership-fuseki-dev
       - fuseki-live-backup:/tmp/change-ownership-fuseki-live
     # execute chmod to enable writing to the volume by other containers
     # write exit status to file
     # only exit status of last command is used, but thats ok since either both or none should fail
     # keep container running to enable abort-on-container-exit for testrunner container
-    # abort-on-container-exit is a prerequisite for using 
     command: >
       sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; tail -f /dev/null"
     healthcheck:
@@ -71,15 +62,8 @@ services:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_web
     build:
       context: "."
-    # caution, don't change this port since it is the one used within the container
-    # to change port, use the "ports:" section
-    # command: >
-    #   sh -c "python ./evoks/manage.py migrate && 
-    #          python ./evoks/manage.py runserver 0.0.0.0:8000"
     entrypoint: >
-      sh -c "python ./evoks/manage.py migrate && python ./evoks/manage.py collectstatic --noinput --verbosity 0 && gunicorn evoks.wsgi:application --bind 0.0.0.0:8000 --chdir evoks --log-level debug"
-    ports:
-      - "${EVOKS_PORT:-8000}:8000"
+      sh -c "python ./evoks/manage.py migrate && python ./evoks/manage.py collectstatic --noinput --verbosity 0 && gunicorn evoks.wsgi:application --bind 0.0.0.0:8000 --chdir evoks"
     depends_on:
       postgres:
           condition: service_healthy
@@ -106,7 +90,7 @@ services:
       - fuseki-live-backup:/code/fuseki-live/backup 
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/login || exit 1"]
       interval: 20s
       timeout: 10s
       retries: 5
@@ -163,8 +147,7 @@ services:
     build:
       context: https://github.com/NatLibFi/Skosmos.git#v2.17
       dockerfile: dockerfiles/Dockerfile.ubuntu
-    ports: 
-      - "${SKOSMOS_DEV_PORT:-8001}:80"
+    # to change port here, use .env file
     hostname: skosmos-dev
     depends_on: 
       - fuseki-dev
@@ -187,8 +170,6 @@ services:
     build:
       context: https://github.com/NatLibFi/Skosmos.git#v2.17
       dockerfile: dockerfiles/Dockerfile.ubuntu
-    ports: 
-      - "${SKOSMOS_LIVE_PORT:-8002}:80"
     hostname: skosmos-live
     depends_on: 
       - fuseki-live
