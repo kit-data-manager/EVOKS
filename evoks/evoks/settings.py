@@ -69,7 +69,7 @@ SKOSMOS_LIVE_URI = f"http://{PUBLICURL}:{SKOSMOS_LIVE_PORT}/"
 SECRET_KEY = 'django-insecure-_91@mjc8g-&q_f9io$jmicovci2bilh#)ud3$^iqhj1wnccr%t'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 
 # set to False to disable Browser-sync
@@ -155,7 +155,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'evoks.wsgi.application'
-
+FORCE_SCRIPT_NAME = get_env('EVOKS_URL', '/')
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -215,7 +215,7 @@ INTERNAL_IPS += [".".join(ip.split(".")[:-1] + ["1"]) for ip in ips]
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = "/static/"
+STATIC_URL = "{}/static/".format(get_env('EVOKS_URL', ''))
 STATIC_ROOT = BASE_DIR / "theme/static"
 
 # Default primary key field type

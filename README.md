@@ -21,9 +21,9 @@ This software is only for internal vocabulary development purposes. It is *not r
 The main way to install EVOKS and its depending services is to build and run the docker images locally using docker compose. 
 ## Prerequisites
 * Unix-based system (e.g. Linux, MacOS, Windows using WSL (untested))
-* Installation of 
+* Installation of most recent versions of
     * [git](https://git-scm.com/) 
-    * [Docker](https://www.docker.com/) 
+    * [Docker](https://www.docker.com/) (at least docker compose version v2.27.1 needed)
 
 ## Installation procedure:
 

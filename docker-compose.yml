@@ -1,4 +1,22 @@
 services:
+  proxy:
+    build: 
+      context: ./proxy
+    container_name: evoks_${INSTANCE_NAME:-defaultinstance}_proxy
+    ports:
+      - 9000:80
+    depends_on:
+      - web
+    restart: always
+    networks:
+    - frontnet
+    volumes:
+      - ./evoks/theme/static:/app/evoks/static
+      - static-skosmos-dev:/app/skosmos-dev/static
+      - static-skosmos-live:/app/skosmos-live/static
+    environment:
+      - EVOKS_URL=${EVOKS_URL:-}
+
   postgres:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_postgres
     image: postgres
@@ -55,9 +73,11 @@ services:
       context: "."
     # caution, don't change this port since it is the one used within the container
     # to change port, use the "ports:" section
-    command: >
-      sh -c "python ./evoks/manage.py migrate && 
-             python ./evoks/manage.py runserver 0.0.0.0:8000"
+    # command: >
+    #   sh -c "python ./evoks/manage.py migrate && 
+    #          python ./evoks/manage.py runserver 0.0.0.0:8000"
+    entrypoint: >
+      sh -c "python ./evoks/manage.py migrate && python ./evoks/manage.py collectstatic --noinput --verbosity 0 && gunicorn evoks.wsgi:application --bind 0.0.0.0:8000 --chdir evoks --log-level debug"
     ports:
       - "${EVOKS_PORT:-8000}:8000"
     depends_on:
@@ -77,12 +97,13 @@ services:
       - postgres
       - fuseki-dev
       - fuseki-live
+      - frontnet
     volumes:
       - .:/code
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
       - fuseki-dev-backup:/code/fuseki-dev/backup
-      - fuseki-live-backup:/code/fuseki-live/backup
+      - fuseki-live-backup:/code/fuseki-live/backup 
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
@@ -149,8 +170,10 @@ services:
       - fuseki-dev
     networks:
       - fuseki-dev
+      - frontnet
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
+      - static-skosmos-dev:/var/www/html/resource
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
@@ -171,8 +194,10 @@ services:
       - fuseki-live
     networks:
       - fuseki-live
+      - frontnet
     volumes:
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
+      - static-skosmos-live:/var/www/html/resource
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
@@ -188,6 +213,8 @@ networks:
     driver: bridge
   fuseki-live:
     driver: bridge
+  frontnet:
+    driver: bridge
 volumes:
     postgres:
     fuseki:
@@ -197,3 +224,5 @@ volumes:
     fuseki-live-data:
     fuseki-live-config:
     fuseki-live-backup:
+    static-skosmos-dev:
+    static-skosmos-live:

@@ -1,31 +1,35 @@
 services:
+  proxy:
+    container_name: evokstest_proxy
+    restart: "no"
+
   postgres:
     container_name: evokstest_postgres
-    restart: no
+    restart: "no"
 
   web:
     container_name: evokstest_testrunner
-    command: >
+    entrypoint: >
       sh -c "set -e &&
              cd ./evoks &&
              python manage.py migrate &&
              coverage run manage.py test -v 3 tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks &&
              coverage report &&
              coverage xml"
-    restart: no
+    restart: "no"
 
   fuseki-dev:
     container_name: evokstest_fuseki-dev
-    restart: no
+    restart: "no"
       
   fuseki-live:
     container_name: evokstest_fuseki-live
-    restart: no
+    restart: "no"
 
   skosmos-dev:
     container_name: evokstest_skosmos-dev
-    restart: no
+    restart: "no"
 
   skosmos-live:
     container_name: evokstest_skosmos-live
-    restart: no
+    restart: "no"

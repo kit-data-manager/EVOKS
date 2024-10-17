@@ -13,6 +13,9 @@ media
 *.bak 
 
 evoks/theme/static_src/core
+evoks/theme/static/admin
+evoks/theme/static/guardian
+
 
 
 # If you are using PyCharm # 

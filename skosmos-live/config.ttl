@@ -7,7 +7,8 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 :config a skosmos:Configuration ;
-    skosmos:customCss "resource/css/stylesheet.css" ;
+    skosmos:customCss "resource/css/stylesheet.css" ;    
+    skosmos:baseHref "http://localhost:9000/skosmos-live/" ;
     skosmos:feedbackAddress "" ;
     skosmos:feedbackEnvelopeSender "" ;
     skosmos:feedbackSender "" ;
