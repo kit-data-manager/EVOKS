@@ -15,6 +15,10 @@ It allows you to:
 **Caution**
 This software is only for internal vocabulary development purposes. It is *not ready* for production and shall not be available for public access when installed. 
 
+# Know issues
+- Reverse proxy setup currently not working with Firefox.
+- See github issues of this repo for all other known issues.
+
 # Installation
 
 
