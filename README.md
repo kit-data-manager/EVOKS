@@ -21,7 +21,6 @@ This software is only for internal vocabulary development purposes. It is *not r
 
 # Installation
 
-
 The main way to install EVOKS and its depending services is to build and run the docker images locally using docker compose. 
 ## Prerequisites
 * Unix-based system (e.g. Linux, MacOS, Windows using WSL (untested))
@@ -119,11 +118,6 @@ You need to create an administrator account for EVOKS by performing the followin
 
 Most of the email providers (e.g. Gmail) do not accept Less Secure Apps by default, so you have to accept Less Secure Apps in the settings of the email you are using.
 
-## HTTPs + Domains
-
-1. Stop containers
-2. See Caddy.md for Caddy setup
-3. Run containers again
 
 # For Developers
 
