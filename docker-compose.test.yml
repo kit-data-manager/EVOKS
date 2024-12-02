@@ -11,6 +11,9 @@ services:
     container_name: evokstest_testrunner
     entrypoint: >
       sh -c "set -e &&
+             export BASEHREF && 
+             envsubst '$$BASEHREF' < /code/skosmos-dev/config-template.ttl > /code/skosmos-dev/config.ttl && 
+             envsubst '$$BASEHREF' < /code/skosmos-live/config-template.ttl > /code/skosmos-live/config.ttl && 
              cd ./evoks &&
              python manage.py migrate &&
              coverage run manage.py test -v 3 tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks &&
