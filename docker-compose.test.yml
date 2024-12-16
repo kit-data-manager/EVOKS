@@ -1,6 +1,8 @@
 services:
   proxy:
     container_name: evokstest_proxy
+    depends_on:
+      - web
     restart: "no"
 
   postgres:
