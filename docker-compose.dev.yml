@@ -2,9 +2,30 @@ services:
   postgres:
     ports:
       - "${POSTGRES_PORT:-8005}:5432"
+  web:
+    command: >
+      sh -c "python ./evoks/manage.py migrate && 
+             python ./evoks/manage.py runserver 0.0.0.0:8000"
+    entrypoint: []
+    # entrypoint: >
+    #   sh -c "python ./evoks/manage.py migrate && python ./evoks/manage.py collectstatic --noinput --verbosity 0 && gunicorn evoks.wsgi:application --bind 0.0.0.0:8000 --chdir evoks --log-level debug"
+    ports:
+      - "${EVOKS_PORT:-8000}:8000"
+    environment:
+      - DJANGO_DEBUG=True  # This will set the DEBUG flag to True
+
+  skosmos-dev:
+    ports: 
+      - "${SKOSMOS_DEV_PORT:-8001}:80"
+
+  skosmos-live:
+    ports: 
+      - "${SKOSMOS_LIVE_PORT:-8002}:80"
+
   fuseki-dev:
     ports:
       - "${FUSEKI_DEV_PORT:-8003}:3030"
+
   fuseki-live:
     ports:
       - "${FUSEKI_LIVE_PORT:-8004}:3030"

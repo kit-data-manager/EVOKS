@@ -69,8 +69,9 @@ SKOSMOS_LIVE_URI = f"http://{PUBLICURL}:{SKOSMOS_LIVE_PORT}/"
 SECRET_KEY = 'django-insecure-_91@mjc8g-&q_f9io$jmicovci2bilh#)ud3$^iqhj1wnccr%t'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-
+# convert DJANGO_DEBUG value into boolean
+# default is 'False', only True when env var is set to 'True'
+DEBUG = get_env('DJANGO_DEBUG', 'False') == 'True'
 
 # set to False to disable Browser-sync
 TAILWIND_DEV_MODE = False
