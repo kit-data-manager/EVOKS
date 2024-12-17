@@ -15,15 +15,18 @@ It allows you to:
 **Caution**
 This software is only for internal vocabulary development purposes. It is *not ready* for production and shall not be available for public access when installed. 
 
-# Installation
+# Know issues
+- Reverse proxy setup currently not working with Firefox.
+- See github issues of this repo for all other known issues.
 
+# Installation
 
 The main way to install EVOKS and its depending services is to build and run the docker images locally using docker compose. 
 ## Prerequisites
 * Unix-based system (e.g. Linux, MacOS, Windows using WSL (untested))
-* Installation of 
+* Installation of most recent versions of
     * [git](https://git-scm.com/) 
-    * [Docker](https://www.docker.com/) 
+    * [Docker](https://www.docker.com/) (at least docker compose version v2.27.1 needed)
 
 ## Installation procedure:
 
@@ -115,11 +118,6 @@ You need to create an administrator account for EVOKS by performing the followin
 
 Most of the email providers (e.g. Gmail) do not accept Less Secure Apps by default, so you have to accept Less Secure Apps in the settings of the email you are using.
 
-## HTTPs + Domains
-
-1. Stop containers
-2. See Caddy.md for Caddy setup
-3. Run containers again
 
 # For Developers
 
