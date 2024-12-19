@@ -56,12 +56,12 @@ The main way to install EVOKS and its depending services is to build and run the
 |-------------------|--------------------|----------------------------------------------------------------------------------------------------------------------------|--------------------|---|
 | INSTANCE_NAME     | defaultinstance    | Prefix of docker container names                                                                                           | no                 |   |
 | PROXY_PORT        | 9000               | Port where the proxy is located                                                                                            | no                 |   |
-| PUBLICURL         | http://localhost   | (public) URL under which the service will be reached                                                                       | no                 |   |
+| PUBLICURL         | http://localhost   | (public) base URL under which the services will be reached                                                                 | no                 |   |
 | EVOKS_MAIL        | example@example.de | Mailaddress for automatically sending notifications to the instance admin (typically the person who installed the service) | no                 |   |
 | FUSEKI_PASSWORD   | insecure_changeme  | Default fuseki password, change especially if not used locally                                                             | yes                |   |
 | POSTGRES_USER     | postgres           | Default postgres username, change especially if not used locally                                                           | yes                |   |
 | POSTGRES_PASSWORD | insecure_changeme  | Default postgres password, change especially if not used locally                                                           | yes                |   |
-| EVOKS_URL         | (empty)            | (public) URL under which the service will be reached                                                                       | no                 |   |
+| EVOKS_URL         | /                  | path directory under which the web app (evoks) will be reached                                                             | no                 |   |
 | POSTGRES_PORT     | 8005               | (Developers only) Port of Postgres DB, service not forwarded to host if unset                                              | no                 |   |
 | FUSEKI_DEV_PORT   | 8003               | (Developers only) Port of Fuseki Triple Store, service not forwarded directly to host if unset                             | no                 |   |
 | FUSEKI_LIVE_PORT  | 8004               | (Developers only) Port of Fuseki Triple Store (of published vocabularies), service not forwarded directly to host if unset | no                 |   |
