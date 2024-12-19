@@ -45,6 +45,7 @@ The main way to install EVOKS and its depending services is to build and run the
 
     **Caution** Change of Fuseki and Postgres credentials is strongly recommended, especially if it will be accessible from outside
 
+4. Open evoks/evoks/settings.py and change the SECRET_KEY. Use of a key generator like https://djecrety.ir/ is strongly recommended.
 4. Run `docker compose build`
 5. Run `docker compose up`
 6. Open PUBLICURL:PROXYPORT/EVOKS_URL (as set in .env), e.g. localhost:9000/evoks in your browser (opening in Firefox not working currently)
