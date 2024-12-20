@@ -153,7 +153,7 @@ services:
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-dev
     environment:
-      - BASEHREF="${PUBLICURL:-http://localhost}:${PROXY_PORT:-9000}/skosmos-dev/"
+      - BASEHREFDEV="${PUBLICURL:-http://localhost}:${PROXY_PORT:-9000}/skosmos-dev/"
     depends_on: 
       - fuseki-dev
     networks:
@@ -161,11 +161,12 @@ services:
       - frontnet
     volumes:
       - ./skosmos-dev/config-template.ttl:/var/www/html/config-template.ttl
+      - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
       - static-skosmos-dev:/var/www/html/resource
     restart: unless-stopped
     command: >
-      /bin/bash -c "export BASEHREF &&
-      envsubst '$$BASEHREF' < /var/www/html/config-template.ttl > /var/www/html/config.ttl &&
+      /bin/bash -c "export BASEHREFDEV &&
+      envsubst '$$BASEHREFDEV' < /var/www/html/config-template.ttl > /var/www/html/config.ttl &&
       /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
@@ -181,7 +182,7 @@ services:
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-live
     environment:
-      - BASEHREF="${PUBLICURL:-http://localhost}:${PROXY_PORT:-9000}/skosmos-live/"
+      - BASEHREFLIVE="${PUBLICURL:-http://localhost}:${PROXY_PORT:-9000}/skosmos-live/"
     depends_on: 
       - fuseki-live
     networks:
@@ -189,11 +190,12 @@ services:
       - frontnet
     volumes:
       - ./skosmos-live/config-template.ttl:/var/www/html/config-template.ttl
+      - ./skosmos-live/config.ttl:/var/www/html/config.ttl
       - static-skosmos-live:/var/www/html/resource
     restart: unless-stopped
     command: >
-      /bin/bash -c "export BASEHREF &&
-      envsubst '$$BASEHREF' < /var/www/html/config-template.ttl > /var/www/html/config.ttl &&
+      /bin/bash -c "export BASEHREFLIVE &&
+      envsubst '$$BASEHREFLIVE' < /var/www/html/config-template.ttl > /var/www/html/config.ttl &&
       /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
