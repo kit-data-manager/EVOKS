@@ -62,13 +62,8 @@ services:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_web
     build:
       context: "."
-    environment:
-      - BASEHREF="${PUBLICURL:-http://localhost}:${PROXY_PORT:-9000}/skosmos-dev/"
     entrypoint: >
-      sh -c "export BASEHREF && 
-      envsubst '$$BASEHREF' < /code/skosmos-dev/config-template.ttl > /code/skosmos-dev/config.ttl && 
-      envsubst '$$BASEHREF' < /code/skosmos-live/config-template.ttl > /code/skosmos-live/config.ttl && 
-      python ./evoks/manage.py migrate && 
+      sh -c "python ./evoks/manage.py migrate && 
       python ./evoks/manage.py collectstatic --noinput --verbosity 0 && 
       gunicorn evoks.wsgi:application --bind 0.0.0.0:8000 --chdir evoks"
     depends_on:
@@ -156,23 +151,23 @@ services:
     build:
       context: https://github.com/NatLibFi/Skosmos.git#v2.17
       dockerfile: dockerfiles/Dockerfile.ubuntu
-    # to change port here, use .env file
     hostname: skosmos-dev
-    # environment:
-    #   - BASEHREF="${PUBLICURL:-http://localhost}:${PROXY_PORT:-9000}/skosmos-dev/"
+    environment:
+      - BASEHREFDEV="${PUBLICURL:-http://localhost}:${PROXY_PORT:-9000}/skosmos-dev/"
     depends_on: 
       - fuseki-dev
     networks:
       - fuseki-dev
       - frontnet
     volumes:
-      # - ./skosmos-dev/config-template.ttl:/var/www/html/config-template.ttl
+      - ./skosmos-dev/config-template.ttl:/var/www/html/config-template.ttl
+      - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
       - static-skosmos-dev:/var/www/html/resource
     restart: unless-stopped
-    # command: >
-    #   /bin/bash -c "export BASEHREF &&
-    #   envsubst '$$BASEHREF' < /var/www/html/config-template.ttl > /var/www/html/config.ttl && cat /var/www/html/config.ttl &&
-    #   /usr/sbin/apache2ctl -D FOREGROUND"
+    command: >
+      /bin/bash -c "export BASEHREFDEV &&
+      envsubst '$$BASEHREFDEV' < /var/www/html/config-template.ttl > /var/www/html/config.ttl &&
+      /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
       interval: 20s
@@ -187,7 +182,7 @@ services:
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-live
     environment:
-      - BASEHREF="${PUBLICURL:-http://localhost}:${PROXY_PORT:-9000}/skosmos-live/"
+      - BASEHREFLIVE="${PUBLICURL:-http://localhost}:${PROXY_PORT:-9000}/skosmos-live/"
     depends_on: 
       - fuseki-live
     networks:
@@ -195,11 +190,12 @@ services:
       - frontnet
     volumes:
       - ./skosmos-live/config-template.ttl:/var/www/html/config-template.ttl
+      - ./skosmos-live/config.ttl:/var/www/html/config.ttl
       - static-skosmos-live:/var/www/html/resource
     restart: unless-stopped
     command: >
-      /bin/bash -c "export BASEHREF &&
-      envsubst '$$BASEHREF' < /var/www/html/config-template.ttl > /var/www/html/config.ttl &&
+      /bin/bash -c "export BASEHREFLIVE &&
+      envsubst '$$BASEHREFLIVE' < /var/www/html/config-template.ttl > /var/www/html/config.ttl &&
       /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]

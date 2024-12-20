@@ -7,7 +7,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 :config a skosmos:Configuration ;
-    skosmos:baseHref ${BASEHREF} ;
+    skosmos:baseHref ${BASEHREFDEV} ;
     skosmos:customCss "resource/css/stylesheet.css" ;
     skosmos:feedbackAddress "" ;
     skosmos:feedbackEnvelopeSender "" ;
