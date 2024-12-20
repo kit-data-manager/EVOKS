@@ -115,3 +115,6 @@ Run the tests:
 
 EVOKS is licensed under the Apache License, Version 2.0. 
 License owner: Karlsruhe Institute of Technology (KIT)
+
+**Acknowledgement**
+Development of this software product was funded by the German Research Foundation (DFG)—CRC 980 Episteme in Motion, Project-ID 191249397, and by the research program “Engineering Digital Futures” of the Helmholtz Association of German Research Centers.
