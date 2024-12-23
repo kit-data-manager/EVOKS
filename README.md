@@ -57,7 +57,7 @@ The main way to install EVOKS and its depending services is to build and run the
 |-------------------|--------------------|----------------------------------------------------------------------------------------------------------------------------|--------------------|---|
 | INSTANCE_NAME     | defaultinstance    | Prefix of docker container names                                                                                           | no                 |   |
 | PROXY_PORT        | 9000               | Port where the proxy is located                                                                                            | no                 |   |
-| PUBLICURL         | http://localhost   | (public) base URL under which the services will be reached (adding "http://" resp. "https://" is mandatory)                | no                 |   |
+| PUBLICURL         | localhost          | (public) base URL under which the services will be reached ("http://" resp. "https://" is added automatically)             | no                 |   |
 | EVOKS_MAIL        | example@example.de | Mailaddress for automatically sending notifications to the instance admin (typically the person who installed the service) | no                 |   |
 | FUSEKI_PASSWORD   | insecure_changeme  | Default fuseki password, change especially if not used locally                                                             | yes                |   |
 | POSTGRES_USER     | postgres           | Default postgres username, change especially if not used locally                                                           | yes                |   |
