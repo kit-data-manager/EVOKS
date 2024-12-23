@@ -16,8 +16,7 @@ It allows you to:
 Use of this software in a production environment or with external access is at your own risk. No warranties, guarantees, or liabilities are provided, and the software is offered as-is.
 
 # Know issues
-- Reverse proxy setup currently not working with Firefox.
-- See github issues of this repo for all other known issues.
+- See github issues of this repo for all known issues.
 
 # Installation
 
@@ -48,7 +47,8 @@ The main way to install EVOKS and its depending services is to build and run the
 4. Open evoks/evoks/settings.py and change the SECRET_KEY. Use of a key generator like https://djecrety.ir/ is strongly recommended.
 4. Run `docker compose build`
 5. Run `docker compose up`
-6. Open PUBLICURL:PROXYPORT/EVOKS_URL (as set in .env), e.g. localhost:9000/evoks in your browser (opening in Firefox not working currently)
+6. Open PUBLICURL:PROXYPORT/EVOKS_URL (as set in .env), with default values http://localhost:9000/ in your browser (opening in Firefox not working currently)
+7. To open the vocabulary browser Skosmos, open PUBLICURL:PROXYPORT/skosmos-dev or PUBLICURL:PROXYPORT/skosmos-live
 11. To stop the services, run `docker compose down` and to restart `docker compose up`
 
 ## Variables
@@ -57,7 +57,7 @@ The main way to install EVOKS and its depending services is to build and run the
 |-------------------|--------------------|----------------------------------------------------------------------------------------------------------------------------|--------------------|---|
 | INSTANCE_NAME     | defaultinstance    | Prefix of docker container names                                                                                           | no                 |   |
 | PROXY_PORT        | 9000               | Port where the proxy is located                                                                                            | no                 |   |
-| PUBLICURL         | http://localhost   | (public) base URL under which the services will be reached                                                                 | no                 |   |
+| PUBLICURL         | localhost          | (public) base URL under which the services will be reached ("http://" resp. "https://" is added automatically)             | no                 |   |
 | EVOKS_MAIL        | example@example.de | Mailaddress for automatically sending notifications to the instance admin (typically the person who installed the service) | no                 |   |
 | FUSEKI_PASSWORD   | insecure_changeme  | Default fuseki password, change especially if not used locally                                                             | yes                |   |
 | POSTGRES_USER     | postgres           | Default postgres username, change especially if not used locally                                                           | yes                |   |

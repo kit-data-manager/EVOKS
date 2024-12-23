@@ -58,9 +58,11 @@ SKOSMOS_TEST_CONFIG = "evoks/tests/skosmos/config.ttl"
 SKOSMOS_DEV_PORT = get_env('SKOSMOS_DEV_PORT', '8001')
 SKOSMOS_LIVE_PORT = get_env('SKOSMOS_LIVE_PORT', '8002')
 PUBLICURL = get_env('PUBLICURL', 'localhost')
+PROXY_PORT = get_env('PROXY_PORT', '9000')
 
-SKOSMOS_DEV_URI = f"http://{PUBLICURL}:{SKOSMOS_DEV_PORT}/"
-SKOSMOS_LIVE_URI = f"http://{PUBLICURL}:{SKOSMOS_LIVE_PORT}/"
+
+SKOSMOS_DEV_URI = f"http://{PUBLICURL}:{PROXY_PORT}/skosmos-dev/"
+SKOSMOS_LIVE_URI = f"http://{PUBLICURL}:{PROXY_PORT}/skosmos-live/"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
