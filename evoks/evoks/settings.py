@@ -76,7 +76,7 @@ DEBUG = get_env('DJANGO_DEBUG', 'False') == 'True'
 # set to False to disable Browser-sync
 TAILWIND_DEV_MODE = False
 
-ALLOWED_HOSTS = [PUBLICURL]
+ALLOWED_HOSTS = ['localhost', PUBLICURL]
 
 
 LOGIN_REDIRECT_URL = '/vocabularies'
