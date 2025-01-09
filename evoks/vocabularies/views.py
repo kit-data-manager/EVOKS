@@ -606,7 +606,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
             term_label = request.POST['term-label']
 
             if not (bool(re.match('^[a-zA-Z0-9_-]+$', term_subject))):
-                return HttpResponseBadRequest('invalid subject')
+                return HttpResponseBadRequest('error, subject may only contain alphanumberic characters, underscores (_) or hyphens (-) (no blanks)')
 
             term_name = term_subject.replace('/', '_')
 
