@@ -153,7 +153,7 @@ services:
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-dev
     environment:
-      - BASEHREFDEV="http://${PUBLICURL:-http://localhost}:${PROXY_PORT:-9000}/skosmos-dev/"
+      - BASEHREFDEV="http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-dev/"
     depends_on: 
       - fuseki-dev
     networks:
@@ -182,7 +182,7 @@ services:
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-live
     environment:
-      - BASEHREFLIVE="http://${PUBLICURL:-http://localhost}:${PROXY_PORT:-9000}/skosmos-live/"
+      - BASEHREFLIVE="http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-live/"
     depends_on: 
       - fuseki-live
     networks:
