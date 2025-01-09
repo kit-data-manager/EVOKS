@@ -605,7 +605,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
             term_subject = request.POST['term-subject']
             term_label = request.POST['term-label']
 
-            if not (bool(re.match('^[a-zA-Z0-9]+$', term_subject))):
+            if not (bool(re.match('^[a-zA-Z0-9_-]+$', term_subject))):
                 return HttpResponseBadRequest('invalid subject')
 
             term_name = term_subject.replace('/', '_')
