@@ -167,6 +167,7 @@ services:
     restart: unless-stopped
     command: >
       /bin/bash -c "export BASEHREFDEV &&
+      chmod +x /home/replace-basehref.sh &&
       /home/replace-basehref.sh /var/www/html/config.ttl $$BASEHREFDEV &&
       /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
@@ -197,6 +198,7 @@ services:
     restart: unless-stopped
     command: >
       /bin/bash -c "export BASEHREFLIVE &&
+      chmod +x /home/replace-basehref.sh &&
       /home/replace-basehref.sh /var/www/html/config.ttl $$BASEHREFLIVE &&
       /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
