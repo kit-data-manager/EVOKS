@@ -44,10 +44,12 @@ replace() {
 
     # Create a backup of the original file
     echo "$content" > "$backup_path"
+    chmod --reference="$file_path" "$backup_path"
 
     # Write the updated content to a temporary file first
     local temp_file_path="${file_path}.temp"
     echo "$updated_content" > "$temp_file_path"
+    chmod --reference="$file_path" "$temp_file_path"
 
     # Replace the original file with the temporary file's content
     if ! mv "$temp_file_path" "$file_path"; then
