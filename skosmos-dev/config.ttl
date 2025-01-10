@@ -1,13 +1,11 @@
 @prefix : <file:///code/evoks/tests/skosmos/config.ttl#> .
-@prefix dc: <http://purl.org/dc/terms/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skosmos: <http://purl.org/net/skosmos#> .
-@prefix void: <http://rdfs.org/ns/void#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 :config a skosmos:Configuration ;
-    skosmos:baseHref ${BASEHREFDEV} ;
+    skosmos:baseHref "http://localhost:9000/skosmos-dev/" ;
     skosmos:customCss "resource/css/stylesheet.css" ;
     skosmos:feedbackAddress "" ;
     skosmos:feedbackEnvelopeSender "" ;
@@ -47,5 +45,4 @@
     skosmos:uiHoneypotEnabled true ;
     skosmos:uiHoneypotTime 5 ;
     skosmos:uiLanguageDropdown true .
-
 
