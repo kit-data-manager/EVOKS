@@ -68,7 +68,7 @@ SKOSMOS_LIVE_URI = f"http://{PUBLICURL}:{PROXY_PORT}/skosmos-live/"
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_91@mjc8g-&q_f9io$jmicovci2bilh#)ud3$^iqhj1wnccr%t'
+SECRET_KEY = get_env('DJANGO_SECRET_KEY', 'django-insecure-_91@mjc8g-&q_f9io$jmicovci2bilh#)ud3$^iqhj1wnccr%t')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # convert DJANGO_DEBUG value into boolean

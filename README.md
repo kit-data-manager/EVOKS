@@ -42,9 +42,8 @@ The main way to install EVOKS and its depending services is to build and run the
 3. Open .env and change the variables if desired, see
 [Overview of variables](##Variables).
 
-    **Caution** Change of Fuseki and Postgres credentials is strongly recommended, especially if it will be accessible from outside
+    **Caution** Change of Fuseki and Postgres credentials and replace default secret key is strongly recommended, especially if it will be accessible from outside
 
-4. Open evoks/evoks/settings.py and change the SECRET_KEY. Use of a key generator like https://djecrety.ir/ is strongly recommended.
 4. Run `docker compose build`
 5. Run `docker compose up`
 6. Open PUBLICURL:PROXYPORT/EVOKS_URL (as set in .env), with default values http://localhost:9000/ in your browser (opening in Firefox not working currently)
@@ -53,22 +52,23 @@ The main way to install EVOKS and its depending services is to build and run the
 
 ## Variables
 
-| VAR NAME          | Default value      | Description                                                                                                                | Change recommended |   |
-|-------------------|--------------------|----------------------------------------------------------------------------------------------------------------------------|--------------------|---|
-| INSTANCE_NAME     | defaultinstance    | Prefix of docker container names                                                                                           | no                 |   |
-| PROXY_PORT        | 9000               | Port where the proxy is located                                                                                            | no                 |   |
-| PUBLICURL         | localhost          | (public) base URL under which the services will be reached ("http://" resp. "https://" is added automatically)             | no                 |   |
-| EVOKS_MAIL        | example@example.de | Mailaddress for automatically sending notifications to the instance admin (typically the person who installed the service) | no                 |   |
-| FUSEKI_PASSWORD   | insecure_changeme  | Default fuseki password, change especially if not used locally                                                             | yes                |   |
-| POSTGRES_USER     | postgres           | Default postgres username, change especially if not used locally                                                           | yes                |   |
-| POSTGRES_PASSWORD | insecure_changeme  | Default postgres password, change especially if not used locally                                                           | yes                |   |
-| EVOKS_URL         | /                  | path directory under which the web app (evoks) will be reached                                                             | no                 |   |
-| POSTGRES_PORT     | 8005               | (Developers only) Port of Postgres DB, service not forwarded to host if unset                                              | no                 |   |
-| FUSEKI_DEV_PORT   | 8003               | (Developers only) Port of Fuseki Triple Store, service not forwarded directly to host if unset                             | no                 |   |
-| FUSEKI_LIVE_PORT  | 8004               | (Developers only) Port of Fuseki Triple Store (of published vocabularies), service not forwarded directly to host if unset | no                 |   |
-| EVOKS_PORT        | 8000               | (Developers only) Port of EVOKS, service not forwarded directly to host if unset                                           | no                 |   |
-| SKOSMOS_DEV_PORT  | 8001               | (Developers only) Port of Skosmos for vocabulary development, service not forwarded directly to host if unset              | no                 |   |
-| SKOSMOS_LIVE_PORT | 8002               | (Developers only) Port of Skosmos for published vocabularies, , service not forwarded directly to host if unset            | no                 |   |
+| VAR NAME          | Default value      | Description                                                                                                                | Change strongly recommended |   |
+|-------------------|--------------------|----------------------------------------------------------------------------------------------------------------------------|-----------------------------|---|
+| INSTANCE_NAME     | defaultinstance    | Prefix of docker container names                                                                                           | no                          |   |
+| PROXY_PORT        | 9000               | Port where the proxy is located                                                                                            | no                          |   |
+| PUBLICURL         | localhost          | (public) base URL under which the services will be reached ("http://" resp. "https://" is added automatically)             | no                          |   |
+| EVOKS_MAIL        | example@example.de | Mailaddress for automatically sending notifications to the instance admin (typically the person who installed the service) | no                          |   |
+| FUSEKI_PASSWORD   | insecure_changeme  | Default fuseki password, change especially if not used locally                                                             | yes                         |   |
+| POSTGRES_USER     | postgres           | Default postgres username, change especially if not used locally                                                           | yes                         |   |
+| POSTGRES_PASSWORD | insecure_changeme  | Default postgres password, change especially if not used locally                                                           | yes                         |   |
+| EVOKS_URL         | /                  | path directory under which the web app (evoks) will be reached                                                             | no                          |   |
+| DJANGO_SECRET_KEY | (insecure key)     | Use of a key generator like https://djecrety.ir/ is strongly recommended, especially if not used locally                   | no                          |   |
+| POSTGRES_PORT     | 8005               | (Developers only) Port of Postgres DB, service not forwarded to host if unset                                              | no                          |   |
+| FUSEKI_DEV_PORT   | 8003               | (Developers only) Port of Fuseki Triple Store, service not forwarded directly to host if unset                             | no                          |   |
+| FUSEKI_LIVE_PORT  | 8004               | (Developers only) Port of Fuseki Triple Store (of published vocabularies), service not forwarded directly to host if unset | no                          |   |
+| EVOKS_PORT        | 8000               | (Developers only) Port of EVOKS, service not forwarded directly to host if unset                                           | no                          |   |
+| SKOSMOS_DEV_PORT  | 8001               | (Developers only) Port of Skosmos for vocabulary development, service not forwarded directly to host if unset              | no                          |   |
+| SKOSMOS_LIVE_PORT | 8002               | (Developers only) Port of Skosmos for published vocabularies, , service not forwarded directly to host if unset            | no                          |   |
 
 
 ## Create an administrator
