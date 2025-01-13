@@ -86,8 +86,6 @@ services:
       - frontnet
     volumes:
       - .:/code
-      - ./skosmos-dev/config-template.ttl:/code/skosmos-dev/config-template.ttl
-      - ./skosmos-live/config-template.ttl:/code/skosmos-live/config-template.ttl
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
       - fuseki-dev-backup:/code/fuseki-dev/backup
@@ -153,20 +151,21 @@ services:
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-dev
     environment:
-      - BASEHREFDEV="http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-dev/"
+      - BASEHREFDEV=http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-dev/
     depends_on: 
       - fuseki-dev
     networks:
       - fuseki-dev
       - frontnet
     volumes:
-      - ./skosmos-dev/config-template.ttl:/var/www/html/config-template.ttl
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
+      - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
       - static-skosmos-dev:/var/www/html/resource
     restart: unless-stopped
     command: >
       /bin/bash -c "export BASEHREFDEV &&
-      envsubst '$$BASEHREFDEV' < /var/www/html/config-template.ttl > /var/www/html/config.ttl &&
+      chmod +x /home/replace-basehref.sh &&
+      /home/replace-basehref.sh /var/www/html/config.ttl $$BASEHREFDEV &&
       /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
@@ -182,20 +181,21 @@ services:
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-live
     environment:
-      - BASEHREFLIVE="http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-live/"
+      - BASEHREFLIVE=http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-live/
     depends_on: 
       - fuseki-live
     networks:
       - fuseki-live
       - frontnet
     volumes:
-      - ./skosmos-live/config-template.ttl:/var/www/html/config-template.ttl
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
+      - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
       - static-skosmos-live:/var/www/html/resource
     restart: unless-stopped
     command: >
       /bin/bash -c "export BASEHREFLIVE &&
-      envsubst '$$BASEHREFLIVE' < /var/www/html/config-template.ttl > /var/www/html/config.ttl &&
+      chmod +x /home/replace-basehref.sh &&
+      /home/replace-basehref.sh /var/www/html/config.ttl $$BASEHREFLIVE &&
       /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
