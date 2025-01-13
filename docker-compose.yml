@@ -86,8 +86,6 @@ services:
       - frontnet
     volumes:
       - .:/code
-      - ./skosmos-dev/config-template.ttl:/code/skosmos-dev/config-template.ttl
-      - ./skosmos-live/config-template.ttl:/code/skosmos-live/config-template.ttl
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
       - ./skosmos-live/config.ttl:/code/skosmos-live/config.ttl
       - fuseki-dev-backup:/code/fuseki-dev/backup
@@ -160,7 +158,6 @@ services:
       - fuseki-dev
       - frontnet
     volumes:
-      - ./skosmos-dev/config-template.ttl:/var/www/html/config-template.ttl
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
       - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
       - static-skosmos-dev:/var/www/html/resource
@@ -191,7 +188,6 @@ services:
       - fuseki-live
       - frontnet
     volumes:
-      - ./skosmos-live/config-template.ttl:/var/www/html/config-template.ttl
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
       - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
       - static-skosmos-live:/var/www/html/resource
