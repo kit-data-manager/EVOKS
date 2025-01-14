@@ -80,6 +80,13 @@ You need to create an administrator account for EVOKS by performing the followin
 4. Follow instructions to create a superuser. You can choose whatever username, password and (arbitary) mailaddress you like
 5. Log into EVOKS using the email as username and the chosen password
 
+## Note on running the service in production state  (e.g. available from the www)
+Apply the [Django deployment checklist](https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/). 
+Most of it is already implemented, you should at least do the following:
+- Setup https using the provided reverse proxy nginx
+- Log into the web container and run `python evoks/manage.py check --deploy` and check & solve all issues
+- Make sure to set / change all variables in .env where it is recommended
+
 # Further settings (not needed for initial setup)
 ## Configure Mail Server
 1. Open .env file
