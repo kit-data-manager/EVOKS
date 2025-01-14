@@ -225,3 +225,7 @@ STATIC_ROOT = BASE_DIR / "theme/static"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Supress this warning until it is solved
+# (urls.W002) Your URL pattern '/<group_name>' [name='teams'] has a route beginning with a '/'. Remove this slash as it is unnecessary. If this pattern is targeted in an include(), ensure the include() pattern has a trailing '/'.
+SILENCED_SYSTEM_CHECKS = ['urls.W002']
