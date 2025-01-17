@@ -30,6 +30,8 @@ services:
        - postgres:/data/postgres
     networks:
       - postgres
+    mem_limit: 200M
+    mem_reservation: 50M  
     restart: unless-stopped
     healthcheck:
       test: pg_isready
@@ -84,6 +86,8 @@ services:
       - fuseki-dev
       - fuseki-live
       - frontnet
+    mem_limit: 500M
+    mem_reservation: 50M  
     volumes:
       - .:/code
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
@@ -107,12 +111,15 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
+      JVM_ARGS: "-Xms400m -Xmx800m"
     volumes: 
       - fuseki-dev-data:/fuseki-base/databases
       - fuseki-dev-config:/fuseki-base/configuration
       - fuseki-dev-backup:/fuseki-base/backups
     networks:
       - fuseki-dev
+    mem_limit: 1G
+    mem_reservation: 500M  
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
@@ -130,12 +137,15 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
+      JVM_ARGS: "-Xms400m -Xmx800m"
     volumes: 
       - fuseki-live-data:/fuseki-base/databases
       - fuseki-live-config:/fuseki-base/configuration
       - fuseki-live-backup:/fuseki-base/backups
     networks:
       - fuseki-live
+    mem_limit: 1G
+    mem_reservation: 500M  
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
@@ -157,6 +167,8 @@ services:
     networks:
       - fuseki-dev
       - frontnet
+    mem_limit: 200M
+    mem_reservation: 50M  
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
       - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
@@ -187,6 +199,8 @@ services:
     networks:
       - fuseki-live
       - frontnet
+    mem_limit: 200M
+    mem_reservation: 50M  
     volumes:
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
       - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
