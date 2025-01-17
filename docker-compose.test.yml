@@ -9,6 +9,12 @@ services:
     container_name: evokstest_postgres
     restart: "no"
 
+  change-vol-ownership:
+    container_name: evokstest_change-vol-ownership
+    command: >
+      sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; tail -f /dev/null"
+    restart: "no"
+
   web:
     container_name: evokstest_testrunner
     entrypoint: >
