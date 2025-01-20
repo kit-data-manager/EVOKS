@@ -50,9 +50,8 @@ services:
     # execute chmod to enable writing to the volume by other containers
     # write exit status to file
     # only exit status of last command is used, but thats ok since either both or none should fail
-    # keep container running to enable abort-on-container-exit for testrunner container
     command: >
-      sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; tail -f /dev/null"
+      sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status)"
     healthcheck:
       test: ["CMD-SHELL", "cat /tmp/chmod_exit_status | grep -q '^0$'"]
       interval: 5s
