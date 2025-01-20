@@ -11,6 +11,8 @@ services:
     restart: always
     networks:
     - frontnet
+    mem_limit: 1G
+    mem_reservation: 250M  
     volumes:
       - ./evoks/theme/static:/app/evoks/static
       - static-skosmos-dev:/app/skosmos-dev/static
@@ -30,8 +32,8 @@ services:
        - postgres:/data/postgres
     networks:
       - postgres
-    mem_limit: 200M
-    mem_reservation: 50M  
+    mem_limit: 500M
+    mem_reservation: 100M  
     restart: unless-stopped
     healthcheck:
       test: pg_isready
@@ -55,6 +57,8 @@ services:
     # keep container running to enable abort-on-container-exit for testrunner container
     command: >
       sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; tail -f /dev/null"
+    mem_limit: 250M
+    mem_reservation: 50M  
     healthcheck:
       test: ["CMD-SHELL", "cat /tmp/chmod_exit_status | grep -q '^0$'"]
       interval: 5s
@@ -111,14 +115,14 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
-      JVM_ARGS: "-Xms400m -Xmx800m"
+      JVM_ARGS: "-Xms500m -Xmx1000m"
     volumes: 
       - fuseki-dev-data:/fuseki-base/databases
       - fuseki-dev-config:/fuseki-base/configuration
       - fuseki-dev-backup:/fuseki-base/backups
     networks:
       - fuseki-dev
-    mem_limit: 1G
+    mem_limit: 1500G
     mem_reservation: 500M  
     restart: unless-stopped
     healthcheck:
@@ -137,15 +141,15 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
-      JVM_ARGS: "-Xms400m -Xmx800m"
+      JVM_ARGS: "-Xms500m -Xmx1000m"
     volumes: 
       - fuseki-live-data:/fuseki-base/databases
       - fuseki-live-config:/fuseki-base/configuration
       - fuseki-live-backup:/fuseki-base/backups
     networks:
       - fuseki-live
-    mem_limit: 1G
-    mem_reservation: 500M  
+    mem_limit: 1500G
+    mem_reservation: 500M
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
