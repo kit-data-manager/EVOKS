@@ -13,7 +13,10 @@ services:
     container_name: evokstest_change-vol-ownership
     # Keep container running during tests to ensure proper --exit-code-from functionality
     command: >
-      sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; tail -f /dev/null"
+      sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; 
+      [ ! -s /tmp/skosmos-dev/config.ttl ] && cp -a /tmp/skosmos-dev/config-template.ttl /tmp/skosmos-dev/config.ttl || true ;
+      [ ! -s /tmp/skosmos-live/config.ttl ] && cp -a /tmp/skosmos-live/config-template.ttl /tmp/skosmos-live/config.ttl || true ; 
+      tail -f /dev/null"
     restart: "no"
     healthcheck:
       test: ["CMD-SHELL", "cat /tmp/chmod_exit_status | grep -q '^0$'"]
