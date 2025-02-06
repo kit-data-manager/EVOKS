@@ -468,7 +468,7 @@ class Vocabulary_views_test(TestCase):
         # create term so that search finds something
         self.c.post(
             '/vocabularies/{0}/terms'.format(self.vocabulary.name),
-            {'create-term': '', 'term-subject': 'testterm', 'term-label': 'testlabel'}
+            {'create-term': '', 'term-subject': 'testterm_43-2_23', 'term-label': 'testlabel'}
         )
 
         response = self.c.get(
@@ -502,19 +502,40 @@ class Vocabulary_views_test(TestCase):
     def test_create_term(self):
         response = self.c.post(
             '/vocabularies/{0}/terms'.format(self.vocabulary.name),
-            {'create-term': '', 'term-subject': 'testterm', 'term-label': 'testlabel'},
+            {'create-term': '', 'term-subject': 'testterm_43-2_23', 'term-label': 'testlabel'},
             follow=True
         )
         self.assertEqual(response.status_code, 200)
         voc = Vocabulary.objects.get(name=self.vocabulary.name)
-        self.assertTrue(voc.term_set.filter(name='testterm').exists())
+        self.assertTrue(voc.term_set.filter(name='testterm_43-2_23').exists())
 
         # create same term again
         error_response = self.c.post(
             '/vocabularies/{0}/terms'.format(self.vocabulary.name),
-            {'create-term': '', 'term-subject': 'testterm', 'term-label': 'testlabel'}
+            {'create-term': '', 'term-subject': 'testterm_43-2_23', 'term-label': 'testlabel'}
         )
         self.assertEqual(error_response.status_code, 409)
+
+        # create term with empty subject
+        error_response = self.c.post(
+            '/vocabularies/{0}/terms'.format(self.vocabulary.name),
+            {'create-term': '', 'term-subject': '', 'term-label': 'testlabelempty'}
+        )
+        self.assertEqual(error_response.status_code, 400)
+
+        # create term with space in subject
+        error_response = self.c.post(
+            '/vocabularies/{0}/terms'.format(self.vocabulary.name),
+            {'create-term': '', 'term-subject': 'test term', 'term-label': 'testlabelspace'}
+        )
+        self.assertEqual(error_response.status_code, 400)
+
+        # create term with disallowed character in subject
+        error_response = self.c.post(
+            '/vocabularies/{0}/terms'.format(self.vocabulary.name),
+            {'create-term': '', 'term-subject': 'testterm!', 'term-label': 'testlabelquestionmark'}
+        )
+        self.assertEqual(error_response.status_code, 400)
 
     # base view tests
 
@@ -571,7 +592,7 @@ class Vocabulary_views_test(TestCase):
         # create term so that search finds something
         self.c.post(
             '/vocabularies/{0}/terms'.format(self.vocabulary.name),
-            {'create-term': '', 'term-subject': 'testterm', 'term-label': 'testlabel'}
+            {'create-term': '', 'term-subject': 'testterm_43-2_23', 'term-label': 'testlabel'}
         )
 
         response = self.c.get(
