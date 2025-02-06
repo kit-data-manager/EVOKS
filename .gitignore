@@ -2,6 +2,9 @@
 fuseki-dev/config/*
 fuseki-live/config/*
 
+# keep config.ttl out of repo
+config.ttl
+
 .log
 *.pot
 *.pyc

@@ -51,18 +51,18 @@ services:
       # The volumes to chown
       - fuseki-dev-backup:/tmp/change-ownership-fuseki-dev
       - fuseki-live-backup:/tmp/change-ownership-fuseki-live
+      # The volumes needed for skosmos config-template copy
+      - ./skosmos-dev/:/tmp/skosmos-dev
+      - ./skosmos-live/:/tmp/skosmos-live
     # execute chmod to enable writing to the volume by other containers
     # write exit status to file
     # only exit status of last command is used, but thats ok since either both or none should fail
-    # keep container running to enable abort-on-container-exit for testrunner container
     command: >
-      sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; tail -f /dev/null"
+      sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; 
+      [ ! -s /tmp/skosmos-dev/config.ttl ] && cp -a /tmp/skosmos-dev/config-template.ttl /tmp/skosmos-dev/config.ttl || true ;
+      [ ! -s /tmp/skosmos-live/config.ttl ] && cp -a /tmp/skosmos-live/config-template.ttl /tmp/skosmos-live/config.ttl || true"
     mem_limit: 256M
     mem_reservation: 64M  
-    healthcheck:
-      test: ["CMD-SHELL", "cat /tmp/chmod_exit_status | grep -q '^0$'"]
-      interval: 5s
-      retries: 5
 
   web:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_web
@@ -76,7 +76,7 @@ services:
       postgres:
           condition: service_healthy
       change-vol-ownership:
-          condition: service_healthy
+          condition: service_completed_successfully
       fuseki-dev:
           condition: service_healthy
       fuseki-live:
@@ -166,8 +166,11 @@ services:
     hostname: skosmos-dev
     environment:
       - BASEHREFDEV=http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-dev/
-    depends_on: 
-      - fuseki-dev
+    depends_on:
+      fuseki-dev:
+          condition: service_healthy
+      change-vol-ownership:
+          condition: service_completed_successfully
     networks:
       - fuseki-dev
       - frontnet
@@ -198,8 +201,11 @@ services:
     hostname: skosmos-live
     environment:
       - BASEHREFLIVE=http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-live/
-    depends_on: 
-      - fuseki-live
+    depends_on:
+      fuseki-live:
+          condition: service_healthy
+      change-vol-ownership:
+          condition: service_completed_successfully
     networks:
       - fuseki-live
       - frontnet

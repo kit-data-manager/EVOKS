@@ -9,6 +9,20 @@ services:
     container_name: evokstest_postgres
     restart: "no"
 
+  change-vol-ownership:
+    container_name: evokstest_change-vol-ownership
+    # Keep container running during tests to ensure proper --exit-code-from functionality
+    command: >
+      sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; 
+      [ ! -s /tmp/skosmos-dev/config.ttl ] && cp -a /tmp/skosmos-dev/config-template.ttl /tmp/skosmos-dev/config.ttl || true ;
+      [ ! -s /tmp/skosmos-live/config.ttl ] && cp -a /tmp/skosmos-live/config-template.ttl /tmp/skosmos-live/config.ttl || true ; 
+      tail -f /dev/null"
+    restart: "no"
+    healthcheck:
+      test: ["CMD-SHELL", "cat /tmp/chmod_exit_status | grep -q '^0$'"]
+      interval: 5s
+      retries: 5
+
   web:
     container_name: evokstest_testrunner
     entrypoint: >
@@ -18,6 +32,9 @@ services:
              coverage run manage.py test -v 3 tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks &&
              coverage report &&
              coverage xml"
+    depends_on:
+      change-vol-ownership:
+        condition: service_healthy
     restart: "no"
 
   fuseki-dev:
@@ -30,8 +47,14 @@ services:
 
   skosmos-dev:
     container_name: evokstest_skosmos-dev
+    depends_on:
+      change-vol-ownership:
+          condition: service_healthy
     restart: "no"
 
   skosmos-live:
     container_name: evokstest_skosmos-live
+    depends_on:
+      change-vol-ownership:
+          condition: service_healthy
     restart: "no"
