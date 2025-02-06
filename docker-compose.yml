@@ -69,7 +69,7 @@ services:
       postgres:
           condition: service_healthy
       change-vol-ownership:
-          condition: service_healthy
+          condition: service_completed_successfully
       fuseki-dev:
           condition: service_healthy
       fuseki-live:
@@ -151,8 +151,11 @@ services:
     hostname: skosmos-dev
     environment:
       - BASEHREFDEV=http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-dev/
-    depends_on: 
-      - fuseki-dev
+    depends_on:
+      fuseki-dev:
+          condition: service_healthy
+      change-vol-ownership:
+          condition: service_completed_successfully
     networks:
       - fuseki-dev
       - frontnet
@@ -181,8 +184,11 @@ services:
     hostname: skosmos-live
     environment:
       - BASEHREFLIVE=http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-live/
-    depends_on: 
-      - fuseki-live
+    depends_on:
+      fuseki-live:
+          condition: service_healthy
+      change-vol-ownership:
+          condition: service_completed_successfully
     networks:
       - fuseki-live
       - frontnet

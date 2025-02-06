@@ -15,6 +15,10 @@ services:
     command: >
       sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; tail -f /dev/null"
     restart: "no"
+    healthcheck:
+      test: ["CMD-SHELL", "cat /tmp/chmod_exit_status | grep -q '^0$'"]
+      interval: 5s
+      retries: 5
 
   web:
     container_name: evokstest_testrunner
@@ -25,6 +29,9 @@ services:
              coverage run manage.py test -v 3 tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks &&
              coverage report &&
              coverage xml"
+    depends_on:
+      change-vol-ownership:
+        condition: service_healthy
     restart: "no"
 
   fuseki-dev:
@@ -37,8 +44,14 @@ services:
 
   skosmos-dev:
     container_name: evokstest_skosmos-dev
+    depends_on:
+      change-vol-ownership:
+          condition: service_healthy
     restart: "no"
 
   skosmos-live:
     container_name: evokstest_skosmos-live
+    depends_on:
+      change-vol-ownership:
+          condition: service_healthy
     restart: "no"
