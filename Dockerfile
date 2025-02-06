@@ -11,6 +11,8 @@ RUN apt-get update \
     && apt-get clean
 
 COPY requirements*.txt ./
+COPY skosmos-dev/config-template.ttl ./skosmos-dev/config.ttl
+COPY skosmos-live/config-template.ttl ./skosmos-live/config.ttl
 
 RUN pip install -r requirements.txt
 
