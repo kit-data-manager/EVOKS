@@ -11,6 +11,8 @@ services:
     restart: always
     networks:
     - frontnet
+    mem_limit: 1024M
+    mem_reservation: 256M  
     volumes:
       - ./evoks/theme/static:/app/evoks/static
       - static-skosmos-dev:/app/skosmos-dev/static
@@ -30,6 +32,8 @@ services:
        - postgres:/data/postgres
     networks:
       - postgres
+    mem_limit: 512M
+    mem_reservation: 128M  
     restart: unless-stopped
     healthcheck:
       test: pg_isready
@@ -57,6 +61,8 @@ services:
       sh -c "(chmod -R 777 /tmp/change-ownership-fuseki-dev && chmod -R 777 /tmp/change-ownership-fuseki-live ; echo $? > /tmp/chmod_exit_status) ; 
       [ ! -s /tmp/skosmos-dev/config.ttl ] && cp -a /tmp/skosmos-dev/config-template.ttl /tmp/skosmos-dev/config.ttl || true ;
       [ ! -s /tmp/skosmos-live/config.ttl ] && cp -a /tmp/skosmos-live/config-template.ttl /tmp/skosmos-live/config.ttl || true"
+    mem_limit: 256M
+    mem_reservation: 64M  
 
   web:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_web
@@ -84,6 +90,8 @@ services:
       - fuseki-dev
       - fuseki-live
       - frontnet
+    mem_limit: 1024M
+    mem_reservation: 128M
     volumes:
       - .:/code
       - ./skosmos-dev/config.ttl:/code/skosmos-dev/config.ttl
@@ -107,12 +115,15 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
-    volumes: 
+      JVM_ARGS: "-Xms256m -Xmx1024m"
+    volumes:
       - fuseki-dev-data:/fuseki-base/databases
       - fuseki-dev-config:/fuseki-base/configuration
       - fuseki-dev-backup:/fuseki-base/backups
     networks:
       - fuseki-dev
+    mem_limit: 1536M
+    mem_reservation: 512M
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
@@ -130,12 +141,15 @@ services:
       ENABLE_DATA_WRITE: 'True'
       ENABLE_UPDATE: 'True'
       ENABLE_UPLOAD: 'True'
-    volumes: 
+      JVM_ARGS: "-Xms256m -Xmx1024m"
+    volumes:
       - fuseki-live-data:/fuseki-base/databases
       - fuseki-live-config:/fuseki-base/configuration
       - fuseki-live-backup:/fuseki-base/backups
     networks:
       - fuseki-live
+    mem_limit: 1536M
+    mem_reservation: 512M
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
@@ -160,6 +174,8 @@ services:
     networks:
       - fuseki-dev
       - frontnet
+    mem_limit: 256M
+    mem_reservation: 64M
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
       - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
@@ -193,6 +209,8 @@ services:
     networks:
       - fuseki-live
       - frontnet
+    mem_limit: 256M
+    mem_reservation: 64M
     volumes:
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
       - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
