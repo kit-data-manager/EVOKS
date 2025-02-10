@@ -24,42 +24,59 @@ class Term(models.Model):
         term = cls(name=name, uri=uri)
         term.save()
         return term
+    
+    def export_term(self, dataformat: str) -> dict:
+        """Exports a single term in the requested RDF format.
 
-    def export_term(self, data_format: str) -> None:
+        Args:
+            data_format (str): Desired data format (json-ld, turtle, rdf+xml).
+
+        Returns:
+            dict: Dictionary containing file content, content type, and content disposition.
+        """
         from evoks.fuseki import fuseki_dev
+        from rdflib import Graph
 
-        query = """
-            SELECT ?subject ?predicate ?object
-            WHERE {{
-            <{0}{1}> ?predicate ?object
-            }}""".format(self.vocabulary.urispace, self.uri)
-        if data_format == 'json-ld':
-            thing = fuseki_dev.query(self.vocabulary, """
-            DESCRIBE <{0}{1}> """.format(self.vocabulary.urispace, self.uri), 'xml')
-            file_content = thing.serialize(format='json-ld')
-            content_type = 'application/json-ld'
-            content_disposition = 'attachment; filename={0}_{1}.jsonld'.format(
-                self.vocabulary.name, self.name)
-        elif data_format == 'turtle':
-            thing = fuseki_dev.query(self.vocabulary, """
-            DESCRIBE <{0}{1}> """.format(self.vocabulary.urispace, self.uri), 'xml')
-            file_content = thing.serialize(format='n3')
-            content_type = 'application/ttl'
-            content_disposition = 'attachment; filename={0}_{1}.ttl'.format(
-                self.vocabulary.name, self.name)
-        elif data_format == 'rdf+xml':
-            thing = fuseki_dev.query(self.vocabulary, query, 'xml')
-            file_content = thing.toprettyxml()
-            content_type = 'application/rdf+xml'
-            content_disposition = 'attachment; filename={0}_{1}.rdf'.format(
-                self.vocabulary.name, self.name)
+        term_uri = f"{self.vocabulary.urispace}{self.uri}"
 
-        export = {
-            'file_content': file_content,
-            'content_type': content_type,
-            'content_disposition': content_disposition
+        # SPARQL query to get all triples related to the term
+        query = f"""
+            CONSTRUCT {{ <{term_uri}> ?p ?o }}
+            WHERE {{ <{term_uri}> ?p ?o }}
+        """
+
+        try:
+            rdf_graph = fuseki_dev.query(self.vocabulary, query, 'xml')
+
+            if not isinstance(rdf_graph, Graph):
+                raise ValueError(f"Expected RDF Graph but got {type(rdf_graph)}")
+
+        except Exception as e:
+            raise RuntimeError(f"Error fetching RDF data from Fuseki: {str(e)}")
+
+        # Format mapping for different RDF serialization options
+        format_mapping = {
+            "json-ld": ("json-ld", "application/ld+json", "jsonld"),
+            "turtle": ("turtle", "text/turtle", "ttl"),
+            "rdf+xml": ("xml", "application/rdf+xml", "rdf"),
         }
-        return export
+
+        if dataformat not in format_mapping:
+            raise ValueError(f"Unsupported format: {dataformat}")
+
+        rdf_format, content_type, file_extension = format_mapping[dataformat]
+
+        try:
+            file_content = rdf_graph.serialize(format=rdf_format, indent=2 if dataformat == "json-ld" else None)
+        except Exception as e:
+            raise RuntimeError(f"Error serializing RDF data: {str(e)}")
+
+        return {
+            "file_content": file_content,
+            "content_type": content_type,
+            "content_disposition": f'attachment; filename={self.vocabulary.name}_{self.name}.{file_extension}',
+        }
+
 
     def edit_field(self, predicate: str, old_object: str, new_object: str) -> None:
         """Replaces the object of a triple field with a new object, by using SPARQL Queries and the Fuseki-Dev Instance
