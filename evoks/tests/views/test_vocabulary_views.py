@@ -443,7 +443,7 @@ class Vocabulary_views_test(TestCase):
             {'download': 'turtle'},
         )
         self.assertEqual('{0}'.format(
-            response), '<HttpResponse status_code=200, \"application/ttl\">')
+            response), '<HttpResponse status_code=200, \"text/turtle\">')
         self.assertEqual(response.status_code, 200)
 
     def test_download_jsonld(self):
@@ -452,7 +452,7 @@ class Vocabulary_views_test(TestCase):
             {'download': 'json-ld'},
         )
         self.assertEqual('{0}'.format(
-            response), '<HttpResponse status_code=200, \"application/json-ld\">')
+            response), '<HttpResponse status_code=200, \"application/ld+json\">')
         self.assertEqual(response.status_code, 200)
 
     def test_download_rdfxml(self):
