@@ -29,7 +29,7 @@ class Term(models.Model):
         """Exports a single term in the requested RDF format.
 
         Args:
-            data_format (str): Desired data format (json-ld, turtle, rdf+xml).
+            dataformat (str): Desired data format (json-ld, turtle, rdf+xml).
 
         Returns:
             dict: Dictionary containing file content, content type, and content disposition.
@@ -48,11 +48,8 @@ class Term(models.Model):
         try:
             rdf_graph = fuseki_dev.query(self.vocabulary, query, 'xml')
 
-            if not isinstance(rdf_graph, Graph):
-                raise ValueError(f"Expected RDF Graph but got {type(rdf_graph)}")
-
         except Exception as e:
-            raise RuntimeError(f"Error fetching RDF data from Fuseki: {str(e)}")
+            raise RuntimeError(f"Error fetching RDF data from Fuseki: {e}") from e
 
         # Format mapping for different RDF serialization options
         format_mapping = {
@@ -66,10 +63,7 @@ class Term(models.Model):
 
         rdf_format, content_type, file_extension = format_mapping[dataformat]
 
-        try:
-            file_content = rdf_graph.serialize(format=rdf_format, indent=2 if dataformat == "json-ld" else None)
-        except Exception as e:
-            raise RuntimeError(f"Error serializing RDF data: {str(e)}")
+        file_content = rdf_graph.serialize(format=rdf_format, indent=2 if dataformat == "json-ld" else None)
 
         return {
             "file_content": file_content,

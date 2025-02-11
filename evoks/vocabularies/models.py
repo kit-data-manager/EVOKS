@@ -387,14 +387,7 @@ class Vocabulary(models.Model):
             }}
         """
 
-        try:
-            rdf_graph = fuseki_dev.query(self, query, 'xml')
-
-            if not isinstance(rdf_graph, Graph):
-                raise ValueError(f"Expected RDF Graph but got {type(rdf_graph)}")
-
-        except Exception as e:
-            raise RuntimeError(f"Error fetching RDF data from Fuseki: {str(e)}")
+        rdf_graph = fuseki_dev.query(self, query, 'xml')
 
         # Serialization format mapping
         format_mapping = {
@@ -408,10 +401,7 @@ class Vocabulary(models.Model):
 
         rdf_format, content_type, file_extension = format_mapping[dataformat]
 
-        try:
-            file_content = rdf_graph.serialize(format=rdf_format, indent=2 if dataformat == 'json-ld' else None)
-        except Exception as e:
-            raise RuntimeError(f"Error serializing RDF data: {str(e)}")
+        file_content = rdf_graph.serialize(format=rdf_format, indent=2 if dataformat == 'json-ld' else None)
 
         return {
             "file_content": file_content,
