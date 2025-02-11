@@ -117,6 +117,8 @@ Most of the email providers (e.g. Gmail) do not accept Less Secure Apps by defau
 ## Execution of Tests (only for developers needed)
 Run the tests:
 `docker compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from web`
+Run tests within container (e.g. for test bug fixing):
+Log into web container, cd to evoks, execute `python manage.py test tests/model/ tests/migration/ tests/skosmos/ tests/fuseki/ tests/views/ tests/evoks`
 
 **License**
 

@@ -14,6 +14,9 @@ from langcodes import Language
 from vocabularies.forms import Property_Predicate_Form
 from rdflib.namespace import _is_valid_uri
 from vocabularies.views import get_vocab_perm
+import logging
+
+logger = logging.getLogger(__name__)
 
 def convert_predicate(namespaces: List[Tuple[str, str]], predicate: str) -> str:
     """Convert a URI predicate to a shortened predicate with namespaces
@@ -280,12 +283,16 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
             term_broader.create_field(object, predicate_narrower, urispace)
         
         elif 'download' in request.POST:
-                dataformat = request.POST['download']
-                export = term.export_term(dataformat)
-                response = HttpResponse(
-                    export['file_content'], export['content_type'])
-                response['Content-Disposition'] = export['content_disposition']
-                return response
+                try:
+                    dataformat = request.POST['download']
+                    export = term.export_term(dataformat)
+                    response = HttpResponse(
+                        export['file_content'], export['content_type'])
+                    response['Content-Disposition'] = export['content_disposition']
+                    return response
+                except ValueError as e:
+                    logger.error(f"Error during term export: {e}")
+                    return HttpResponse("An internal error has occurred.", status=400, content_type="text/plain")
 
     # put comments and tags on term into a list sorted from newest to oldest
     comments = term.comment_set.filter()
