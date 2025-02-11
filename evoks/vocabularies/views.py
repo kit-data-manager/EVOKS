@@ -298,12 +298,16 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
             vocabulary.create_field(urispace, predicate, object)
 
         elif 'download' in request.POST:
-            dataformat = request.POST['download']
-            export = vocabulary.export_vocabulary(dataformat)
-            response = HttpResponse(
-                export['file_content'], export['content_type'])
-            response['Content-Disposition'] = export['content_disposition']
-            return response
+            try:
+                dataformat = request.POST['download']
+                export = vocabulary.export_vocabulary(dataformat)
+                response = HttpResponse(
+                    export['file_content'], export['content_type'])
+                response['Content-Disposition'] = export['content_disposition']
+                return response
+            except ValueError as e:
+                return HttpResponse(str(e), status=400, content_type="text/plain")
+
 
     # query all fields of the vocabulary
     query_result = fuseki_dev.query(vocabulary, """
