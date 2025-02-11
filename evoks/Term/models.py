@@ -49,7 +49,7 @@ class Term(models.Model):
             rdf_graph = fuseki_dev.query(self.vocabulary, query, 'xml')
 
         except Exception as e:
-            raise RuntimeError(f"Error fetching RDF data from Fuseki: {e}") from e
+            raise RuntimeError(f"Error fetching RDF data from Fuseki")
 
         # Format mapping for different RDF serialization options
         format_mapping = {
