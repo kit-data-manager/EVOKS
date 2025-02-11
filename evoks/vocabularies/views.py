@@ -24,6 +24,9 @@ from guardian.shortcuts import get_perms
 from django.contrib.auth.decorators import login_required, user_passes_test
 from rdflib.namespace import _is_valid_uri
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
@@ -298,12 +301,17 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
             vocabulary.create_field(urispace, predicate, object)
 
         elif 'download' in request.POST:
-            dataformat = request.POST['download']
-            export = vocabulary.export_vocabulary(dataformat)
-            response = HttpResponse(
-                export['file_content'], export['content_type'])
-            response['Content-Disposition'] = export['content_disposition']
-            return response
+            try:
+                dataformat = request.POST['download']
+                export = vocabulary.export_vocabulary(dataformat)
+                response = HttpResponse(
+                    export['file_content'], export['content_type'])
+                response['Content-Disposition'] = export['content_disposition']
+                return response
+            except ValueError as e:
+                logger.error(f"Error during vocabulary export: {e}")
+                return HttpResponse("An internal error has occurred.", status=400, content_type="text/plain")
+
 
     # query all fields of the vocabulary
     query_result = fuseki_dev.query(vocabulary, """

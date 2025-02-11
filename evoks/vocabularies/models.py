@@ -362,47 +362,54 @@ class Vocabulary(models.Model):
                 prefix=parts[1][:-1], url=parts[2]))
 
         return converted
+    
 
-    def export_vocabulary(self, dataformat: str) -> None:
-        """Sends the Vocabulary in the provided dataformat to the users email
+    def export_vocabulary(self, dataformat: str) -> dict:
+        """Exports the vocabulary in the requested RDF format.
 
         Args:
-            dataformat (Enum): Desired dataformat
+            dataformat (str): Desired data format (json-ld, turtle, rdf+xml).
+
+        Returns:
+            dict: Dictionary containing file content, content type, and content disposition.
         """
         from evoks.fuseki import fuseki_dev
-        urispace = self.urispace
-        query = """
-            SELECT ?subject ?predicate ?object
-            WHERE {{
-            <{0}> ?predicate ?object
-            }}""".format(urispace)
-        if dataformat == 'json-ld':
-            thing = fuseki_dev.query(self, """
-            DESCRIBE <{0}> """.format(urispace), 'xml')
-            file_content = thing.serialize(format='json-ld')
-            content_type = 'application/json-ld'
-            content_disposition = 'attachment; filename={0}.jsonld'.format(
-                self.name)
-        elif dataformat == 'turtle':
-            thing = fuseki_dev.query(self, """
-            DESCRIBE <{0}> """.format(urispace), 'xml')
-            file_content = thing.serialize(format='n3')
-            content_type = 'application/ttl'
-            content_disposition = 'attachment; filename={0}.ttl'.format(
-                self.name)
-        elif dataformat == 'rdf+xml':
-            thing = fuseki_dev.query(self, query, 'xml')
-            file_content = thing.toprettyxml()
-            content_type = 'application/rdf+xml'
-            content_disposition = 'attachment; filename={0}.rdf'.format(
-                self.name)
+        from rdflib import Graph
 
-        export = {
-            'file_content': file_content,
-            'content_type': content_type,
-            'content_disposition': content_disposition
+        urispace = self.urispace
+
+        # SPARQL query to get all triples related to the vocabulary
+        query = f"""
+            CONSTRUCT {{ ?s ?p ?o }}
+            WHERE {{
+                ?s ?p ?o .
+                FILTER (STRSTARTS(STR(?s), "{urispace}"))
+            }}
+        """
+
+        rdf_graph = fuseki_dev.query(self, query, 'xml')
+
+        # Serialization format mapping
+        format_mapping = {
+            "json-ld": ("json-ld", "application/ld+json", "jsonld"),
+            "turtle": ("turtle", "text/turtle", "ttl"),
+            "rdf+xml": ("xml", "application/rdf+xml", "rdf"),
         }
-        return export
+
+        if dataformat not in format_mapping:
+            raise ValueError(f"Unsupported format: {dataformat}")
+
+        rdf_format, content_type, file_extension = format_mapping[dataformat]
+
+        file_content = rdf_graph.serialize(format=rdf_format, indent=2 if dataformat == 'json-ld' else None)
+
+        return {
+            "file_content": file_content,
+            "content_type": content_type,
+            "content_disposition": f'attachment; filename={self.name}.{file_extension}',
+        }
+
+
 
     def get_languages(self) -> List[str]:
         """Returns the languages of the vocabulary"""

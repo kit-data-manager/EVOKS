@@ -438,31 +438,71 @@ class Vocabulary_views_test(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_download_ttl(self):
+        """Test exporting the vocabulary in Turtle format."""
         response = self.c.post(
-            '/vocabularies/{0}'.format(self.vocabulary.name),
+            f'/vocabularies/{self.vocabulary.name}',
             {'download': 'turtle'},
         )
-        self.assertEqual('{0}'.format(
-            response), '<HttpResponse status_code=200, \"application/ttl\">')
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/turtle')
 
     def test_download_jsonld(self):
+        """Test exporting the vocabulary in JSON-LD format."""
         response = self.c.post(
-            '/vocabularies/{0}'.format(self.vocabulary.name),
+            f'/vocabularies/{self.vocabulary.name}',
             {'download': 'json-ld'},
         )
-        self.assertEqual('{0}'.format(
-            response), '<HttpResponse status_code=200, \"application/json-ld\">')
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/ld+json')
 
     def test_download_rdfxml(self):
+        """Test exporting the vocabulary in RDF/XML format."""
         response = self.c.post(
-            '/vocabularies/{0}'.format(self.vocabulary.name),
+            f'/vocabularies/{self.vocabulary.name}',
             {'download': 'rdf+xml'},
         )
-        self.assertEqual('{0}'.format(
-            response), '<HttpResponse status_code=200, \"application/rdf+xml\">')
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/rdf+xml')
+
+    def test_download_invalid_format(self):
+        """Test exporting the vocabulary with an unsupported format."""
+        response = self.c.post(
+            f'/vocabularies/{self.vocabulary.name}',
+            {'download': 'invalid-format'},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("An internal error has occurred.", response.content.decode())
+
+
+    # def test_download_ttl(self):
+    #     response = self.c.post(
+    #         '/vocabularies/{0}'.format(self.vocabulary.name),
+    #         {'download': 'turtle'},
+    #     )
+    #     self.assertEqual('{0}'.format(
+    #         response), '<HttpResponse status_code=200, \"text/turtle\">')
+    #     self.assertEqual(response.status_code, 200)
+
+    # def test_download_jsonld(self):
+    #     response = self.c.post(
+    #         '/vocabularies/{0}'.format(self.vocabulary.name),
+    #         {'download': 'json-ld'},
+    #     )
+    #     self.assertEqual('{0}'.format(
+    #         response), '<HttpResponse status_code=200, \"application/ld+json\">')
+    #     self.assertEqual(response.status_code, 200)
+
+    # def test_download_rdfxml(self):
+    #     response = self.c.post(
+    #         '/vocabularies/{0}'.format(self.vocabulary.name),
+    #         {'download': 'rdf+xml'},
+    #     )
+    #     self.assertEqual('{0}'.format(
+    #         response), '<HttpResponse status_code=200, \"application/rdf+xml\">')
+    #     self.assertEqual(response.status_code, 200)
+
+
+        
 
     def test_overview_search(self):
         # create term so that search finds something
