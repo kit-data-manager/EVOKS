@@ -280,12 +280,15 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
             term_broader.create_field(object, predicate_narrower, urispace)
         
         elif 'download' in request.POST:
-                dataformat = request.POST['download']
-                export = term.export_term(dataformat)
-                response = HttpResponse(
-                    export['file_content'], export['content_type'])
-                response['Content-Disposition'] = export['content_disposition']
-                return response
+                try:
+                    dataformat = request.POST['download']
+                    export = term.export_term(dataformat)
+                    response = HttpResponse(
+                        export['file_content'], export['content_type'])
+                    response['Content-Disposition'] = export['content_disposition']
+                    return response
+                except ValueError as e:
+                    return HttpResponse(str(e), status=400, content_type="text/plain")
 
     # put comments and tags on term into a list sorted from newest to oldest
     comments = term.comment_set.filter()

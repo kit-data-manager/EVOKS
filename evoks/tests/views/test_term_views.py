@@ -104,35 +104,73 @@ class Vocabulary_views_test(TestCase):
         self.assertNotContains(delete_tag, 'example tag')
         self.assertFalse(Tag.objects.filter(name='example tag').exists())
 
-    def test_download_ttl(self):
+    def test_download_term_ttl(self):
+        """Test exporting a single term in Turtle format."""
         response = self.c.post(
-            '/vocabularies/{0}/terms/{1}'.format(
-                self.vocabulary.name, self.term.name),
+            f'/vocabularies/{self.vocabulary.name}/terms/{self.term.name}',
             {'download': 'turtle'},
         )
-        self.assertEqual('{0}'.format(
-            response), '<HttpResponse status_code=200, \"text/turtle\">')
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/turtle')
 
-    def test_download_jsonld(self):
+
+    def test_download_term_jsonld(self):
+        """Test exporting a single term in JSON-LD format."""
         response = self.c.post(
-            '/vocabularies/{0}/terms/{1}'.format(
-                self.vocabulary.name, self.term.name),
+            f'/vocabularies/{self.vocabulary.name}/terms/{self.term.name}',
             {'download': 'json-ld'},
         )
-        self.assertEqual('{0}'.format(
-            response), '<HttpResponse status_code=200, \"application/ld+json\">')
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/ld+json')
 
-    def test_download_rdfxml(self):
+    def test_download_term_rdfxml(self):
+        """Test exporting a single term in RDF/XML format."""
         response = self.c.post(
-            '/vocabularies/{0}/terms/{1}'.format(
-                self.vocabulary.name, self.term.name),
+            f'/vocabularies/{self.vocabulary.name}/terms/{self.term.name}',
             {'download': 'rdf+xml'},
         )
-        self.assertEqual('{0}'.format(
-            response), '<HttpResponse status_code=200, \"application/rdf+xml\">')
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/rdf+xml')
+
+    def test_download_term_invalid_format(self):
+        """Test exporting a term with an unsupported format."""
+        response = self.c.post(
+            f'/vocabularies/{self.vocabulary.name}/terms/{self.term.name}',
+            {'download': 'invalid-format'},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Unsupported format", response.content.decode())
+
+
+    # def test_download_ttl(self):
+    #     response = self.c.post(
+    #         '/vocabularies/{0}/terms/{1}'.format(
+    #             self.vocabulary.name, self.term.name),
+    #         {'download': 'turtle'},
+    #     )
+    #     self.assertEqual('{0}'.format(
+    #         response), '<HttpResponse status_code=200, \"text/turtle\">')
+    #     self.assertEqual(response.status_code, 200)
+
+    # def test_download_jsonld(self):
+    #     response = self.c.post(
+    #         '/vocabularies/{0}/terms/{1}'.format(
+    #             self.vocabulary.name, self.term.name),
+    #         {'download': 'json-ld'},
+    #     )
+    #     self.assertEqual('{0}'.format(
+    #         response), '<HttpResponse status_code=200, \"application/ld+json\">')
+    #     self.assertEqual(response.status_code, 200)
+
+    # def test_download_rdfxml(self):
+    #     response = self.c.post(
+    #         '/vocabularies/{0}/terms/{1}'.format(
+    #             self.vocabulary.name, self.term.name),
+    #         {'download': 'rdf+xml'},
+    #     )
+    #     self.assertEqual('{0}'.format(
+    #         response), '<HttpResponse status_code=200, \"application/rdf+xml\">')
+    #     self.assertEqual(response.status_code, 200)
 
     def test_create_property_empty_predicate(self):
         response = self.c.post(
