@@ -139,7 +139,7 @@ class Vocabulary_views_test(TestCase):
             {'download': 'invalid-format'},
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIn("Unsupported format", response.content.decode())
+        self.assertIn("An internal error has occurred.", response.content.decode())
 
 
     # def test_download_ttl(self):

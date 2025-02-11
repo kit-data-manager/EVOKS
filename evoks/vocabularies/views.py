@@ -310,7 +310,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                 return response
             except ValueError as e:
                 logger.error(f"Error during vocabulary export: {e}")
-                return HttpResponse("An error occurred while processing your request.", status=400, content_type="text/plain")
+                return HttpResponse("An internal error has occurred.", status=400, content_type="text/plain")
 
 
     # query all fields of the vocabulary
