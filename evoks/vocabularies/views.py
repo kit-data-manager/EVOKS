@@ -24,6 +24,9 @@ from guardian.shortcuts import get_perms
 from django.contrib.auth.decorators import login_required, user_passes_test
 from rdflib.namespace import _is_valid_uri
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def prefixes(request: HttpRequest, voc_name: str) -> HttpResponse:
@@ -306,7 +309,8 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                 response['Content-Disposition'] = export['content_disposition']
                 return response
             except ValueError as e:
-                return HttpResponse(str(e), status=400, content_type="text/plain")
+                logger.error(f"Error during vocabulary export: {e}")
+                return HttpResponse("An error occurred while processing your request.", status=400, content_type="text/plain")
 
 
     # query all fields of the vocabulary
