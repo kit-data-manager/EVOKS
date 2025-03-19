@@ -1,30 +1,27 @@
 from Skosmos.skosmos_vocabulary_config import SkosmosVocabularyConfig
 from django.db import models
-from django.utils.datastructures import MultiValueDict
 from Profile.models import Profile
 from GroupProfile.models import GroupProfile
 import enum
 from guardian.shortcuts import assign_perm, remove_perm, get_perms
 from Term.models import Term
 from django.contrib.postgres.fields import ArrayField
-from django.http import HttpResponse, HttpRequest
-import json
 import requests
 from django.conf import settings
 from typing import List, Tuple
 from evoks.skosmos import skosmos_dev, skosmos_live
+from prometheus_client import Gauge
 from skosify import skosify
 import logging
-from django.core.files.storage import FileSystemStorage
 from rdflib import Graph, URIRef
-import os
-from django.utils.crypto import get_random_string
 from tempfile import NamedTemporaryFile
-from time import sleep
 from rdflib.namespace import _is_valid_uri
-import json
 from collections import Counter
 import re
+import prometheus_client
+
+_vocabularies_created = prometheus_client.Counter("evoks_vocabularies_created", "Vocabularies created")
+_vocabularies_stored = Gauge("evoks_vocabularies_stored", "Total number of vocabularies stored")
 
 class State(models.TextChoices):
     """State TextChoices that represent the state of the Vocabulary
@@ -138,6 +135,7 @@ class Vocabulary(models.Model):
         assign_perm('owner', creator.user, vocabulary)
         vocabulary.save()
         fuseki_dev.create_vocabulary(vocabulary)
+        _vocabularies_created.inc()
         return vocabulary
 
     def name_with_version(self) -> str:
@@ -658,3 +656,6 @@ class Vocabulary(models.Model):
             self, query, 'xml', 'update')
         if self.state == State.LIVE:
             self.set_dev()
+
+
+_vocabularies_stored.set_function(lambda: Vocabulary.objects.count())

@@ -1,9 +1,9 @@
 from django.db import models
 from django.db.models.deletion import CASCADE
-import json
-from django.http import HttpResponse
-import requests
-from django.conf import settings
+from prometheus_client import Counter, Gauge
+
+_terms_created = Counter("evoks_terms_created", "Terms created")
+_terms_stored = Gauge("evoks_terms_stored", "Total number of terms stored")
 
 # Create your models here.
 
@@ -23,6 +23,7 @@ class Term(models.Model):
         """
         term = cls(name=name, uri=uri)
         term.save()
+        _terms_created.inc()
         return term
     
     def export_term(self, dataformat: str) -> dict:
@@ -129,3 +130,6 @@ class Term(models.Model):
             """.format(urispace=self.vocabulary.urispace, term=self.uri, predicate=predicate, object=object)
         fuseki_dev.query(
             self.vocabulary, query, 'xml', 'update')
+
+
+_terms_stored.set_function(lambda: Term.objects.count())
