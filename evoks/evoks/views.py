@@ -2,6 +2,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseBadRequest
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+
 from .forms import LoginForm, SignupForm, SetPasswordForm
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -118,3 +121,11 @@ def signup_view(request: HttpRequest) -> HttpResponse:
 def logout_view(request: HttpRequest):
     logout(request)
     return redirect('login')
+
+@csrf_exempt
+def metrics_view(request):
+    return HttpResponse(generate_latest(), content_type=CONTENT_TYPE_LATEST)
+
+@csrf_exempt
+def health_view(request):
+    return HttpResponse()

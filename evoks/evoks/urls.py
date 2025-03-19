@@ -1,5 +1,6 @@
 from django.urls import include, path
 from . import views
+from .views import metrics_view, health_view
 
 """evoks URL Configuration
 
@@ -59,7 +60,8 @@ urlpatterns = [
     path('teams', include('GroupProfile.urls')),
     path('help', TemplateView.as_view(
         template_name='help_page.html'), name='help'),
-
+    path('metrics/', metrics_view),
+    path('health/', health_view),
 ]
 
 if settings.DEBUG: # pragma: no cover

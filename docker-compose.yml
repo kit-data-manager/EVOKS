@@ -100,7 +100,7 @@ services:
       - fuseki-live-backup:/code/fuseki-live/backup 
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/login || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
       interval: 20s
       timeout: 10s
       retries: 5
