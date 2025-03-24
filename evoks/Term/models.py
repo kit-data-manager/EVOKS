@@ -2,8 +2,11 @@ from django.db import models
 from django.db.models.deletion import CASCADE
 from prometheus_client import Counter, Gauge
 
+from vocabularies.state import State
+
 _terms_created = Counter("evoks_terms_created", "Terms created")
 _terms_stored = Gauge("evoks_terms_stored", "Total number of terms stored")
+_terms_stored_public = Gauge("evoks_terms_stored_public", "Total number of terms stored that are published in SKOSMOS")
 
 # Create your models here.
 
@@ -133,3 +136,4 @@ class Term(models.Model):
 
 
 _terms_stored.set_function(lambda: Term.objects.count())
+_terms_stored_public.set_function(lambda: Term.objects.filter(vocabulary__state__in=[State.LIVE, State.REVIEW]).count())

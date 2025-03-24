@@ -19,19 +19,11 @@ from rdflib.namespace import _is_valid_uri
 from collections import Counter
 import re
 import prometheus_client
+from vocabularies.state import State
 
 _vocabularies_created = prometheus_client.Counter("evoks_vocabularies_created", "Vocabularies created")
 _vocabularies_stored = Gauge("evoks_vocabularies_stored", "Total number of vocabularies stored")
-
-class State(models.TextChoices):
-    """State TextChoices that represent the state of the Vocabulary
-
-    Args:
-        models (TextChoices): possible states of a vocabulary
-    """
-    DEV = 'Development'
-    REVIEW = 'Review'
-    LIVE = 'Live'
+_vocabularies_stored_public = Gauge("evoks_vocabularies_stored_public", "Total number of vocabularies stored that are published in SKOSMOS")
 
 
 class Dataformat(enum.Enum):
@@ -659,3 +651,4 @@ class Vocabulary(models.Model):
 
 
 _vocabularies_stored.set_function(lambda: Vocabulary.objects.count())
+_vocabularies_stored_public.set_function(lambda: Vocabulary.objects.filter(state__in=[State.LIVE, State.REVIEW]).count())
