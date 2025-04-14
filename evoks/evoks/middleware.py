@@ -11,7 +11,7 @@ from vocabularies.models import Vocabulary
 from django.shortcuts import redirect
 
 MONITORING_EXEMPT_URLS = ['metrics/', 'health/']
-LOGIN_EXEMPT_URLS = ['logout', 'signup', 'login', 'reset_password/', 'health/'
+LOGIN_EXEMPT_URLS = ['logout', 'signup', 'login', 'reset_password/', 'health/',
                      'reset_password_sent/', 'reset_password_complete/', 'ToS']
 
 users_total_counter = Counter("evoks_users_total", "Total number of requests served")
