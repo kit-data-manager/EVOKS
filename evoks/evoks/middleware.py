@@ -31,6 +31,10 @@ class MonitoringMiddleware(MiddlewareMixin):
         return ip
 
     def process_request(self, request):
+        metrics_enabled = os.environ.get('METRICS_ENABLED', 'false')
+        if metrics_enabled != 'true':
+            return
+
         path = request.path_info.lstrip('/')
         if not any(url == path for url in MONITORING_EXEMPT_URLS):
             users_total_counter.inc()

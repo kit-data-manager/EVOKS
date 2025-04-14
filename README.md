@@ -69,6 +69,7 @@ The main way to install EVOKS and its depending services is to build and run the
 | EVOKS_PORT        | 8000               | (Developers only) Port of EVOKS, service not forwarded directly to host if unset                                           | no                 |   |
 | SKOSMOS_DEV_PORT  | 8001               | (Developers only) Port of Skosmos for vocabulary development, service not forwarded directly to host if unset              | no                 |   |
 | SKOSMOS_LIVE_PORT | 8002               | (Developers only) Port of Skosmos for published vocabularies, , service not forwarded directly to host if unset            | no                 |   |
+| METRICS_ENABLED   | false              | Set to `true` to enable metrics                                                                                            |                    |   |
 | METRICS_USER      | metrics            | Username for metrics endpoint (HTTP Basic Authentication)                                                                  | yes                |   |
 | METRICS_PASS      | metricsPass        | Password for metrics endpoint (HTTP Basic Authentication)                                                                  | yes                |   |
 
