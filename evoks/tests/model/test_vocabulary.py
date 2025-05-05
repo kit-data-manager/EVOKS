@@ -2,7 +2,8 @@ from unittest.case import skip
 from Profile.models import Profile
 from logging import PlaceHolder
 from django.test import TestCase
-from vocabularies.models import Vocabulary, State, Dataformat
+from vocabularies.models import Vocabulary, Dataformat
+from vocabularies.state import State
 from GroupProfile.models import GroupProfile
 from django.contrib.auth.models import User, Group
 from Term.models import Term

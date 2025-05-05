@@ -1,11 +1,15 @@
 import datetime
 from typing import Optional
+from prometheus_client import Counter, Gauge
 from vocabularies.models import Vocabulary
 from Term.models import Term
 from django.db import models
 from django.db.models.deletion import CASCADE, SET_NULL
 import random
 from Profile.models import Profile
+
+_tags_created = Counter("evoks_tags_created", "Tags created")
+_tags_stored = Gauge("evoks_tags_stored", "Total number of tags stored")
 
 class Color(models.TextChoices):
     BLUE = 'blue'
@@ -38,6 +42,9 @@ class Tag(models.Model):
         tag = cls(name=name, author=author, vocabulary=vocabulary, term=term)
         tag.color = random.choice(list(Color))
         tag.save()
+        _tags_created.inc()
 
         return tag
 
+
+_tags_stored.set_function(lambda: Tag.objects.count())

@@ -78,7 +78,7 @@ DEBUG = get_env('DJANGO_DEBUG', 'False') == 'True'
 # set to False to disable Browser-sync
 TAILWIND_DEV_MODE = False
 
-ALLOWED_HOSTS = ['localhost', PUBLICURL]
+ALLOWED_HOSTS = ['localhost', 'host.docker.internal', PUBLICURL]
 
 
 LOGIN_REDIRECT_URL = '/vocabularies'
@@ -132,6 +132,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'evoks.middleware.LoginRequiredMiddleware',
     'evoks.middleware.PartOfVocabularyMiddleware',
+    'evoks.middleware.MonitoringMiddleware'
 ]
 
 AUTHENTICATION_BACKENDS = (

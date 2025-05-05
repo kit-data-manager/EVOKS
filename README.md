@@ -105,6 +105,23 @@ Most of it is already implemented, you should at least do the following:
 
 Most of the email providers (e.g. Gmail) do not accept Less Secure Apps by default, so you have to accept Less Secure Apps in the settings of the email you are using.
 
+## Optional: Monitoring
+
+You can optionally enable monitoring to be able to collect some insights on the number of stored vocabularies and terms, as well as the number of unique and total accesses. These can be collected with [Prometheus](https://prometheus.io/)
+and used with your monitoring setup.
+
+To detect unique accesses, a hashed version of the users IP will be stored in memory (non-persistent) if monitoring is explicitly activated. Apart from the hashed IP, no sensitive user information is recorded. You can collect metrics yourself from the `/metrics` endpoint. Metrics will never be *sent* anywhere.
+The metrics endpoint is secured with HTTP Basic Authentication, the credentials can be set using environment variables (see the table **below**).
+
+The following environment variables are used to configure monitoring. Note that the monitoring endpoint is disabled by default
+and must be activated by setting `METRICS_ENABLED=true` in your environment variables.
+
+| VAR NAME          | Default value      | Description                                               | Change recommended |   |
+|-------------------|--------------------|-----------------------------------------------------------|--------------------|---|
+| METRICS_ENABLED   | false              | Set to `true` to enable the metrics endpoint              | only if needed     |   |
+| METRICS_USER      | metrics            | Username for metrics endpoint (HTTP Basic Authentication) | yes                |   |
+| METRICS_PASS      | metricsPass        | Password for metrics endpoint (HTTP Basic Authentication) | yes                |   |
+
 
 # For Developers
 

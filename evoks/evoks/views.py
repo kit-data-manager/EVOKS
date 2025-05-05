@@ -1,9 +1,14 @@
+import os
+
 from django.contrib.auth import authenticate, login, logout
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseBadRequest
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+
 from .forms import LoginForm, SignupForm, SetPasswordForm
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -118,3 +123,15 @@ def signup_view(request: HttpRequest) -> HttpResponse:
 def logout_view(request: HttpRequest):
     logout(request)
     return redirect('login')
+
+@csrf_exempt
+def metrics_view(request):
+    metrics_enabled = os.environ.get('METRICS_ENABLED', 'false')
+    if metrics_enabled == 'true':
+        return HttpResponse(generate_latest(), content_type=CONTENT_TYPE_LATEST)
+    else:
+        return HttpResponseNotFound("Metrics disabled")
+
+@csrf_exempt
+def health_view(request):
+    return HttpResponse()
