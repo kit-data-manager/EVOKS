@@ -133,3 +133,6 @@ fuseki-data
 
 # macos
 .DS_Store
+
+# IntelliJ IDE Family
+.idea
