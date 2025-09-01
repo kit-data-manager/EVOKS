@@ -8,7 +8,7 @@ It allows you to:
 - create a SKOS vocabulary from scratch
 - import SKOS vocabularies in RDF/XML or Turtle format
 - edit SKOS vocabularies without using its textual representation
-- work collaborativley
+- work collaboratively
 - publish the vocabulary with a single click in the vocabulary browser [SKOSMOS](https://www.skosmos.org)
 
 # Note
@@ -40,7 +40,7 @@ The main way to install EVOKS and its depending services is to build and run the
     ```
 2. Copy .example.env and rename to .env
 3. Open .env and change the variables if desired, see
-[Overview of variables](##Variables).
+[Overview of variables](#variables).
 
     **Caution** Change of Fuseki and Postgres credentials is strongly recommended, especially if it will be accessible from outside
 
@@ -127,7 +127,7 @@ and must be activated by setting `METRICS_ENABLED=true` in your environment vari
 
 ## Bypass proxy setup for direct access to services and enable Django debug mode:
 - Open .env file
-- Adjust all variables marked as "(Developers only)" in the [Overview of variables](##Variables). 
+- Adjust all variables marked as "(Developers only)" in the [Overview of variables](#variables). 
 `docker compose -f docker-compose.yml -f docker-compose.dev.yml up`
 
 
