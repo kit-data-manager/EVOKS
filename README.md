@@ -110,7 +110,7 @@ Most of the email providers (e.g. Gmail) do not accept Less Secure Apps by defau
 
 ## Bypass proxy setup for direct access to services and enable Django debug mode:
 - Open .env file
-- Adjust all variables marked as "(Developers only)" in the [Overview of variables](##Variables). 
+- Adjust all variables marked as "(Developers only)" in the [Overview of variables](#variables). 
 `docker compose -f docker-compose.yml -f docker-compose.dev.yml up`
 
 
