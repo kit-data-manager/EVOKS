@@ -1,28 +1,28 @@
 services:
-  proxy:
-    build: 
-      context: ./proxy
-    container_name: evoks_${INSTANCE_NAME:-defaultinstance}_proxy
-    ports:
-      - "${PROXY_PORT:-9000}:80"
-    depends_on:
-      web:
-          condition: service_healthy
-    restart: always
-    networks:
-    - frontnet
-    mem_limit: 1024M
-    mem_reservation: 256M  
-    volumes:
-      - ./evoks/theme/static:/app/evoks/static
-      - static-skosmos-dev:/app/skosmos-dev/static
-      - static-skosmos-live:/app/skosmos-live/static
-    environment:
-      - EVOKS_URL=${EVOKS_URL:-}
+#  proxy:
+#    build: 
+#      context: ./proxy
+#    container_name: evoks_${INSTANCE_NAME:-defaultinstance}_proxy
+#    ports:
+#      - "${PROXY_PORT:-9000}:80"
+#    depends_on:
+#      web:
+#          condition: service_healthy
+#    restart: always
+#    networks:
+#    - frontnet
+#    mem_limit: 1024M
+#    mem_reservation: 256M  
+#    volumes:
+#      - ./evoks/theme/static:/app/evoks/static
+#      - static-skosmos-dev:/app/skosmos-dev/static
+#      - static-skosmos-live:/app/skosmos-live/static
+#    environment:
+#      - EVOKS_URL=${EVOKS_URL:-}
 
   postgres:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_postgres
-    image: postgres
+    image: postgres:15
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-insecure_changeme}
@@ -72,6 +72,8 @@ services:
       sh -c "python ./evoks/manage.py migrate && 
       python ./evoks/manage.py collectstatic --noinput --verbosity 0 && 
       gunicorn evoks.wsgi:application --bind 0.0.0.0:8000 --chdir evoks"
+    ports:
+      - "${EVOKS_PORT:-8000}:8000"
     depends_on:
       postgres:
           condition: service_healthy
@@ -165,7 +167,9 @@ services:
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-dev
     environment:
-      - BASEHREFDEV=http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-dev/
+      - BASEHREFDEV=https://matwerk.datamanager.kit.edu/skosmos/
+    ports: 
+      - "${SKOSMOS_DEV_PORT:-8001}:80"
     depends_on:
       fuseki-dev:
           condition: service_healthy
@@ -200,7 +204,9 @@ services:
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-live
     environment:
-      - BASEHREFLIVE=http://${PUBLICURL:-localhost}:${PROXY_PORT:-9000}/skosmos-live/
+      - BASEHREFLIVE=https://matwerk.datamanager.kit.edu/skosmos-live/
+    ports: 
+      - "${SKOSMOS_LIVE_PORT:-8002}:80"
     depends_on:
       fuseki-live:
           condition: service_healthy
