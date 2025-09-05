@@ -6,6 +6,8 @@ import os
 import socket
 import environ
 import os
+from django.urls import reverse_lazy
+
 
 
 base_dir = environ.Path(__file__) - 3  # .env is three levels up from this file, therefore - 3
@@ -81,9 +83,10 @@ TAILWIND_DEV_MODE = False
 ALLOWED_HOSTS = ['localhost', 'host.docker.internal', PUBLICURL]
 
 
-LOGIN_REDIRECT_URL = '/vocabularies'
+LOGIN_REDIRECT_URL = reverse_lazy('login') 
 
-LOGIN_URL = '/login'
+LOGIN_URL = reverse_lazy('vocabularies')
+
 
 
 #SMTP Configuration
