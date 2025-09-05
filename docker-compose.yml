@@ -29,7 +29,7 @@ services:
       PGDATA: /data/postgres
       POSTGRES_DB: dev
     volumes:
-       - postgres:/data/postgres
+       - postgres15:/data/postgres
     networks:
       - postgres
     mem_limit: 512M
@@ -167,7 +167,7 @@ services:
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-dev
     environment:
-      - BASEHREFDEV=https://matwerk.datamanager.kit.edu/skosmos/
+      - BASEHREFDEV=https://metarepo.nffa.eu/skosmos/
     ports: 
       - "${SKOSMOS_DEV_PORT:-8001}:80"
     depends_on:
@@ -204,7 +204,7 @@ services:
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-live
     environment:
-      - BASEHREFLIVE=https://matwerk.datamanager.kit.edu/skosmos-live/
+      - BASEHREFLIVE=https://metarepo.nffa.eu/skosmos-live/
     ports: 
       - "${SKOSMOS_LIVE_PORT:-8002}:80"
     depends_on:
@@ -244,7 +244,7 @@ networks:
   frontnet:
     driver: bridge
 volumes:
-    postgres:
+    postgres15:
     fuseki:
     fuseki-dev-data:
     fuseki-dev-config:
