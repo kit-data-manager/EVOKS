@@ -90,7 +90,7 @@ Most of it is already implemented, you should at least do the following:
 # Further settings (not needed for initial setup)
 ## Configure Mail Server
 1. Open .env file
-2. Fill out 
+2. Add
     ```
     EMAIL_HOST_USER=your-email
     EMAIL_HOST_PASSWORD=your-password
