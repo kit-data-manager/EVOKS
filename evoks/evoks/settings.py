@@ -227,3 +227,42 @@ STATIC_ROOT = BASE_DIR / "theme/static"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Logging
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "WARNING",
+            "stream": "ext://sys.stdout",
+        },
+    },
+
+    # Everything that uses the root logger will be WARNING
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+
+    # Optional: keep Django internals also at WARNING
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.server": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+}

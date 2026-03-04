@@ -71,7 +71,7 @@ services:
     entrypoint: >
       sh -c "python ./evoks/manage.py migrate && 
       python ./evoks/manage.py collectstatic --noinput --verbosity 0 && 
-      gunicorn evoks.wsgi:application --bind 0.0.0.0:8000 --chdir evoks"
+      gunicorn evoks.wsgi:application  --bind 0.0.0.0:8000 --chdir evoks" --log-level warning --access-logfile /dev/null --error-logfile -
     depends_on:
       postgres:
           condition: service_healthy
