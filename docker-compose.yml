@@ -19,6 +19,12 @@ services:
       - static-skosmos-live:/app/skosmos-live/static
     environment:
       - EVOKS_URL=${EVOKS_URL:-}
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    
 
   postgres:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_postgres
@@ -35,6 +41,11 @@ services:
     mem_limit: 512M
     mem_reservation: 128M  
     restart: unless-stopped
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "5"
     healthcheck:
       test: pg_isready
       interval: 20s
@@ -63,6 +74,11 @@ services:
       [ ! -s /tmp/skosmos-live/config.ttl ] && cp -a /tmp/skosmos-live/config-template.ttl /tmp/skosmos-live/config.ttl || true"
     mem_limit: 256M
     mem_reservation: 64M  
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "5"
 
   web:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_web
@@ -99,6 +115,11 @@ services:
       - fuseki-dev-backup:/code/fuseki-dev/backup
       - fuseki-live-backup:/code/fuseki-live/backup 
     restart: unless-stopped
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "5"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
       interval: 20s
@@ -125,6 +146,11 @@ services:
     mem_limit: 1536M
     mem_reservation: 512M
     restart: unless-stopped
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "5"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
       interval: 20s
@@ -151,6 +177,11 @@ services:
     mem_limit: 1536M
     mem_reservation: 512M
     restart: unless-stopped
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "5"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-S", "http://localhost:3030/$/ping"]
       interval: 20s
@@ -186,6 +217,11 @@ services:
       chmod +x /home/replace-basehref.sh &&
       /home/replace-basehref.sh /var/www/html/config.ttl $$BASEHREFDEV &&
       /usr/sbin/apache2ctl -D FOREGROUND"
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "5"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
       interval: 20s
@@ -221,6 +257,11 @@ services:
       chmod +x /home/replace-basehref.sh &&
       /home/replace-basehref.sh /var/www/html/config.ttl $$BASEHREFLIVE &&
       /usr/sbin/apache2ctl -D FOREGROUND"
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "5"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
       interval: 20s
