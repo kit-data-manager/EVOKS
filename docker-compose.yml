@@ -161,7 +161,7 @@ services:
   skosmos-dev:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-dev
     build:
-      context: https://github.com/NatLibFi/Skosmos.git#v2.17
+      context: https://github.com/NatLibFi/Skosmos.git#v3.0
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-dev
     environment:
@@ -196,7 +196,7 @@ services:
   skosmos-live:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-live
     build:
-      context: https://github.com/NatLibFi/Skosmos.git#v2.17
+      context: https://github.com/NatLibFi/Skosmos.git#v3.0
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-live
     environment:
