@@ -62,6 +62,9 @@ class Skosmos:
               URIRef('http://purl.org/net/skosmos#fullAlphabeticalIndex'), Literal(True)))
 
         g.add((URIRef(vocabulary_uri),
+              URIRef('http://purl.org/net/skosmos#showTopConcepts'), Literal(True)))
+
+        g.add((URIRef(vocabulary_uri),
               URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('http://purl.org/net/skosmos#Vocabulary')))
 
         g.add((URIRef(vocabulary_uri),
