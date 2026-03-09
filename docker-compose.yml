@@ -122,6 +122,8 @@ services:
       - fuseki-dev-data:/fuseki-base/databases
       - fuseki-dev-config:/fuseki-base/configuration
       - fuseki-dev-backup:/fuseki-base/backups
+      # Set log for fuseki to WARN level
+      - ./fuseki-dev/log4j2.properties:/jena-fuseki/log4j2.properties
     networks:
       - fuseki-dev
     mem_limit: 1536M
@@ -183,6 +185,8 @@ services:
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
       - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
+      # Configure CustomLog to /dev/null to avoid big log files 
+      - ./skosmos-dev/sites-available/000-default.conf:/etc/apache2/sites-available/000-default.conf
       - static-skosmos-dev:/var/www/html/resource
     restart: unless-stopped
     command: >
