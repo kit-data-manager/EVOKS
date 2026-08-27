@@ -14,8 +14,8 @@ MONITORING_EXEMPT_URLS = ['metrics/', 'health/']
 LOGIN_EXEMPT_URLS = ['logout', 'signup', 'login', 'reset_password/', 'health/',
                      'reset_password_sent/', 'reset_password_complete/', 'ToS']
 
-users_total_counter = Counter("evoks_users_total", "Total number of requests served")
-users_unique_gauge = Gauge("evoks_unique_users", "Unique number of users, distinguished by IP")
+users_total_counter = Counter("evoks_requests_handled", "Total number of requests served")
+users_unique_gauge = Gauge("evoks_unique_ips_handled", "Unique number of users, distinguished by IP")
 
 class MonitoringMiddleware(MiddlewareMixin):
     stored_ips = set()
