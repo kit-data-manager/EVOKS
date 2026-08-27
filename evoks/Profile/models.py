@@ -6,6 +6,15 @@ from django.conf import settings
 from io import BytesIO
 from zipfile import ZipFile
 from django.core.mail import EmailMessage
+from prometheus_client import Gauge
+
+users_registered_gauge = Gauge(
+    "evoks_users_registered", "Number of registered users",
+    ["user_verified"])
+users_registered_gauge.labels('true').set_function(
+    lambda: User.objects.filter(profile__verified=True).count())
+users_registered_gauge.labels('false').set_function(
+    lambda: User.objects.filter(profile__verified=False).count())
 
 
 class Profile(models.Model):
