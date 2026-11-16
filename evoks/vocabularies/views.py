@@ -612,6 +612,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
         if 'create-term' in request.POST and permission != 'spectator':
             term_subject = request.POST['term-subject']
             term_label = request.POST['term-label']
+            term_language = request.POST.get('term-language', '').strip()
 
             if not (bool(re.match('^[a-zA-Z0-9_-]+$', term_subject))):
                 return HttpResponseBadRequest('error, subject may only contain alphanumberic characters, underscores (_) or hyphens (-) (no blanks)')
@@ -635,10 +636,20 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
             if "'''" in term_label:
                 return HttpResponseBadRequest('prefLabel cannot contain \'\'\'', status=400)
 
+            if term_language:
+                try:
+                    language = Language.get(term_language)
+                except (TypeError, ValueError):
+                    return HttpResponseBadRequest('Invalid language', status=400)
+                if not language.is_valid():
+                    return HttpResponseBadRequest('Invalid language', status=400)
+
             vocabulary.add_term(name, term_subject)
 
             # insert into vocabulary
             object = '\'\'\'{0}\'\'\''.format(term_label)
+            if term_language:
+                object += '@{0}'.format(language.language)
             urispace = '<{0}{1}>'.format(
                 vocabulary.urispace, term_subject.rstrip())
             predicate = '<http://www.w3.org/2004/02/skos/core#prefLabel>'

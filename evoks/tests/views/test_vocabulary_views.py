@@ -577,6 +577,35 @@ class Vocabulary_views_test(TestCase):
         )
         self.assertEqual(error_response.status_code, 400)
 
+    def test_create_term_with_label_language(self):
+        response = self.c.post(
+            '/vocabularies/{0}/terms'.format(self.vocabulary.name),
+            {
+                'create-term': '',
+                'term-subject': 'term-with-language',
+                'term-label': 'English label',
+                'term-language': 'en',
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'English')
+
+    def test_create_term_with_invalid_label_language(self):
+        response = self.c.post(
+            '/vocabularies/{0}/terms'.format(self.vocabulary.name),
+            {
+                'create-term': '',
+                'term-subject': 'term-with-invalid-language',
+                'term-label': 'Label',
+                'term-language': '////',
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(
+            Term.objects.filter(uri='term-with-invalid-language').exists()
+        )
+
     # base view tests
 
     def test_base_view(self):
