@@ -155,8 +155,15 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
                     if "'''" in new_obj:
                         return HttpResponse('Literal cannot contain \'\'\'', status=400)
                     new_object = '\'\'\'{0}\'\'\''.format(new_obj)
-                    if lang != '':  # add lang tag if it exists
-                        new_object += '@{0}'.format(lang)
+                    new_lang = request.POST.get('new-lang', lang).strip()
+                    if new_lang:
+                        try:
+                            language = Language.get(new_lang.replace('_', '-'))
+                        except (TypeError, ValueError):
+                            return HttpResponse('Invalid language', status=400)
+                        if not language.is_valid():
+                            return HttpResponse('Invalid language', status=400)
+                        new_object += '@{0}'.format(language.to_tag())
                     elif datatype != '':  # add datatype if it exists
                         new_object += '^^<{0}>'.format(datatype)
 
@@ -333,6 +340,7 @@ def term_detail(request: HttpRequest, voc_name: str, term_name: str):
         # add language tag
         if 'xml:lang' in obj:
             obj['lang'] = obj['xml:lang'] 
+            obj['lang_code'] = obj['xml:lang'].replace('-', '_')
             obj['lang_display'] = Language.get(obj['xml:lang']).display_name() 
 
         # append object to list of objects with same predicate

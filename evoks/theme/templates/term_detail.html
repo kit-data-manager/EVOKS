@@ -105,11 +105,24 @@
                                                         {{ obj.value }}</span>
                                      
                                                     {% endif %}
-                                                    <span class="flex-grow mt-2 col-span-1 text-center">
-                                                        {% if obj.lang != '' %}
-                                                        {{ obj.lang_display }}
+                                                    <div class="flex-grow mt-2 col-span-1 text-center">
+                                                        <span id="title-language-{{forloop.parentloop.counter}}-{{forloop.counter}}">
+                                                            {% if obj.lang != '' %}
+                                                            {{ obj.lang_display }}
+                                                            {% endif %}
+                                                        </span>
+                                                        {% if obj.type == "literal" %}
+                                                        <div class="hidden items-center gap-2" id="title-language-editor-{{forloop.parentloop.counter}}-{{forloop.counter}}">
+                                                            <label for="title-language-select-{{forloop.parentloop.counter}}-{{forloop.counter}}">Language:</label>
+                                                            <select name="new-lang"
+                                                                id="title-language-select-{{forloop.parentloop.counter}}-{{forloop.counter}}"
+                                                                disabled
+                                                                class="relative z-10 min-w-0 flex-1 text-center shadow-sm focus:ring-gray-500 focus:border-gray-500 block sm:text-sm border-gray-300 rounded-md">
+                                                                {% include "modals/language_options.html" with selected_language=obj.lang_code allow_empty=True %}
+                                                            </select>
+                                                        </div>
                                                         {% endif %}
-                                                    </span>
+                                                    </div>
                                                     {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
                                                     {% if "owner" in vocabulary_perms or "participant" in vocabulary_perms %} 
                                                     <span class="ml-4">

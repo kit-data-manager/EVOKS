@@ -204,8 +204,15 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
                     if "'''" in new_obj:
                         return HttpResponse('Literal cannot contain \'\'\'', status=400)
                     new_object = '\'\'\'{0}\'\'\''.format(new_obj)
-                    if lang != '':  # add lang tag if it exists
-                        new_object += '@{0}'.format(lang)
+                    new_lang = request.POST.get('new-lang', lang).strip()
+                    if new_lang:
+                        try:
+                            language = Language.get(new_lang.replace('_', '-'))
+                        except (TypeError, ValueError):
+                            return HttpResponse('Invalid language', status=400)
+                        if not language.is_valid():
+                            return HttpResponse('Invalid language', status=400)
+                        new_object += '@{0}'.format(language.to_tag())
                     elif datatype != '':  # add datatype if it exists
                         new_object += '^^<{0}>'.format(datatype)
 
@@ -341,6 +348,7 @@ def index(request: HttpRequest, voc_name: str) -> HttpResponse:
         # add language tag
         if 'xml:lang' in obj:
             obj['lang'] = obj['xml:lang']
+            obj['lang_code'] = obj['xml:lang'].replace('-', '_')
             obj['lang_display'] = Language.get(
                 obj['xml:lang']).display_name()
 
@@ -638,7 +646,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
 
             if term_language:
                 try:
-                    language = Language.get(term_language)
+                    language = Language.get(term_language.replace('_', '-'))
                 except (TypeError, ValueError):
                     return HttpResponseBadRequest('Invalid language', status=400)
                 if not language.is_valid():
@@ -649,7 +657,7 @@ def terms(request: HttpRequest, voc_name: str) -> HttpResponse:
             # insert into vocabulary
             object = '\'\'\'{0}\'\'\''.format(term_label)
             if term_language:
-                object += '@{0}'.format(language.language)
+                object += '@{0}'.format(language.to_tag())
             urispace = '<{0}{1}>'.format(
                 vocabulary.urispace, term_subject.rstrip())
             predicate = '<http://www.w3.org/2004/02/skos/core#prefLabel>'
