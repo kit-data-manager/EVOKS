@@ -37,12 +37,12 @@
     skosmos:searchResultsSize 20 ;
     skosmos:serviceName "Skosmos" ;
     skosmos:sparqlCollationEnabled false ;
-    skosmos:sparqlDialect "JenaText" ;
+    skosmos:sparqlDialect "Generic" ;
     skosmos:sparqlEndpoint <http://fuseki-live:3030/> ;
     skosmos:sparqlTimeout 20 ;
     skosmos:templateCache "/tmp/skosmos-template-cache" ;
     skosmos:transitiveLimit 1000 ;
-    skosmos:uiHoneypotEnabled true ;
-    skosmos:uiHoneypotTime 5 ;
+    skosmos:feedbackHoneypotEnabled true ;
+    skosmos:feedbackHoneypotTime 5 ;
     skosmos:uiLanguageDropdown true .
 
