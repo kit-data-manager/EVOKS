@@ -577,6 +577,22 @@ class Vocabulary_views_test(TestCase):
         )
         self.assertEqual(error_response.status_code, 400)
 
+    def test_create_term_language_dropdown_defaults_to_english(self):
+        response = self.c.get(
+            '/vocabularies/{0}/terms'.format(self.vocabulary.name),
+        )
+        self.assertContains(
+            response, '<option value="en" selected>en</option>', html=True)
+        for language in (
+                'da', 'de', 'en_US', 'es', 'fa', 'fi', 'fr', 'it', 'nb',
+                'nl', 'nn', 'pl', 'pt', 'pt_BR', 'ru', 'sv', 'zh'):
+            with self.subTest(language=language):
+                self.assertContains(
+                    response,
+                    '<option value="{0}">{0}</option>'.format(language),
+                    html=True,
+                )
+
     def test_create_term_with_label_language(self):
         response = self.c.post(
             '/vocabularies/{0}/terms'.format(self.vocabulary.name),
