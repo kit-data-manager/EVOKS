@@ -179,12 +179,14 @@ services:
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
       - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
+      - ./helperscripts/addTwigFiles.sh:/home/addTwigFiles.sh
       - static-skosmos-dev:/var/www/html/resource
     restart: unless-stopped
     command: >
       /bin/bash -c "export BASEHREFDEV &&
       chmod +x /home/replace-basehref.sh &&
       /home/replace-basehref.sh /var/www/html/config.ttl $$BASEHREFDEV &&
+      /home/addTwigFiles.sh &&
       /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
@@ -214,12 +216,14 @@ services:
     volumes:
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
       - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
+      - ./helperscripts/addTwigFiles.sh:/home/addTwigFiles.sh
       - static-skosmos-live:/var/www/html/resource
     restart: unless-stopped
     command: >
       /bin/bash -c "export BASEHREFLIVE &&
-      chmod +x /home/replace-basehref.sh &&
+      chmod +x /home/*.sh &&
       /home/replace-basehref.sh /var/www/html/config.ttl $$BASEHREFLIVE &&
+      /home/addTwigFiles.sh &&
       /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
