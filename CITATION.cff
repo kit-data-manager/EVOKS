@@ -11,6 +11,11 @@ authors:
   affiliation: Karlsruhe Institute of Technology
   email: volker.hartmann@kit.edu
   orcid: "https://orcid.org/0000-0001-6383-5214"
+- family-names: "Kabbe"
+  given-names: "Maximilian Hans"
+  affiliation: Karlsruhe Institute of Technology
+  email: maximilian.kabbe@kit.edu
+  orcid: "https://orcid.org/0009-0004-8883-492X"
 title: "EVOKS"
 type: software
 abstract: EVOKS allows to create, import, edit, curate and publish controlled vocabularies. It uses the SKOS data model and supports RDF/XML and JSON-LD.
