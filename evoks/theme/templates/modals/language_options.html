@@ -1,0 +1,24 @@
+{% if allow_empty %}
+<option value="" {% if not selected_language %}selected{% endif %}>No language</option>
+{% endif %}
+{% if selected_language and selected_language != "en" and selected_language != "da" and selected_language != "de" and selected_language != "en_US" and selected_language != "es" and selected_language != "fa" and selected_language != "fi" and selected_language != "fr" and selected_language != "it" and selected_language != "nb" and selected_language != "nl" and selected_language != "nn" and selected_language != "pl" and selected_language != "pt" and selected_language != "pt_BR" and selected_language != "ru" and selected_language != "sv" and selected_language != "zh" %}
+<option value="{{ selected_language }}" selected>{{ selected_language }}</option>
+{% endif %}
+<option value="en" {% if selected_language == "en" %}selected{% endif %}>en</option>
+<option value="da" {% if selected_language == "da" %}selected{% endif %}>da</option>
+<option value="de" {% if selected_language == "de" %}selected{% endif %}>de</option>
+<option value="en_US" {% if selected_language == "en_US" %}selected{% endif %}>en_US</option>
+<option value="es" {% if selected_language == "es" %}selected{% endif %}>es</option>
+<option value="fa" {% if selected_language == "fa" %}selected{% endif %}>fa</option>
+<option value="fi" {% if selected_language == "fi" %}selected{% endif %}>fi</option>
+<option value="fr" {% if selected_language == "fr" %}selected{% endif %}>fr</option>
+<option value="it" {% if selected_language == "it" %}selected{% endif %}>it</option>
+<option value="nb" {% if selected_language == "nb" %}selected{% endif %}>nb</option>
+<option value="nl" {% if selected_language == "nl" %}selected{% endif %}>nl</option>
+<option value="nn" {% if selected_language == "nn" %}selected{% endif %}>nn</option>
+<option value="pl" {% if selected_language == "pl" %}selected{% endif %}>pl</option>
+<option value="pt" {% if selected_language == "pt" %}selected{% endif %}>pt</option>
+<option value="pt_BR" {% if selected_language == "pt_BR" %}selected{% endif %}>pt_BR</option>
+<option value="ru" {% if selected_language == "ru" %}selected{% endif %}>ru</option>
+<option value="sv" {% if selected_language == "sv" %}selected{% endif %}>sv</option>
+<option value="zh" {% if selected_language == "zh" %}selected{% endif %}>zh</option>

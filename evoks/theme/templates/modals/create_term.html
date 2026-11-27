@@ -38,18 +38,29 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <label for="term-label"
-                                                class="block text-sm font-medium text-gray-700">skos:prefLabel
+                                            <label for="term-label" class="block text-sm font-medium text-gray-700">
+                                                skos:prefLabel
                                             </label>
                                             <div>
-                                                <input type="text" name="term-label" id="text" required maxlength=5000
+                                                <input type="text" name="term-label" id="term-label" required maxlength=5000
                                                     class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                                     placeholder="Term Beschreibung">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="term-language"
+                                                class="block text-sm font-medium text-gray-700">Language</label>
+                                            <div>
+                                                <select name="term-language" id="term-language"
+                                                    class="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                    {% include "modals/language_options.html" with selected_language="en" %}
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </form>
                     </div>
                     <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
                         <button type="submit" name="create-term"
@@ -61,11 +72,10 @@
                             Cancel
                         </button>
                     </div>
-</form>
-</div>
-</div>
-</div>
-</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </form>
 <script type="text/javascript">
     document.getElementById("create-term-modal-cancel").addEventListener("click", function (e) {

@@ -58,6 +58,8 @@ class Vocabulary_views_test(TestCase):
             {'delete-term': ''}
         )
         self.assertTemplateUsed(response, 'term_detail.html')
+        self.assertContains(response, '<option value="en">en</option>', html=True)
+        self.assertContains(response, '<option value="pt_BR">pt_BR</option>', html=True)
 
     def test_delete_term(self):
         response = self.c.post(
@@ -291,6 +293,48 @@ class Vocabulary_views_test(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'example label')
         self.assertContains(response, 'skos:note')
+
+    def test_edit_literal_field_language(self):
+        self.c.post(
+            '/vocabularies/{0}/terms/{1}'.format(
+                self.vocabulary.name, self.term.name),
+            {'create-property': '', 'predicate': 'skos:note',
+                'obj-type': 'literal', 'object': 'example label', 'lang': 'en'},
+        )
+        edit_page = self.c.get(
+            '/vocabularies/{0}/terms/{1}'.format(
+                self.vocabulary.name, self.term.name),
+        )
+        self.assertContains(
+            edit_page, '<option value="en" selected>en</option>', html=True)
+
+        response = self.c.post(
+            '/vocabularies/{0}/terms/{1}'.format(
+                self.vocabulary.name, self.term.name),
+            {'obj': 'example label', 'key': 'skos:note', 'lang': 'en',
+                'new-obj': 'example label', 'new-lang': 'da',
+                'obj-type': 'literal', 'obj-datatype': ''},
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Danish')
+
+    def test_edit_literal_field_invalid_language(self):
+        self.c.post(
+            '/vocabularies/{0}/terms/{1}'.format(
+                self.vocabulary.name, self.term.name),
+            {'create-property': '', 'predicate': 'skos:note',
+                'obj-type': 'literal', 'object': 'example label', 'lang': 'en'},
+        )
+
+        response = self.c.post(
+            '/vocabularies/{0}/terms/{1}'.format(
+                self.vocabulary.name, self.term.name),
+            {'obj': 'example label', 'key': 'skos:note', 'lang': 'en',
+                'new-obj': 'example label', 'new-lang': '////',
+                'obj-type': 'literal', 'obj-datatype': ''},
+        )
+        self.assertEqual(response.status_code, 400)
 
     def test_edit_uri_field_invalid_uri(self):
         # create field

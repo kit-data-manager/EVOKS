@@ -161,7 +161,7 @@ services:
   skosmos-dev:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-dev
     build:
-      context: https://github.com/NatLibFi/Skosmos.git#v3.0
+      context: https://github.com/NatLibFi/Skosmos.git#v3.6
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-dev
     environment:
@@ -179,12 +179,14 @@ services:
     volumes:
       - ./skosmos-dev/config.ttl:/var/www/html/config.ttl
       - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
+      - ./helperscripts/addTwigFiles.sh:/home/addTwigFiles.sh
       - static-skosmos-dev:/var/www/html/resource
     restart: unless-stopped
     command: >
       /bin/bash -c "export BASEHREFDEV &&
       chmod +x /home/replace-basehref.sh &&
       /home/replace-basehref.sh /var/www/html/config.ttl $$BASEHREFDEV &&
+      /home/addTwigFiles.sh &&
       /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
@@ -196,7 +198,7 @@ services:
   skosmos-live:
     container_name: evoks_${INSTANCE_NAME:-defaultinstance}_skosmos-live
     build:
-      context: https://github.com/NatLibFi/Skosmos.git#v3.0
+      context: https://github.com/NatLibFi/Skosmos.git#v3.6
       dockerfile: dockerfiles/Dockerfile.ubuntu
     hostname: skosmos-live
     environment:
@@ -214,12 +216,14 @@ services:
     volumes:
       - ./skosmos-live/config.ttl:/var/www/html/config.ttl
       - ./helperscripts/replace-basehref.sh:/home/replace-basehref.sh
+      - ./helperscripts/addTwigFiles.sh:/home/addTwigFiles.sh
       - static-skosmos-live:/var/www/html/resource
     restart: unless-stopped
     command: >
       /bin/bash -c "export BASEHREFLIVE &&
-      chmod +x /home/replace-basehref.sh &&
+      chmod +x /home/*.sh &&
       /home/replace-basehref.sh /var/www/html/config.ttl $$BASEHREFLIVE &&
+      /home/addTwigFiles.sh &&
       /usr/sbin/apache2ctl -D FOREGROUND"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
