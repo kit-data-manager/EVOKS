@@ -19,9 +19,9 @@ authors:
 title: "EVOKS"
 type: software
 abstract: EVOKS allows to create, import, edit, curate and publish controlled vocabularies. It uses the SKOS data model and supports RDF/XML and JSON-LD.
-version: -
-date-released: -
-doi: -
+version: 0.9.0
+date-released: 2026-11-27
+doi: 10.5281/zenodo.13784193
 url: "https://github.com/kit-data-manager/EVOKS"
 repository-code: "https://github.com/kit-data-manager/EVOKS"
 license: Apache-2.0
