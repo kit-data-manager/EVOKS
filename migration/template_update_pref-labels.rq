@@ -1,0 +1,14 @@
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+DELETE {
+  ?s skos:prefLabel ?label .
+}
+INSERT {
+  ?s skos:prefLabel ?labelEn .
+}
+WHERE {
+  ?s skos:prefLabel ?label .
+  FILTER(lang(?label) = "")
+  BIND(STRLANG(STR(?label), "__DEFAULT_LANGUAGE__") AS ?labelEn)
+}
+

@@ -18,6 +18,12 @@ Use of this software in a production environment or with external access is at y
 # Know issues
 - See github issues of this repo for all known issues.
 
+# Migration
+
+For upgrades of existing EVOKS installations, please refer to the migration guide:
+
+- [Migration Guide: SKOSMOS 2 to SKOSMOS 3](MigrationGuide.md)
+
 # Installation
 
 The main way to install EVOKS and its depending services is to build and run the docker images locally using docker compose. 
